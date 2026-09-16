@@ -10,7 +10,7 @@
 |---|---|---|---|
 | Phạm Quân | 2A202602890 |  |  |
 | Đặng Hữu Tâm | 2A202602940 |  |  |
-| Nguyễn Hoàng Việt | 2A202602890 |  |  |
+| Nguyễn Hoàng Việt | 2A202602602 |  |  |
 | Nguyễn Đỗ Chiến Thắng | 2A202602442 |  |  |
 
 > Nhóm copy nguyên file README này về repo của mình, rồi điền bảng trên. Cột **Phần việc đảm nhiệm** ghi càng cụ thể càng tốt.

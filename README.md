@@ -8,10 +8,10 @@
 
 | Họ và Tên | Mã Học Viên | Vai trò chính | Phần việc đảm nhiệm trong dự án |
 |---|---|---|---|
-| Phạm Quân | 2A202602890 | Evidence *(nháp)* | Mining chatlog + khảo sát ≥20 học viên, ghi log bằng chứng |
-| Đặng Hữu Tâm | 2A202602940 | Build *(nháp)* | Dựng prototype (cây sơ đồ tương tác + lời gọi AI thật) |
-| **Nguyễn Hoàng Việt** (Đội trưởng) | 2A202602602 | Prompt & golden set *(nháp)* | Viết prompt cho AI trích xuất cấu trúc/cây sơ đồ, xây golden set ≥20 case |
-| Nguyễn Đỗ Chiến Thắng | 2A202602442 | Spec & validation *(nháp)* | Viết spec.md, chuẩn bị vòng validation + demo |
+| Phạm Quân | 2A202602890 | Evidence | Mining chatlog + khảo sát 15 học viên, ghi log bằng chứng |
+| Đặng Hữu Tâm | 2A202602940 | Build | Dựng prototype (cây sơ đồ tương tác + lời gọi AI thật) |
+| **Nguyễn Hoàng Việt** (Đội trưởng) | 2A202602602 | Prompt & golden set | Viết prompt cho AI trích xuất cấu trúc/cây sơ đồ, xây golden set ≥20 case |
+| Nguyễn Đỗ Chiến Thắng | 2A202602442 | Spec & validation | Viết spec.md, chuẩn bị vòng validation + demo |
 
 > ⚠️ **Vai trò/phần việc trên là nháp đề xuất, chưa được nhóm xác nhận cuối — đổi tên/hoán đổi theo thế mạnh thật của từng người.** Đội trưởng: **Nguyễn Hoàng Việt** (2A202602602) — dùng đúng MSSV này nộp cả 5 mốc CP1–CP5.
 

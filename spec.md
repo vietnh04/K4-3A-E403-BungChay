@@ -13,8 +13,12 @@ Loại: [ ] Tối ưu tính năng có sẵn (A1)  [x] Tính năng mới (A2 — 
   - **46,7% (7/15)** kết quả cuối cùng là "Không nắm chắc mối liên hệ giữa các phần kiến thức"; **53,3% (8/15)** "tự vẽ/tóm tắt được nhưng mất rất nhiều thời gian"; **26,7% (4/15)** "bỏ cuộc giữa chừng, học thuộc vẹt từng slide rời rạc"
   - **86,7% (13/15)** đã phải đọc lại file slide bài giảng nhiều trang trong 7 ngày qua để ôn bài/làm bài tập; trong đó 60% để "nắm tổng quan trước khi đi sâu chi tiết", 13,3% để "tìm mối liên kết giữa các khái niệm/chương mục để ôn thi"
   - **100% (15/15) sẵn sàng dùng** công cụ tự động chuyển slide dài thành sơ đồ tư duy trực quan nếu có (40% "chắc chắn sẽ dùng" + 60% "có thể sẽ thử", 0% "không có nhu cầu")
+  - **60% (9/15)** đánh giá 4-5/5 điểm cho hiệu quả học qua mindmap so với đọc văn bản truyền thống
   - Tương quan củng cố: 53,3% (8/15) hiện đã dùng AI tóm tắt thành **text**, nhưng nỗi đau lớn nhất vẫn là thiếu **mạch logic trực quan** — cho thấy tóm tắt dạng chữ chưa giải quyết đúng vấn đề, cần dạng sơ đồ
-  - **[CẦN LÀM]** Bổ sung ≥5 phản hồi khảo sát nữa (đủ ≥20) + xin trích 5 câu trả lời tự luận nguyên văn (câu "Khó khăn lớn nhất" có ô tự luận, ví dụ đã có: *"Tóm tắt xong thì bị ngắt kết nối với slide gốc, không biết ý đó nằm ở đâu"*, *"slide ngắn gọn nhưng vẫn thiếu connect"*, *"Dài quá không đọc"*) để đủ điều kiện trích dẫn nguyên văn theo chuẩn spec
+  - Quote nguyên văn (câu tự luận "Khó khăn lớn nhất"), hiện có **2/5**:
+    - **P03**: *"Slide ngắn gọn nhưng vẫn thiếu connect"*
+    - **P07**: *"Dài quá không đọc"*
+  - **[CẦN LÀM — tự khai thiếu, chưa giấu]** Còn thiếu ≥3 quote nguyên văn nữa và ≥5 phản hồi khảo sát (đủ ≥20) — có 1 câu tự luận khác trong form bị cắt chữ trên biểu đồ tổng hợp ("Tóm tắt xong thì bị ngắt kết nối với slide gốc, không biết ý đó n...") chưa xác nhận được văn bản đầy đủ, cần mở tab "Câu trả lời riêng lẻ" hoặc Google Sheet gốc của form để lấy nguyên văn chính xác trước khi trích vào spec
 
 ## §2. Impact & quyết định chọn
 - Bảng impact (≥3 ứng viên, số liệu từ mining ở trên):

@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VLearn - Lesson 1 · Day01 (Cây Sơ Đồ Tư Duy Tương Tác)</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .code-cmd {
+      font-family: 'JetBrains Mono', monospace;
+      color: #DC2626;
+      font-weight: 700;
+    }
+    .tree-path {
+      fill: none;
+      stroke: #CBD5E1;
+      stroke-width: 2.2px;
+      stroke-linecap: round;
+      transition: all 0.35s ease;
+    }
+    .tree-path.active {
+      stroke: #2563EB;
+      stroke-width: 3.5px;
+      filter: drop-shadow(0 2px 5px rgba(37, 99, 235, 0.35));
+    }
+    .node-card {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .node-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1);
+    }
+    .node-card.active {
+      border-color: #2563EB !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2), 0 8px 16px -4px rgba(37, 99, 235, 0.25) !important;
+      background: #FFFFFF !important;
+    }
+  </style>
+</head>
+<body class="bg-[#F0F2F5] text-slate-800 antialiased min-h-screen flex flex-col select-none">
+
+  <!-- ================= TOP CONTROLS FOR HACKATHON CP2 DEMO ================= -->
+  <div class="bg-indigo-950 text-white px-4 py-2 text-xs flex flex-wrap items-center justify-between gap-3 shadow-md z-50 border-b border-indigo-800">
+    <div class="flex items-center gap-2">
+      <span class="px-2 py-0.5 rounded bg-blue-600 font-extrabold text-[10px] uppercase tracking-wider">CP2 DEMO</span>
+      <span class="font-semibold text-indigo-100">Bản Mockup: Toàn Bộ Cây Mindmap &rarr; Click Node Mở Chi Tiết (BungChay)</span>
+    </div>
+    
+    <div class="flex items-center gap-2">
+      <span class="text-indigo-300 font-medium">Chuyển luồng:</span>
+      <button onclick="setMode('slide')" id="btn-mode-slide" class="px-2.5 py-1 rounded bg-indigo-900 hover:bg-indigo-800 text-indigo-100 font-medium transition">
+        1. Slide gốc VLearn
+      </button>
+      <button onclick="startAiGeneration()" id="btn-mode-ai" class="px-2.5 py-1 rounded bg-indigo-900 hover:bg-indigo-800 text-indigo-100 font-medium transition">
+        2. AI Quét Cây Sơ Đồ
+      </button>
+      <button onclick="setMode('mindmap')" id="btn-mode-map" class="px-2.5 py-1 rounded bg-white text-indigo-950 font-bold shadow-sm transition flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        3. Toàn Bộ Cây Sơ Đồ (Mindmap Tree)
+      </button>
+      <div class="h-3.5 w-px bg-indigo-800 mx-1"></div>
+      <button onclick="openModal('modal-clarify')" class="px-2 py-1 rounded bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border border-amber-500/40 font-medium">
+        ⚡ Test CLARIFY
+      </button>
+      <button onclick="openModal('modal-unsupported')" class="px-2 py-1 rounded bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/40 font-medium">
+        ⚠️ Test LỖI
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= EXACT VLEARN TOP NAVIGATION BAR ================= -->
+  <header class="bg-white border-b border-slate-200 px-5 py-2.5 flex items-center justify-between sticky top-0 z-40">
+    
+    <!-- Left: Back button & Lesson Title -->
+    <div class="flex items-center gap-3">
+      <button onclick="setMode('slide')" class="w-7 h-7 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-600 transition" title="Quay lại slide">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+      </button>
+      <span class="font-semibold text-slate-800 text-sm">Lesson 1 · Day01</span>
+    </div>
+
+    <!-- Center: Progress Indicator -->
+    <div class="hidden md:flex items-center gap-3">
+      <span class="text-xs text-slate-500 font-medium">0/28 parts</span>
+      <div class="w-36 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+        <div class="w-1 h-full bg-blue-600 rounded-full"></div>
+      </div>
+    </div>
+
+    <!-- Right: VLearn Actions + NEW CONCEPTMAP BUTTON -->
+    <div class="flex items-center gap-3">
+      
+      <!-- NEW FEATURE: ConceptMap Tree Trigger Button directly in VLearn Header -->
+      <button onclick="toggleConceptMap()" id="btn-header-mindmap" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all transform hover:scale-[1.02]">
+        <svg class="w-3.5 h-3.5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+        </svg>
+        <span id="header-btn-text">✨ Cây Sơ Đồ Tư Duy (Mindmap)</span>
+      </button>
+
+      <button class="text-xs font-medium text-slate-700 hover:text-slate-900 flex items-center gap-1 px-2.5 py-1.5 rounded-md hover:bg-slate-100 transition">
+        <span class="text-indigo-600">✦</span> Ask AI a question
+      </button>
+
+      <button class="text-xs font-medium text-slate-700 hover:text-slate-900 flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-slate-100 transition">
+        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        Send a request
+      </button>
+
+      <!-- User Avatar 'N' -->
+      <div class="w-7 h-7 rounded-full bg-[#E0E7FF] text-[#1E40AF] font-bold text-xs flex items-center justify-center border border-indigo-200">
+        N
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= MAIN BODY: SIDEBAR + CONTENT ================= -->
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- EXACT VLEARN LEFT SIDEBAR: LESSON CONTENTS -->
+    <aside class="w-[260px] bg-[#F1F5F9] border-r border-slate-200 flex flex-col shrink-0 overflow-y-auto">
+      
+      <!-- Sidebar Header -->
+      <div class="px-4 py-3 flex items-center justify-between border-b border-slate-200/80">
+        <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-700">LESSON CONTENTS</span>
+        <button class="text-slate-400 hover:text-slate-600 text-xs">✕</button>
+      </div>
+
+      <!-- Accordion: Slides -->
+      <div class="py-2">
+        <div class="px-4 py-2 flex items-center justify-between cursor-pointer text-slate-800 hover:text-blue-600 font-semibold text-xs">
+          <span>Slides</span>
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
+
+        <!-- Slide items list -->
+        <div class="space-y-0.5">
+          <!-- Active Slide Item (material_mrxpq9zu...) -->
+          <div onclick="setMode('slide')" class="flex items-center justify-between px-4 py-2 bg-[#E2E8F0]/70 border-l-[3px] border-red-500 text-blue-700 font-medium text-xs cursor-pointer">
+            <div class="flex items-center gap-2 truncate">
+              <svg class="w-3.5 h-3.5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <span class="truncate">material_mrxpq9zu...</span>
+            </div>
+            <span class="text-[10px] text-blue-600 font-semibold shrink-0 ml-1">In progress</span>
+          </div>
+
+          <div class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-slate-200/50 text-xs cursor-pointer">
+            <span class="w-3.5 h-3.5 rounded border border-amber-600/50 flex items-center justify-center text-[8px] text-amber-700 font-mono">P</span>
+            <span class="truncate">day01-slide-v2-blue</span>
+          </div>
+
+          <div class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-slate-200/50 text-xs cursor-pointer">
+            <span class="w-3.5 h-3.5 rounded border border-amber-600/50 flex items-center justify-center text-[8px] text-amber-700 font-mono">P</span>
+            <span class="truncate">d301-pham-mah</span>
+          </div>
+
+          <div class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-slate-200/50 text-xs cursor-pointer">
+            <span class="w-3.5 h-3.5 rounded border border-amber-600/50 flex items-center justify-center text-[8px] text-amber-700 font-mono">P</span>
+            <span class="truncate">day01-llm-foundation-1</span>
+          </div>
+
+          <div class="flex items-center gap-2 px-4 py-2 text-slate-600 hover:bg-slate-200/50 text-xs cursor-pointer">
+            <span class="w-3.5 h-3.5 rounded border border-amber-600/50 flex items-center justify-center text-[8px] text-amber-700 font-mono">P</span>
+            <span class="truncate">Day01-C401-Thầy-Đức</span>
+          </div>
+        </div>
+
+        <!-- Other modules -->
+        <div class="mt-3 px-3">
+          <div class="flex items-center justify-between p-2 rounded-lg bg-blue-50/80 border border-blue-100 text-blue-900 font-semibold text-xs cursor-pointer">
+            <div class="flex items-center gap-2 truncate">
+              <span class="w-4 h-4 rounded bg-blue-600 text-white flex items-center justify-center text-[9px] font-bold">L</span>
+              <span class="truncate">Lab 01 – Nền tảng LLM API</span>
+            </div>
+            <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="mt-2 px-4 py-2 flex items-center justify-between text-slate-700 hover:text-slate-900 font-medium text-xs cursor-pointer">
+          <span>Videos</span>
+          <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+
+        <div class="px-4 py-2 flex items-center justify-between text-slate-700 hover:text-slate-900 font-medium text-xs cursor-pointer">
+          <span>Knowledge & practice</span>
+          <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- ================= RIGHT MAIN WORKSPACE ================= -->
+    <main class="flex-1 p-4 md:p-6 overflow-y-auto flex flex-col items-center justify-start relative">
+
+      <!-- ================= MODE 1: ORIGINAL VLEARN SLIDE VIEW ================= -->
+      <div id="section-slide" class="w-full max-w-5xl flex flex-col">
+        
+        <!-- Quick Insight Alert -->
+        <div class="mb-4 flex items-center justify-between bg-white border border-blue-200/80 rounded-xl p-3 text-xs shadow-sm">
+          <div class="flex items-center gap-2 text-slate-700">
+            <span class="w-2 h-2 rounded-full bg-blue-600 animate-ping"></span>
+            <span><strong>Nỗi đau học viên (73.3%):</strong> Tệp slide 28 trang nhiều chữ, khó nhìn ra mạch logic tổng thể.</span>
+          </div>
+          <button onclick="startAiGeneration()" class="font-bold text-blue-700 hover:text-blue-800 flex items-center gap-1 hover:underline">
+            Bấm để AI bóc tách Cây Sơ Đồ &rarr;
+          </button>
+        </div>
+
+        <!-- EXACT SLIDE CANVAS (Matching User's Image) -->
+        <div class="w-full bg-white rounded-2xl border border-slate-200/90 shadow-md p-8 md:p-12 relative min-h-[520px] flex flex-col justify-between">
+          
+          <!-- Floating Blue AI Tutor Trigger (Exact matching image icon) -->
+          <div class="absolute top-6 right-6">
+            <button onclick="startAiGeneration()" class="w-9 h-9 rounded-full bg-[#1E40AF] hover:bg-blue-800 text-white flex items-center justify-center shadow-lg transition-transform hover:scale-110 group relative" title="Hỏi VLearn AI Tutor hoặc Tạo Sơ đồ tư duy">
+              <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L14.4 7.6L20 10L14.4 12.4L12 18L9.6 12.4L4 10L9.6 7.6L12 2Z"/>
+              </svg>
+              <!-- Tooltip -->
+              <span class="absolute right-11 top-1/2 -translate-y-1/2 whitespace-nowrap bg-slate-900 text-white text-[11px] font-semibold px-2.5 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow">
+                ✨ Bấm để mở Cây Sơ Đồ Tư Duy
+              </span>
+            </button>
+          </div>
+
+          <!-- Slide Body -->
+          <div class="max-w-3xl">
+            <!-- Slide Title -->
+            <h1 class="text-3xl md:text-4xl font-extrabold text-slate-950 tracking-tight mb-8">
+              Local Checklist
+            </h1>
+
+            <!-- Slide Bullet Points (Exact text from image) -->
+            <ul class="space-y-6 text-slate-800 text-base md:text-lg leading-relaxed font-normal">
+              
+              <li class="flex items-start gap-4">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-900 mt-2.5 shrink-0"></span>
+                <span>Trên máy đã cài đặt Git (Mở cmd chạy <span class="code-cmd">git version</span> để kiểm tra)</span>
+              </li>
+
+              <li class="flex items-start gap-4">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-900 mt-2.5 shrink-0"></span>
+                <span>Trên máy đã cài đặt Python &lt; 3.14 &amp; &gt; 3.11 (Mở cmd chạy <span class="code-cmd">python --version</span> để kiểm tra)</span>
+              </li>
+
+              <li class="flex items-start gap-4">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-900 mt-2.5 shrink-0"></span>
+                <span>Trên máy đã có IDE Visual Studio Code (VSCode).</span>
+              </li>
+
+              <li class="flex items-start gap-4">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-900 mt-2.5 shrink-0"></span>
+                <span>Đã cài đặt Extension GitHub Classroom trên VSCode.</span>
+              </li>
+
+              <li class="flex items-start gap-4">
+                <span class="w-2.5 h-2.5 rounded-full bg-slate-900 mt-2.5 shrink-0"></span>
+                <span>Đã đăng nhập vào GitHub trên VSCode</span>
+              </li>
+
+            </ul>
+          </div>
+
+          <!-- Slide Footer -->
+          <div class="pt-8 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+            <span>Lesson 1 · Day01: Nền tảng AI & LLM Foundation</span>
+            <span>Trang 1 / 28</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ================= MODE 2: GENUINE VISUAL TREE MINDMAP VIEW ================= -->
+      <!-- By default: full width tree container. Clicking a node opens the detail side-panel -->
+      <div id="section-mindmap" class="w-full max-w-7xl h-[680px] bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden flex flex-col md:flex-row transition-all duration-300">
+        
+        <!-- LEFT: THE GENUINE TREE GRAPH CANVAS (Starts at 100% full width, shrinks to 60% when details open) -->
+        <div id="tree-panel" class="w-full border-r border-slate-200 flex flex-col bg-[#FAFBFD] overflow-hidden transition-all duration-300">
+          
+          <!-- Tree Toolbar -->
+          <div class="px-5 py-2.5 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <span class="font-extrabold text-xs text-slate-900 uppercase tracking-wider">CÂY SƠ ĐỒ TỔNG THỂ (BỨC TRANH TOÀN CẢNH)</span>
+              <span id="tree-view-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">Toàn Cảnh 100%</span>
+            </div>
+
+            <div class="flex items-center gap-3 text-xs">
+              <button onclick="collapseDetailToFullTree()" id="btn-collapse-detail" class="hidden px-2.5 py-1 text-slate-700 hover:text-blue-700 hover:bg-blue-50 border border-slate-200 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                <span>✕</span> <span>Đóng Chi Tiết &rarr; Mở Rộng Toàn Cây</span>
+              </button>
+              <button onclick="setMode('slide')" class="px-2.5 py-1 text-slate-600 hover:text-slate-900 font-semibold text-xs">
+                📖 Quay lại Slide
+              </button>
+            </div>
+          </div>
+
+          <!-- Helpful guidance banner when in full tree mode -->
+          <div id="tree-instruction-banner" class="bg-blue-50/80 border-b border-blue-100 px-5 py-2 text-xs text-blue-900 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="font-bold bg-blue-600 text-white px-2 py-0.2 rounded text-[10px]">HƯỚNG DẪN</span>
+              <span>Bạn đang xem toàn bộ cây sơ đồ bài giảng. <strong>Bấm vào bất kỳ nút (node) nào</strong> để mở nội dung chi tiết &amp; slide gốc tương ứng!</span>
+            </div>
+          </div>
+
+          <!-- TREE DIAGRAM CONTAINER WITH SVG BRANCH CONNECTORS -->
+          <div class="flex-1 p-4 overflow-auto relative flex items-center justify-center min-h-[520px]" id="tree-scroll-container">
+            
+            <!-- Absolute Canvas for Tree Nodes -->
+            <div class="relative w-[780px] h-[520px] shrink-0">
+              
+              <!-- SVG CONNECTING CURVED BRANCHES -->
+              <svg class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;">
+                
+                <!-- Root to Branch 1 (Môi trường) -->
+                <path id="path-root-b1" d="M 190 260 C 230 260, 240 110, 280 110" class="tree-path" />
+                
+                <!-- Root to Branch 2 (Nền tảng LLM) -->
+                <path id="path-root-b2" d="M 190 260 C 230 260, 240 260, 280 260" class="tree-path" />
+                
+                <!-- Root to Branch 3 (Lab thực hành) -->
+                <path id="path-root-b3" d="M 190 260 C 230 260, 240 410, 280 410" class="tree-path" />
+
+                <!-- Branch 1 to Leaves -->
+                <path id="path-b1-l11" d="M 450 110 C 485 110, 490 60, 520 60" class="tree-path" />
+                <path id="path-b1-l12" d="M 450 110 C 485 110, 490 150, 520 150" class="tree-path" />
+
+                <!-- Branch 2 to Leaves -->
+                <path id="path-b2-l21" d="M 450 260 C 485 260, 490 215, 520 215" class="tree-path" />
+                <path id="path-b2-l22" d="M 450 260 C 485 260, 490 305, 520 305" class="tree-path" />
+
+                <!-- Branch 3 to Leaves -->
+                <path id="path-b3-l31" d="M 450 410 C 485 410, 490 365, 520 365" class="tree-path" />
+                <path id="path-b3-l32" d="M 450 410 C 485 410, 490 455, 520 455" class="tree-path" />
+
+              </svg>
+
+              <!-- ================= HTML NODE CARDS ================= -->
+
+              <!-- LEVEL 0: ROOT NODE (GỐC BÀI GIẢNG) -->
+              <div onclick="selectTreeNode('root', 1)" id="node-root" class="node-card absolute left-2 top-[220px] w-[185px] p-3 rounded-2xl bg-gradient-to-br from-indigo-900 to-blue-900 text-white shadow-md border-2 border-indigo-700 cursor-pointer z-10 hover:border-blue-400">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[9px] uppercase font-extrabold tracking-wider text-blue-300">Gốc Toàn Bài</span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                </div>
+                <h3 class="font-extrabold text-xs text-white leading-tight">Day01 · Nền Tảng AI &amp; LLM</h3>
+                <div class="mt-2 text-[10px] text-blue-200 flex items-center justify-between">
+                  <span>28 Trang slide</span>
+                  <span class="font-mono bg-blue-800/80 px-1.5 py-0.2 rounded font-bold">3 Nhánh chính</span>
+                </div>
+              </div>
+
+              <!-- LEVEL 1: NHÁNH 1 - CHUẨN BỊ MÔI TRƯỜNG -->
+              <div onclick="selectTreeNode('b1', 1)" id="node-b1" class="node-card absolute left-[280px] top-[85px] w-[170px] p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm cursor-pointer z-10 hover:border-blue-500">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-blue-100 text-blue-700">NHÁNH 1</span>
+                  <span class="text-[10px] text-slate-400 font-mono">Slide 1-5</span>
+                </div>
+                <h4 class="text-xs font-bold text-slate-900">Môi Trường Máy</h4>
+                <p class="text-[10px] text-slate-500">Cài đặt công cụ nền tảng</p>
+              </div>
+
+              <!-- LEVEL 1: NHÁNH 2 - NỀN TẢNG LLM CỐT LÕI -->
+              <div onclick="selectTreeNode('b2', 12)" id="node-b2" class="node-card absolute left-[280px] top-[235px] w-[170px] p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm cursor-pointer z-10 hover:border-blue-500">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-purple-100 text-purple-700">NHÁNH 2</span>
+                  <span class="text-[10px] text-slate-400 font-mono">Slide 6-20</span>
+                </div>
+                <h4 class="text-xs font-bold text-slate-900">Nền Tảng LLM</h4>
+                <p class="text-[10px] text-slate-500">Kiến trúc, Tokens, Prompt</p>
+              </div>
+
+              <!-- LEVEL 1: NHÁNH 3 - THỰC HÀNH LAB -->
+              <div onclick="selectTreeNode('b3', 20)" id="node-b3" class="node-card absolute left-[280px] top-[385px] w-[170px] p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm cursor-pointer z-10 hover:border-blue-500">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-[9px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-700">NHÁNH 3</span>
+                  <span class="text-[10px] text-slate-400 font-mono">Slide 21-28</span>
+                </div>
+                <h4 class="text-xs font-bold text-slate-900">Thực Hành Lab 01</h4>
+                <p class="text-[10px] text-slate-500">Gọi API &amp; Chạy test</p>
+              </div>
+
+              <!-- LEVEL 2: CÁC NÚT LÁ (LEAVES) -->
+              
+              <!-- Leaf 1.1: Local Checklist (Matches user screenshot!) -->
+              <div onclick="selectTreeNode('l11', 1)" id="node-l11" class="node-card absolute left-[520px] top-[35px] w-[230px] p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm cursor-pointer z-10 hover:border-blue-600">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-xs font-bold text-slate-900 truncate">Local Checklist</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-100 text-blue-800 font-mono">[Slide 1]</span>
+                </div>
+                <p class="text-[11px] text-slate-600 truncate">Git, Python, VSCode, Classroom</p>
+              </div>
+
+              <!-- Leaf 1.2: GitHub Classroom Flow -->
+              <div onclick="selectTreeNode('l12', 3)" id="node-l12" class="node-card absolute left-[520px] top-[125px] w-[230px] p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm cursor-pointer z-10 hover:border-blue-600">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-xs font-bold text-slate-800 truncate">GitHub Classroom Flow</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-600 font-mono">[Slide 3]</span>
+                </div>
+                <p class="text-[11px] text-slate-500 truncate">Clone repo cá nhân, git push</p>
+              </div>
+
+              <!-- Leaf 2.1: Tokens & Context Window -->
+              <div onclick="selectTreeNode('l21', 12)" id="node-l21" class="node-card absolute left-[520px] top-[190px] w-[230px] p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm cursor-pointer z-10 hover:border-blue-600">
+                <div class="flex items-center justify-between mb-0.5">
+                  <div class="flex items-center gap-1 truncate">
+                    <span class="text-xs font-bold text-slate-800 truncate">Token &amp; Context Window</span>
+                    <span class="px-1 rounded text-[8px] font-black bg-rose-100 text-rose-700">🔥</span>
+                  </div>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-600 font-mono">[Slide 12]</span>
+                </div>
+                <p class="text-[11px] text-slate-500 truncate">Cơ chế tokenize, tràn ngữ cảnh</p>
+              </div>
+
+              <!-- Leaf 2.2: LLM API Call -->
+              <div onclick="selectTreeNode('l22', 17)" id="node-l22" class="node-card absolute left-[520px] top-[280px] w-[230px] p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm cursor-pointer z-10 hover:border-blue-600">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-xs font-bold text-slate-800 truncate">Gọi API &amp; Prompting</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-600 font-mono">[Slide 17]</span>
+                </div>
+                <p class="text-[11px] text-slate-500 truncate">Cấu hình API Key, System Prompt</p>
+              </div>
+
+              <!-- Leaf 3.1: Python Virtualenv -->
+              <div onclick="selectTreeNode('l31', 22)" id="node-l31" class="node-card absolute left-[520px] top-[345px] w-[230px] p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm cursor-pointer z-10 hover:border-blue-600">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-xs font-bold text-slate-800 truncate">Môi Trường Ảo .venv</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-600 font-mono">[Slide 22]</span>
+                </div>
+                <p class="text-[11px] text-slate-500 truncate">pip install, isolation packages</p>
+              </div>
+
+              <!-- Leaf 3.2: Eval & Testing -->
+              <div onclick="selectTreeNode('l32', 26)" id="node-l32" class="node-card absolute left-[520px] top-[435px] w-[230px] p-2.5 rounded-xl bg-white border border-slate-200 shadow-sm cursor-pointer z-10 hover:border-blue-600">
+                <div class="flex items-center justify-between mb-0.5">
+                  <span class="text-xs font-bold text-slate-800 truncate">Chạy Test &amp; Nộp Bài</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-100 text-slate-600 font-mono">[Slide 26]</span>
+                </div>
+                <p class="text-[11px] text-slate-500 truncate">Kiểm thử tự động, pass checklist</p>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Tree Footnote -->
+          <div class="px-5 py-2.5 bg-slate-100/90 border-t border-slate-200 flex items-center justify-between text-[11px] text-slate-500 shrink-0">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+              <span>Bấm vào bất kỳ nút nào để mở <strong>nội dung sâu hơn</strong> &amp; slide gốc bên phải.</span>
+            </span>
+            <span class="font-mono text-slate-400">Tỉ lệ nhánh: 1 &rarr; 3 &rarr; 6</span>
+          </div>
+        </div>
+
+        <!-- RIGHT: SYNCHRONIZED SLIDE & AI TUTOR (HIDDEN BY DEFAULT, OPENS ONLY WHEN A NODE IS CLICKED!) -->
+        <div id="detail-panel" class="hidden w-full md:w-5/12 flex flex-col bg-slate-50 border-l border-slate-200 transition-all duration-300">
+          
+          <!-- Header of Deep Dive Detail -->
+          <div class="px-4 py-2.5 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2 truncate">
+              <span class="text-xs font-bold text-slate-800">📄 Nội Dung Chi Tiết</span>
+              <span id="sync-page-badge" class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-mono font-bold">Trang 1 / 28</span>
+            </div>
+            
+            <button onclick="collapseDetailToFullTree()" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold transition" title="Đóng bảng chi tiết để mở rộng lại toàn cây">
+              ✕ Thu nhỏ
+            </button>
+          </div>
+
+          <!-- Synchronized Slide Content Area -->
+          <div class="flex-1 p-5 overflow-y-auto flex flex-col justify-center">
+            <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm space-y-4">
+              <div class="flex items-center justify-between text-[11px] text-slate-400 border-b border-slate-100 pb-2">
+                <span class="font-mono text-slate-500 truncate">material_mrxpq9zu...</span>
+                <span id="sync-slide-ref" class="font-bold text-blue-600 shrink-0">[Slide 1]</span>
+              </div>
+
+              <!-- Slide Title -->
+              <h4 id="sync-slide-title" class="text-xl font-black text-slate-900 leading-snug">Local Checklist</h4>
+              
+              <!-- Slide Body -->
+              <div id="sync-slide-content" class="text-xs text-slate-700 leading-relaxed space-y-2">
+                <p>• Trên máy đã cài đặt Git (Mở cmd chạy <code class="code-cmd">git version</code> để kiểm tra)</p>
+                <p>• Trên máy đã cài đặt Python &lt; 3.14 &amp; &gt; 3.11 (Mở cmd chạy <code class="code-cmd">python --version</code> để kiểm tra)</p>
+                <p>• Trên máy đã có IDE Visual Studio Code (VSCode).</p>
+                <p>• Đã cài đặt Extension GitHub Classroom trên VSCode.</p>
+                <p>• Đã đăng nhập vào GitHub trên VSCode</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Explanation Drawer (Augment Mode) -->
+          <div class="p-4 bg-white border-t border-slate-200 shrink-0">
+            <div class="flex items-start gap-2.5">
+              <div class="w-6 h-6 rounded-full bg-blue-700 text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
+                ✦
+              </div>
+              <div class="flex-1 text-xs">
+                <div class="font-bold text-slate-800 mb-0.5 flex items-center justify-between">
+                  <span>VLearn Tutor Tóm Tắt Nhanh</span>
+                  <span class="text-[10px] text-emerald-600 font-semibold">✓ Có dẫn nguồn</span>
+                </div>
+                <p id="sync-ai-explanation" class="text-slate-600 text-[11px] leading-relaxed">
+                  Trang này yêu cầu hoàn thiện đủ 5 công cụ trước khi bắt đầu Lab 01. Nếu thiếu Python hoặc Git, các lệnh chạy script sẽ báo lỗi 'command not found'.
+                </p>
+                <div class="mt-2 flex items-center gap-2">
+                  <button onclick="alert('VLearn Tutor sẽ phân tích sâu hơn khái niệm này trong CP3!')" class="px-2.5 py-1 rounded bg-blue-50 text-blue-700 font-semibold text-[10px] hover:bg-blue-100 transition">
+                    💬 Hỏi sâu hơn về node này
+                  </button>
+                  <button onclick="collapseDetailToFullTree()" class="px-2.5 py-1 rounded bg-slate-100 text-slate-600 font-medium text-[10px] hover:bg-slate-200 transition">
+                    🌳 Trở lại toàn cây
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ================= AI PROCESSING MODAL ================= -->
+  <div id="modal-processing" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center">
+      <div class="w-12 h-12 rounded-full border-4 border-blue-600 border-t-transparent animate-spin mx-auto mb-3"></div>
+      <h3 class="font-bold text-slate-900 text-sm mb-1">AI VLearn Đang Bóc Tách Cây Sơ Đồ...</h3>
+      <p class="text-xs text-slate-500 mb-4">Đọc 28 trang slide &rarr; Nhận diện phân cấp 3 tầng &rarr; Sinh Sơ đồ tư duy dạng cây có dẫn nguồn.</p>
+      
+      <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-left text-[11px] space-y-1 font-mono text-slate-600 mb-4">
+        <div class="text-emerald-600">✓ Đã phân tích text layer 28 slide</div>
+        <div class="text-emerald-600">✓ Bóc tách 3 nhánh chính &amp; 6 khái niệm</div>
+        <div class="text-blue-600 font-bold animate-pulse">⚡ Quyết định logic: [STRUCTURED]</div>
+      </div>
+
+      <button onclick="finishAiGeneration()" class="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition">
+        Xem Cây Sơ Đồ Tư Duy Ngay
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= CLARIFY MODAL (State test) ================= -->
+  <div id="modal-clarify" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-amber-200">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">DECISION: [CLARIFY]</span>
+      </div>
+      <h3 class="text-sm font-bold text-slate-900 mb-2">Tệp slide dài 28 trang. Bạn muốn xem sơ đồ mức nào?</h3>
+      <p class="text-xs text-slate-500 mb-4">Để tránh quá tải thị giác, chọn phạm vi bóc tách kiến thức:</p>
+      
+      <div class="space-y-2 mb-4">
+        <div onclick="closeModal('modal-clarify'); setMode('mindmap')" class="p-2.5 rounded-lg border border-slate-200 hover:border-blue-600 hover:bg-blue-50/50 cursor-pointer text-xs">
+          <div class="font-bold text-slate-800">1. Sơ đồ tổng quan toàn bài (High-level)</div>
+          <div class="text-[11px] text-slate-500">Hiển thị 3 nhánh chính và 6 khái niệm cốt lõi (Khuyên dùng).</div>
+        </div>
+        <div onclick="closeModal('modal-clarify'); setMode('mindmap')" class="p-2.5 rounded-lg border border-slate-200 hover:border-blue-600 hover:bg-blue-50/50 cursor-pointer text-xs">
+          <div class="font-bold text-slate-800">2. Đi sâu vào Nhánh 2: Tokens &amp; LLM API</div>
+          <div class="text-[11px] text-slate-500">Tập trung chi tiết vào phần được hỏi nhiều nhất trong chatlog (23.1%).</div>
+        </div>
+      </div>
+      <button onclick="closeModal('modal-clarify')" class="w-full py-1.5 text-xs text-slate-500 hover:bg-slate-100 rounded-lg">Hủy</button>
+    </div>
+  </div>
+
+  <!-- ================= UNSUPPORTED MODAL (State test) ================= -->
+  <div id="modal-unsupported" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-rose-200 text-center">
+      <div class="w-10 h-10 rounded-full bg-rose-100 text-rose-600 font-bold text-lg flex items-center justify-center mx-auto mb-2">⚠️</div>
+      <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px] font-bold">DECISION: [UNSUPPORTED]</span>
+      <h3 class="text-sm font-bold text-slate-900 mt-2 mb-1">Không thể tạo sơ đồ tư duy</h3>
+      <p class="text-xs text-slate-500 mb-4">Tệp slide tải lên là bản quét ảnh (scan) không chứa lớp văn bản, hoặc không thuộc nội dung bài giảng của khóa học.</p>
+      <button onclick="closeModal('modal-unsupported')" class="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs">Đã hiểu & Đóng</button>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT CONTROLLER ================= -->
+  <script>
+    let currentMode = 'slide';
+
+    function toggleConceptMap() {
+      if (currentMode === 'slide') {
+        startAiGeneration();
+      } else {
+        setMode('slide');
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      const secSlide = document.getElementById('section-slide');
+      const secMap = document.getElementById('section-mindmap');
+      const btnSlide = document.getElementById('btn-mode-slide');
+      const btnMap = document.getElementById('btn-mode-map');
+      const headerText = document.getElementById('header-btn-text');
+
+      if (mode === 'slide') {
+        secSlide.classList.remove('hidden');
+        secMap.classList.add('hidden');
+        btnSlide.className = "px-2.5 py-1 rounded bg-white text-indigo-950 font-bold shadow-sm transition";
+        btnMap.className = "px-2.5 py-1 rounded bg-indigo-900 hover:bg-indigo-800 text-indigo-100 font-medium transition flex items-center gap-1.5";
+        headerText.innerText = "✨ Cây Sơ Đồ Tư Duy (Mindmap)";
+      } else {
+        secSlide.classList.add('hidden');
+        secMap.classList.remove('hidden');
+        btnMap.className = "px-2.5 py-1 rounded bg-white text-indigo-950 font-bold shadow-sm transition flex items-center gap-1.5";
+        btnSlide.className = "px-2.5 py-1 rounded bg-indigo-900 hover:bg-indigo-800 text-indigo-100 font-medium transition";
+        headerText.innerText = "📖 Đóng Sơ Đồ & Xem Slide";
+        
+        // When first entering mindmap mode: show 100% full tree overview!
+        collapseDetailToFullTree();
+      }
+    }
+
+    function startAiGeneration() {
+      document.getElementById('modal-processing').classList.remove('hidden');
+      setTimeout(() => {
+        finishAiGeneration();
+      }, 900);
+    }
+
+    function finishAiGeneration() {
+      document.getElementById('modal-processing').classList.add('hidden');
+      setMode('mindmap');
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // Collapse the detail panel so the tree takes 100% full width
+    function collapseDetailToFullTree() {
+      const detailPanel = document.getElementById('detail-panel');
+      const treePanel = document.getElementById('tree-panel');
+      const btnCollapse = document.getElementById('btn-collapse-detail');
+      const treeBadge = document.getElementById('tree-view-badge');
+      const instructionBanner = document.getElementById('tree-instruction-banner');
+
+      detailPanel.classList.add('hidden');
+      treePanel.className = "w-full border-r border-slate-200 flex flex-col bg-[#FAFBFD] overflow-hidden transition-all duration-300";
+      btnCollapse.classList.add('hidden');
+      instructionBanner.classList.remove('hidden');
+      treeBadge.innerText = "Toàn Cảnh 100%";
+      treeBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700";
+
+      // Clear highlighted borders on leaves and active paths
+      document.querySelectorAll('.node-card').forEach(el => {
+        el.classList.remove('active', 'border-blue-600', 'border-2');
+        if (el.id !== 'node-root') {
+          el.classList.add('border-slate-200', 'border');
+        }
+      });
+      document.querySelectorAll('.tree-path').forEach(p => {
+        p.classList.remove('active');
+      });
+    }
+
+    // Database of slide contents for live synchronization
+    const slidesData = {
+      1: {
+        title: "Local Checklist",
+        ref: "[Slide 1]",
+        badge: "Trang 1 / 28",
+        content: "<p>• Trên máy đã cài đặt Git (Mở cmd chạy <code class='code-cmd'>git version</code> để kiểm tra)</p><p>• Trên máy đã cài đặt Python &lt; 3.14 &amp; &gt; 3.11 (Mở cmd chạy <code class='code-cmd'>python --version</code> để kiểm tra)</p><p>• Trên máy đã có IDE Visual Studio Code (VSCode).</p><p>• Đã cài đặt Extension GitHub Classroom trên VSCode.</p><p>• Đã đăng nhập vào GitHub trên VSCode</p>",
+        explanation: "Checklist tiên quyết của buổi 1. 100% học viên cần đảm bảo đủ 5 công cụ này trước khi bắt đầu Lab 01."
+      },
+      3: {
+        title: "GitHub Classroom Workflow",
+        ref: "[Slide 3]",
+        badge: "Trang 3 / 28",
+        content: "<p>• Bấm vào link GitHub Classroom do Giảng viên/TA cung cấp trên VLearn.</p><p>• Hệ thống tự sinh repository cá nhân dạng: <code class='code-cmd'>K4-Lab01-[MSSV]</code>.</p><p>• Clone repo về máy: <code class='code-cmd'>git clone &lt;url&gt;</code>.</p><p>• Hoàn thành bài và push commit trước deadline 21:00.</p>",
+        explanation: "Quy trình nộp bài chính thức của cả khóa. Điểm số và thời gian nộp được ghi nhận tự động qua commit log của GitHub."
+      },
+      12: {
+        title: "Tokens & Context Window",
+        ref: "[Slide 12]",
+        badge: "Trang 12 / 28",
+        content: "<p>• Token là đơn vị cơ bản mô hình đọc (100 tokens ≈ 75 từ tiếng Anh, ~50 từ tiếng Việt).</p><p>• <strong>Context Window:</strong> Dung lượng ngữ cảnh tối đa mô hình có thể tiếp nhận trong 1 lượt hỏi.</p><p>• ⚠️ <strong>Cảnh báo tràn context:</strong> Vượt quá giới hạn sẽ khiến mô hình bỏ quên phần đầu hoặc báo lỗi 400 Out-of-memory.</p>",
+        explanation: "Điểm nghẽn lớn nhất của khóa K4 (23.1% câu hỏi thật trong chatlog rơi vào khái niệm này). Hiểu token là điều kiện để tối ưu chi phí API."
+      },
+      17: {
+        title: "Kỹ Thuật Gọi LLM API & Prompting",
+        ref: "[Slide 17]",
+        badge: "Trang 17 / 28",
+        content: "<p>• Khởi tạo Client: <code class='code-cmd'>client = genai.Client(api_key=...)</code></p><p>• Tách biệt <strong>System Instruction</strong> (vai trò cố định) và <strong>User Content</strong> (dữ liệu biến thiên).</p><p>• Cấu hình tham số: <code class='code-cmd'>temperature=0.2</code> cho câu trả lời chuẩn xác, hạn chế ảo giác (hallucination).</p>",
+        explanation: "Kỹ thuật lập trình cốt lõi để gọi mô hình Gemini từ code Python, chuẩn bị cho bài tập Lab 01 và làm prototype hackathon."
+      },
+      22: {
+        title: "Thiết Lập Môi Trường Ảo .venv",
+        ref: "[Slide 22]",
+        badge: "Trang 22 / 28",
+        content: "<p>• Tạo môi trường ảo riêng biệt: <code class='code-cmd'>python -m venv .venv</code></p><p>• Kích hoạt môi trường (Windows PowerShell): <code class='code-cmd'>.venv\\Scripts\\Activate.ps1</code></p><p>• Cài đặt thư viện theo chuẩn: <code class='code-cmd'>pip install -r requirements.txt</code></p>",
+        explanation: "Cô lập thư viện để tránh xung đột phiên bản package giữa các môn học và đảm bảo code chạy được trên máy của ban giám khảo."
+      },
+      26: {
+        title: "Chạy Kiểm Thử Tự Động & Checklist",
+        ref: "[Slide 26]",
+        badge: "Trang 26 / 28",
+        content: "<p>• Chạy script test tự động: <code class='code-cmd'>pytest tests/</code></p><p>• Đảm bảo 100% test cases trong Golden Set đều PASS.</p><p>• Commit code sạch, không commit file <code class='code-cmd'>.env</code> hoặc API Key cá nhân.</p>",
+        explanation: "Bước nghiệm thu cuối cùng trước khi nộp bài. Thầy cô và hệ thống CI/CD sẽ dựa vào kết quả test này để chấm điểm."
+      }
+    };
+
+    // WHEN A NODE IS CLICKED: Reveal the deeper contents side-by-side!
+    function selectTreeNode(nodeId, slidePage) {
+      const detailPanel = document.getElementById('detail-panel');
+      const treePanel = document.getElementById('tree-panel');
+      const btnCollapse = document.getElementById('btn-collapse-detail');
+      const treeBadge = document.getElementById('tree-view-badge');
+      const instructionBanner = document.getElementById('tree-instruction-banner');
+
+      // Expand to split-view (Tree 60% + Detail 40%)
+      detailPanel.classList.remove('hidden');
+      treePanel.className = "w-full md:w-7/12 border-r border-slate-200 flex flex-col bg-[#FAFBFD] overflow-hidden transition-all duration-300";
+      btnCollapse.classList.remove('hidden');
+      instructionBanner.classList.add('hidden');
+      treeBadge.innerText = "Chế Độ Chi Tiết";
+      treeBadge.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-700";
+
+      // Clear active styles on all node cards
+      document.querySelectorAll('.node-card').forEach(el => {
+        el.classList.remove('active', 'border-blue-600', 'border-2');
+        if (el.id !== 'node-root') {
+          el.classList.add('border-slate-200', 'border');
+        }
+      });
+
+      // Clear active styles on all paths
+      document.querySelectorAll('.tree-path').forEach(p => {
+        p.classList.remove('active');
+      });
+
+      // Activate clicked node
+      const clickedEl = document.getElementById('node-' + nodeId);
+      if (clickedEl) {
+        clickedEl.classList.add('active', 'border-blue-600', 'border-2');
+      }
+
+      // Activate path hierarchy
+      if (nodeId.startsWith('l1')) {
+        document.getElementById('path-root-b1').classList.add('active');
+        document.getElementById('node-b1').classList.add('active', 'border-blue-600', 'border-2');
+        if (nodeId === 'l11') document.getElementById('path-b1-l11').classList.add('active');
+        if (nodeId === 'l12') document.getElementById('path-b1-l12').classList.add('active');
+      } else if (nodeId.startsWith('l2')) {
+        document.getElementById('path-root-b2').classList.add('active');
+        document.getElementById('node-b2').classList.add('active', 'border-blue-600', 'border-2');
+        if (nodeId === 'l21') document.getElementById('path-b2-l21').classList.add('active');
+        if (nodeId === 'l22') document.getElementById('path-b2-l22').classList.add('active');
+      } else if (nodeId.startsWith('l3')) {
+        document.getElementById('path-root-b3').classList.add('active');
+        document.getElementById('node-b3').classList.add('active', 'border-blue-600', 'border-2');
+        if (nodeId === 'l31') document.getElementById('path-b3-l31').classList.add('active');
+        if (nodeId === 'l32') document.getElementById('path-b3-l32').classList.add('active');
+      } else if (nodeId === 'b1') {
+        document.getElementById('path-root-b1').classList.add('active');
+      } else if (nodeId === 'b2') {
+        document.getElementById('path-root-b2').classList.add('active');
+      } else if (nodeId === 'b3') {
+        document.getElementById('path-root-b3').classList.add('active');
+      }
+
+      // Synchronize the right slide viewer with deeper content
+      const data = slidesData[slidePage] || slidesData[1];
+      document.getElementById('sync-slide-title').innerText = data.title;
+      document.getElementById('sync-slide-ref').innerText = data.ref;
+      document.getElementById('sync-page-badge').innerText = data.badge;
+      document.getElementById('sync-slide-content').innerHTML = data.content;
+      document.getElementById('sync-ai-explanation').innerText = data.explanation;
+    }
+  </script>
+</body>
+</html>

@@ -4,10 +4,10 @@
 
 | Họ và Tên | MSSV | Vai trò chính | Liên hệ |
 |---|---|---|---|
-| Phạm Quân | 2A202602890 | Evidence *(nháp)* |  |
-| Đặng Hữu Tâm | 2A202602940 | Build *(nháp)* |  |
-| Nguyễn Hoàng Việt | 2A202602602 | Đội trưởng · Prompt & golden set *(nháp)* |  |
-| Nguyễn Đỗ Chiến Thắng | 2A202602442 | Spec & validation *(nháp)* |  |
+| Phạm Quân | 2A202602890 | Evidence |  |
+| Đặng Hữu Tâm | 2A202602940 | Build |  |
+| Nguyễn Hoàng Việt | 2A202602602 | Đội trưởng · Prompt & golden set |  |
+| Nguyễn Đỗ Chiến Thắng | 2A202602442 | Spec & validation |  |
 
 ## Đội trưởng
 - Họ tên: Nguyễn Hoàng Việt
@@ -17,5 +17,3 @@
 ## Willing users (đã khai từ CP1)
 - Dương Đạt Khang
 - Tạ Việt Cường
-
-> ⚠️ Còn thiếu: liên hệ đội trưởng (điền trước khi nộp form CP1). Vai trò còn đánh dấu "(nháp)" — nhóm xác nhận lại khi rảnh, không bắt buộc trước CP1.

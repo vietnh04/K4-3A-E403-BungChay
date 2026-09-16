@@ -1,45 +1,44 @@
-# AI SPEC — Tutor nói rõ khi không có căn cứ · Nhóm BungChay · Zone 1
+# AI SPEC — Cây sơ đồ tư duy tương tác từ slide bài giảng · Nhóm BungChay · Zone 1
 Hướng: [x] A — VLearn  [ ] B — Trợ lý Học viên  [ ] C — Làn mở
-Loại: [x] Tối ưu tính năng có sẵn (A1)  [ ] Tính năng mới
+Loại: [ ] Tối ưu tính năng có sẵn (A1)  [x] Tính năng mới (A2 — cho học viên)
 
-> ⚠️ **[NHÁP — chờ nhóm xác nhận]** Job executor và hướng A1 dưới đây là đề xuất dựa trên mining chatlog, chưa được cả nhóm chốt. Sửa lại nếu nhóm chọn hướng khác.
+> ✅ **Nhóm chốt lại (16/9, sau khảo sát thật):** đổi từ "bản đồ điểm nghẽn cho giảng viên" sang **cây sơ đồ tư duy tương tác cho học viên**, vẫn thuộc A2 (tính năng AI mới trên VLearn), chỉ đổi đối tượng từ giảng viên sang học viên. Bản A2-giảng viên cũ giữ lại trong §2 làm ứng viên đã cân nhắc.
 
 ## §1. User & Job
-- Job executor + workflow: Học viên đang xem bài giảng trong trang học VLearn, bôi đen một đoạn tài liệu/slide hoặc gõ câu hỏi để hỏi tutor ngay trong lúc học.
-- Core JTBD: Hiểu ngay một khái niệm trong bài đang xem mà không phải dừng lại tự tra cứu nơi khác.
-- Problem statement (KHÔNG chữ AI): Khi học viên hỏi về nội dung chưa có sẵn trong tài liệu đang mở (ví dụ video chưa được chuyển thành văn bản), câu trả lời nhận được không nói rõ đây là kiến thức ngoài khoá — học viên không biết khi nào nên tin, khi nào cần tự kiểm lại.
-- Evidence (chuẩn B — mining `data/vlearn-pack/chatlog/tutor_turns.csv`, phương pháp: lọc `is_preset=False` rồi đếm `has_citation=False` bằng pandas, script lưu tại `evidence/mining_chatlog.py`):
-  - **34,6% câu hỏi thật không được trích dẫn nguồn** (3.609/10.427 lượt, toàn khoá); riêng khoá K4 hiện tại: **32,8%** (838/2.555)
-  - Tutor gần như không hỏi lại khi câu hỏi mơ hồ: `ask_probing_question` chỉ 28/13.494 lượt (0,2%); K4 chỉ 6/3.097
-  - ≥5 quote nguyên văn (turn_id dẫn nguồn trong `tutor_turns.csv`):
-    - `[T10424]` Q: "LLM là gì" → A: *"thầy hiện chưa có lời giảng chi tiết từ video để trích xuất nội dung bài học cho em, nhưng anh có thể giúp em hiểu khái niệm này theo kiến thức nền tảng của khóa học."*
-    - `[T10405]` Q: "LLM là gì" (học viên khác, cùng bài) → A: *"Vì nội dung của đoạn video em đang xem chưa có dạng văn bản, anh chưa thể trích xuất chính xác định nghĩa từ tài liệu bài giảng cho em."*
-    - `[T13311]` Q: "tỉ lệ LLM trả lời dùng một tool không có trong tool schema là bao nhiêu %?" → A: trả lời chung chung, không trích dẫn, không nói rõ đây là ước lượng ngoài tài liệu khoá
-    - `[T13469]` Q: hỏi cách tính keyframe trung bình mỗi track trong bài lab → A: hướng dẫn tự suy luận, không trích dẫn tài liệu
-    - `[T10341]` Q: "Tôi nên bắt đầu từ đâu" → A: trả lời có cấu trúc nhưng không trích trang cụ thể
-  - **[CHƯA LÀM — cần nhóm]** Chuẩn A: khảo sát ≥20 học viên ngoài nhóm, ≥50% xác nhận, log câu hỏi + trả lời nguyên văn
+- Job executor + workflow: Học viên đang ôn tập/tổng hợp kiến thức từ slide bài giảng dài (PDF/PowerPoint nhiều trang) trên VLearn. Hiện tại: đọc lướt từng slide và tự ghi chép gạch đầu dòng, hoặc tự tay vẽ sơ đồ tư duy ra giấy/phần mềm, hoặc dùng AI tóm tắt thành văn bản — nhưng vẫn phải tự ngồi vẽ lại quan hệ giữa các phần.
+- Core JTBD: Nắm nhanh mạch logic và mối liên hệ giữa các khái niệm trong một bài giảng dài, để ôn tập/tổng hợp hiệu quả hơn so với đọc tuần tự từng trang.
+- Problem statement (KHÔNG chữ AI): Khi tài liệu bài giảng dài nhiều trang chữ, học viên khó nhìn ra mạch logic tổng thể và mối liên hệ giữa các phần kiến thức — dẫn đến mất nhiều thời gian tự vẽ/tóm tắt lại, hoặc bỏ cuộc giữa chừng và học thuộc vẹt từng slide rời rạc.
+- Evidence (**Chuẩn A** — khảo sát nội bộ Google Form, 15 người ngoài nhóm đã trả lời; ⚠️ **cần bổ sung thêm ≥5 người để đủ mốc ≥20 theo yêu cầu spec**):
+  - **73,3% (11/15)** chọn "Slide quá dài và nhiều chữ, khó nhìn ra mạch logic tổng thể" là khó khăn lớn nhất khi tổng hợp kiến thức
+  - **46,7% (7/15)** kết quả cuối cùng là "Không nắm chắc mối liên hệ giữa các phần kiến thức"; **53,3% (8/15)** "tự vẽ/tóm tắt được nhưng mất rất nhiều thời gian"; **26,7% (4/15)** "bỏ cuộc giữa chừng, học thuộc vẹt từng slide rời rạc"
+  - **86,7% (13/15)** đã phải đọc lại file slide bài giảng nhiều trang trong 7 ngày qua để ôn bài/làm bài tập; trong đó 60% để "nắm tổng quan trước khi đi sâu chi tiết", 13,3% để "tìm mối liên kết giữa các khái niệm/chương mục để ôn thi"
+  - **100% (15/15) sẵn sàng dùng** công cụ tự động chuyển slide dài thành sơ đồ tư duy trực quan nếu có (40% "chắc chắn sẽ dùng" + 60% "có thể sẽ thử", 0% "không có nhu cầu")
+  - Tương quan củng cố: 53,3% (8/15) hiện đã dùng AI tóm tắt thành **text**, nhưng nỗi đau lớn nhất vẫn là thiếu **mạch logic trực quan** — cho thấy tóm tắt dạng chữ chưa giải quyết đúng vấn đề, cần dạng sơ đồ
+  - **[CẦN LÀM]** Bổ sung ≥5 phản hồi khảo sát nữa (đủ ≥20) + xin trích 5 câu trả lời tự luận nguyên văn (câu "Khó khăn lớn nhất" có ô tự luận, ví dụ đã có: *"Tóm tắt xong thì bị ngắt kết nối với slide gốc, không biết ý đó nằm ở đâu"*, *"slide ngắn gọn nhưng vẫn thiếu connect"*, *"Dài quá không đọc"*) để đủ điều kiện trích dẫn nguyên văn theo chuẩn spec
 
 ## §2. Impact & quyết định chọn
 - Bảng impact (≥3 ứng viên, số liệu từ mining ở trên):
 
   | Ứng viên | Bao nhiêu người gặp | Tần suất | Tốn gì mỗi lần | Build nổi không | Chọn? |
   |---|---|---|---|---|---|
-  | Tutor không trích dẫn khi trả lời (không nói rõ ranh giới tài liệu) | 32,8% lượt hỏi thật của K4 (838/2.555) | mỗi lần hỏi ngoài phạm vi tài liệu đang mở | học viên không biết tin hay không, có thể học nhầm kiến thức ngoài khoá | Có — sửa logic quyết định trung tâm (conditional response) | ✅ Chọn |
+  | Cây sơ đồ tư duy tương tác từ slide (A2 — học viên) | 100% khảo sát (15/15) muốn dùng; 73,3% (11/15) thấy đây là khó khăn lớn nhất | mỗi lần ôn bài/tổng hợp — 86,7% phải làm việc này trong 7 ngày qua | mất nhiều thời gian tự vẽ lại (53,3%) hoặc bỏ cuộc, học vẹt rời rạc (26,7%) | Vừa sức nếu giới hạn phạm vi: AI trích xuất cấu trúc khái niệm từ 1 slide/transcript → dựng cây, học viên click node để hỏi thêm | ✅ Chọn |
+  | Giảng viên không biết lớp đang kẹt ở đâu (A2 — giảng viên) | 127 học viên K4 cùng vướng ở bài Day01 (23,1% câu hỏi thật) | mỗi buổi học | ôn sai trọng tâm buổi sau, học viên hổng kiến thức nền không được lấp | Vừa sức nếu giới hạn phạm vi: tổng hợp + xếp hạng theo bài giảng, không cần real-time | Loại — nhóm đổi hướng sang phục vụ trực tiếp học viên sau khi có khảo sát; bằng chứng mining (§1 bản cũ, script `evidence/mining_chatlog_a2.py`) vẫn giữ, có thể tái dùng làm nguồn "concept nào nhiều người hỏi" cho cây sơ đồ |
+  | Tutor không trích dẫn khi trả lời (không nói rõ ranh giới tài liệu, A1) | 32,8% lượt hỏi thật của K4 (838/2.555) | mỗi lần hỏi ngoài phạm vi tài liệu đang mở | học viên không biết tin hay không, có thể học nhầm kiến thức ngoài khoá | Có — sửa logic quyết định trung tâm (conditional response), phạm vi hẹp nhất trong 3 ứng viên | Loại — nhóm ưu tiên hướng có khảo sát thật + insight độc đáo hơn (mindmap) |
   | Tutor không hỏi lại khi câu hỏi mơ hồ | chỉ 6/3.097 lượt K4 có hỏi lại | hiếm | trả lời sai hướng, học viên phải hỏi lại | Có, nhưng cần thêm logic phân loại mơ hồ — phạm vi rộng hơn | Loại — ít bằng chứng định lượng trực tiếp về hậu quả hơn |
-  | Giảng viên không biết lớp đang kẹt ở đâu (A2) | cả lớp mỗi buổi | mỗi buổi học | ôn sai trọng tâm buổi sau | Khó hơn trong thời gian sự kiện — cần tổng hợp nhiều lượt | Loại — build nặng hơn, ít thời gian |
 
-- Ứng viên ĐÃ LOẠI + vì sao: "Tutor không hỏi lại khi mơ hồ" và "bản đồ lỗ hổng cho giảng viên (A2)" — cả hai đều khả thi nhưng ứng viên được chọn có bằng chứng định lượng trực tiếp mạnh hơn (32,8% là con số lớn, có quote cụ thể lặp lại ở nhiều học viên) và phạm vi sửa hẹp hơn (một quyết định: có căn cứ → trả lời kèm trích dẫn; không có căn cứ → nói rõ + gợi ý tìm ở đâu), phù hợp build trong thời gian sự kiện.
-- Ứng viên CHỌN + vì sao (bằng số): Tutor nói rõ khi không có căn cứ trong tài liệu — vì đây là pattern xảy ra ở gần 1/3 số lượt hỏi thật, có bằng chứng lặp lại trên nhiều học viên khác nhau (không phải cá biệt), và sửa được bằng một quyết định AI duy nhất (có căn cứ hay không) khớp đúng lát cắt MỘT CÂU.
+- Ứng viên ĐÃ LOẠI + vì sao: "Tutor không hỏi lại khi mơ hồ" — ít bằng chứng hậu quả trực tiếp. "Tutor không trích dẫn (A1)" — dễ build nhất nhưng ít khác biệt, chỉ dựa mining chatlog chứ chưa có khảo sát trực tiếp người dùng. "Giảng viên không biết lớp kẹt ở đâu (A2 cũ)" — bằng chứng mining mạnh (87,1% review_concept, Day01 chiếm 23,1%) nhưng đối tượng nghiệm thu (giảng viên) khó tiếp cận làm willing user hơn học viên; nhóm quyết định pivot sang phục vụ học viên trực tiếp sau khi khảo sát cho tín hiệu rõ hơn.
+- Ứng viên CHỌN + vì sao (bằng số): Cây sơ đồ tư duy tương tác cho học viên (A2) — vì 100% người khảo sát (15/15) muốn dùng, 73,3% xác nhận đây là khó khăn lớn nhất khi ôn tập, và 86,7% gặp tình huống này thường xuyên (trong 7 ngày qua). Có thể tái dùng bằng chứng mining chatlog cũ (khái niệm nào bị hỏi lại nhiều — `review_concept`) làm tín hiệu tô đậm node "khó" trên cây sơ đồ, kết hợp cả Chuẩn A và Chuẩn B.
+- ⚠️ **Lưu ý rủi ro (tự khai):** (1) khảo sát mới có 15/20 phản hồi, cần bổ sung gấp trước khi khoá spec ở CP4; (2) dựng cây sơ đồ tương tác (parse cấu trúc + UI graph) tốn công hơn một quyết định trả lời đơn — cần thu hẹp phạm vi kỹ ở §4 Non-goals (ví dụ: chỉ 1 bài giảng mẫu, cây 2 cấp, không cần kéo-thả).
 
 ## §3. Giải pháp tương tự đã nghiên cứu
 - [Sản phẩm 1]: flow / đáng học / đáng né / mình khác gì
 - [Sản phẩm 2]: ...
 
 ## §4. Thiết kế
-- Lát cắt MỘT CÂU (1 user · 1 việc · 1 quyết định AI · 1 kết quả):
-- Non-goals (≥3 thứ KHÔNG build):
+- Lát cắt MỘT CÂU (1 user · 1 việc · 1 quyết định AI · 1 kết quả) — **[NHÁP, cần nhóm chốt]**: Học viên đang ôn một bài giảng dài cần thấy mạch logic và mối liên hệ giữa các khái niệm được AI đọc slide/transcript rồi trích xuất cấu trúc khái niệm thành cây sơ đồ tương tác giúp nắm tổng quan nhanh và click vào từng node để AI giải thích sâu hơn.
+- Non-goals (≥3 thứ KHÔNG build) — **[NHÁP]**: (1) không tự dựng cây cho toàn bộ khoá học, chỉ 1 bài giảng/slide đang mở; (2) không cho kéo-thả/chỉnh sửa cây thủ công, chỉ xem + click; (3) không cần đồng bộ real-time với tiến độ học; (4) cây tối đa 2 cấp (chủ đề lớn → khái niệm con), không lồng sâu hơn.
 - Mức prototype nhắm tới: [ ] Sketch [ ] Mock [ ] Working — phần nào mock, phần nào thật:
-- Automation: [ ] augment [ ] conditional [ ] automate — lý do theo cost-of-error:
+- Automation: [x] augment [ ] conditional [ ] automate — **[NHÁP]** lý do: AI chỉ đề xuất cấu trúc/giải thích, học viên tự quyết định học gì tiếp — cost-of-error thấp (sai cấu trúc chỉ gây khó chịu, không gây hiểu sai kiến thức nếu vẫn link về đúng trang slide gốc).
 - §4b. Nguyên tắc đã áp dụng (≥4 — HAX/PAIR, xem guide):
   | Nguyên tắc | Áp cụ thể vào đâu trong prototype |
   |---|---|
@@ -57,8 +56,8 @@ Loại: [x] Tối ưu tính năng có sẵn (A1)  [ ] Tính năng mới
 - Kết quả các lượt chạy (bảng % — cập nhật đến trước CP6):
 
 ## §8. Phân công & kế hoạch
-- Phân công có tên: spec / evidence / prompt / code / demo
-- Willing users (≥2 tên) + kế hoạch vòng validation *(bonus, nếu làm)*:
+- Phân công có tên: spec / evidence / prompt / code / demo — xem `TEAMMATES.md` (⚠️ cần xác nhận lại vai trò cho hướng cây sơ đồ)
+- Willing users (≥2 tên): **Dương Đạt Khang**, **Tạ Việt Cường** + kế hoạch vòng validation *(bonus, nếu làm)*: *(cần bổ sung task cụ thể giao cho họ ở CP5)*
 - Multi-prototype (nếu làm): trục khác biệt của ≥2 phương án + lý do chọn:
 
 ## §9. Changelog

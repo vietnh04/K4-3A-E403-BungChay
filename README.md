@@ -8,10 +8,12 @@
 
 | Họ và Tên | Mã Học Viên | Vai trò chính | Phần việc đảm nhiệm trong dự án |
 |---|---|---|---|
-| Phạm Quân | 2A202602890 |  |  |
-| Đặng Hữu Tâm | 2A202602940 |  |  |
-| Nguyễn Hoàng Việt | 2A202602602 |  |  |
-| Nguyễn Đỗ Chiến Thắng | 2A202602442 |  |  |
+| Phạm Quân | 2A202602890 | Evidence *(nháp)* | Mining chatlog + khảo sát ≥20 học viên, ghi log bằng chứng |
+| Đặng Hữu Tâm | 2A202602940 | Build *(nháp)* | Dựng prototype (flow chính + lời gọi AI thật) |
+| Nguyễn Hoàng Việt | 2A202602602 | Prompt & golden set *(nháp)* | Viết prompt cho tutor, xây golden set ≥20 case |
+| Nguyễn Đỗ Chiến Thắng | 2A202602442 | Spec & validation *(nháp)* | Viết spec.md, chuẩn bị vòng validation + demo |
+
+> ⚠️ **Vai trò/phần việc trên là nháp đề xuất, chưa được nhóm xác nhận — đổi tên/hoán đổi theo thế mạnh thật của từng người.** Đội trưởng chưa xác định — cần chốt trước khi nộp form CP1 (đội trưởng dùng đúng 1 MSSV nộp cả 5 mốc).
 
 > Nhóm copy nguyên file README này về repo của mình, rồi điền bảng trên. Cột **Phần việc đảm nhiệm** ghi càng cụ thể càng tốt.
 

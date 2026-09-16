@@ -10,8 +10,8 @@
 | Nguyễn Đỗ Chiến Thắng | 2A202602442 |  |  |
 
 ## Đội trưởng
-- Họ tên:
-- MSSV: *(dùng duy nhất mã này để nộp cả 5 mốc CP1–CP5)*
+- Họ tên: Nguyễn Hoàng Việt
+- MSSV: 2A202602602
 - Liên hệ (email/SĐT/Discord):
 
-> ⚠️ Cần điền: vai trò + phần việc từng người, xác định đội trưởng, thông tin liên hệ đội trưởng.
+> ⚠️ Còn thiếu: liên hệ đội trưởng (điền trước khi nộp form CP1), ≥2 willing users (đang đi tìm — hạn 19:30 hôm nay).

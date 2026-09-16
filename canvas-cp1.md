@@ -42,5 +42,5 @@ Khi tài liệu bài giảng dài nhiều trang chữ, học viên khó nhìn ra
 ---
 
 **Thông tin nộp form CP1:**
-- Đội trưởng: Nguyễn Hoàng Việt — MSSV 2A202602602 — liên hệ: *(⚠️ CHỜ ĐIỀN)*
+- Đội trưởng: Nguyễn Hoàng Việt — MSSV 2A202602602
 - Link repo GitHub công khai: https://github.com/vietnh04/K4-3A-E403-BungChay

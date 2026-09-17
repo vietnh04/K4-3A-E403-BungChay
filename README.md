@@ -26,17 +26,23 @@ Nhóm **BungChay** đã hoàn thiện bản **Working Prototype (CP3)** đáp �
 - **Hệ Thống Liên Kết Chéo (Cross-Day Linking):** 17/17 liên kết kiến thức liên ngày đạt độ chính xác 100% (ví dụ: Day 4 Tool Calling $\leftrightarrow$ Day 3 ReAct Agent $\leftrightarrow$ Day 1 Setup & API). Click vào huy hiệu 🔗 sẽ tự động nhảy sang Ngày tương ứng và zoom vào node liên kết.
 - **Bảo Vệ Hạn Mức Free Tier (15 RPM / 500 RPD):** Pipeline dữ liệu `codebase/pipeline/mindmap_pipeline.py` tích hợp sẵn bộ đệm cục bộ `codebase/storage/day_X.json`, cho phép chạy demo mượt mà **0đ chi phí token (Zero Quota Mode)**, đồng thời trang bị sẵn hàm gọi Gemini 2.5 Flash Structured Output khi người dùng cấp API Key.
 
-### 2. Cách chạy nhanh Prototype:
-- **Mở giao diện Web D3.js trực tiếp:**
-  - Nhấp đúp chuột mở file `codebase/index.html` trên bất kỳ trình duyệt nào (Chrome, Edge, Firefox), hoặc truy cập file mockup artifact.
-- **Chạy pipeline dữ liệu bằng Python:**
-  ```powershell
-  # Kiểm tra trạng thái kho lưu trữ và xác thực liên kết chéo
-  python codebase/pipeline/mindmap_pipeline.py --status --validate-links
+### 2. Cách chạy nhanh Máy Chủ Web (Backend & Frontend):
+👉 **Xem tài liệu hướng dẫn đầy đủ từng bước tại:** [`SERVER_GUIDE.md`](file:///SERVER_GUIDE.md)
 
-  # Nạp hoặc sinh cây cho một ngày cụ thể (mặc định offline cache an toàn)
-  python codebase/pipeline/mindmap_pipeline.py --day 1
+- **Cài đặt thư viện:**
+  ```powershell
+  pip install -r requirements.txt
   ```
+- **Tạo file `.env`:**
+  ```powershell
+  Copy-Item .env.example .env
+  # Điền GEMINI_API_KEY vào file .env
+  ```
+- **Khởi chạy Server:**
+  ```powershell
+  python run_server.py
+  ```
+  > Truy cập trình duyệt: **`http://127.0.0.1:8000`**
 
 ---
 

@@ -31,6 +31,13 @@ UPLOAD_DIR = DATA_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
+# Auto-initialize storage if empty or on fresh git clone
+try:
+    from backend.seed_data import init_default_storage
+    init_default_storage()
+except Exception as _e:
+    pass
+
 # Rate limiting tracker: min 4.2s for 15 RPM free tier
 _LAST_API_CALL = 0.0
 MIN_CALL_INTERVAL = 4.2

@@ -1,0 +1,271 @@
+{
+  "prompt_ref": "codebase/prompts/system_prompt_v2.md",
+  "note_taxonomy": "Ca ③ va ④ duoc dien giai trong pham vi 1 loi goi AI duy nhat (trich xuat cau truc tu slide), vi san pham hien chi co prompt nay. ③ = noi dung dua vao khong phai bai giang that (AI khong duoc bia cay gia). ④ = slide co dinh dang dac thu (code, cong thuc, bang) can trich xuat dung khong vo cau truc. Xem eval/README.md.",
+  "scoring_rules": {
+    "pass_conditions": [
+      "response la JSON hop le, parse duoc truc tiep (khong bi bao trong ```)",
+      "neu expected.insufficient_info = true thi response.insufficient_info phai = true",
+      "neu expected.insufficient_info = false thi moi so trang trong expected.must_cover_pages phai xuat hien trong source_pages cua it nhat 1 node (cha hoac con)",
+      "response khong duoc chua bat ky cum tu nao trong expected.forbidden_terms (khong phan biet hoa/thuong, kiem tra tren toan bo title+summary) - co nghia AI bia them ngoai nguon",
+      "cau truc toi da 2 cap: node trong children khong duoc co children con"
+    ],
+    "fail_if_any_condition_not_met": true
+  },
+  "cases": [
+    {
+      "id": "gs01",
+      "taxonomy": ["1_nguon_su_that"],
+      "usage_type": "common",
+      "survey_grounded": true,
+      "survey_ref": "spec.md SS1 - 73.3% (11/15) chon 'slide dai, nhieu chu, kho nhin mach logic' la kho khan lon nhat; quote P07 'Dai qua khong doc'",
+      "input": "[Trang 1] Bai 5: Cau truc du lieu Stack va Queue\n- Stack va Queue la 2 cau truc du lieu co ban, khac nhau ve thu tu truy cap\n\n[Trang 2] Stack (Ngan xep)\n- Nguyen tac LIFO (Last In First Out) - phan tu vao sau ra truoc\n- Cac thao tac chinh: push (them), pop (lay ra), peek (xem dinh)\n- Ung dung: undo trong trinh soan thao, danh gia bieu thuc\n\n[Trang 3] Queue (Hang doi)\n- Nguyen tac FIFO (First In First Out) - phan tu vao truoc ra truoc\n- Cac thao tac chinh: enqueue (them), dequeue (lay ra)\n- Ung dung: xu ly tac vu theo thu tu, hang doi in an",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2, 3],
+        "forbidden_terms": ["double-ended queue", "circular queue", "priority queue"]
+      }
+    },
+    {
+      "id": "gs02",
+      "taxonomy": ["1_nguon_su_that"],
+      "usage_type": "common",
+      "survey_grounded": true,
+      "survey_ref": "spec.md SS1 - 86.7% (13/15) da phai doc lai slide bai giang de on bai trong 7 ngay qua",
+      "input": "[Trang 1] Giai thuat sap xep: Bubble Sort\n- Y tuong: so sanh 2 phan tu lien ke, doi cho neu sai thu tu, lap lai nhieu vong\n- Do phuc tap: O(n^2) trong truong hop xau nhat\n\n[Trang 2] Vi du minh hoa\n- Mang [5, 2, 8, 1] sau vong 1: [2, 5, 1, 8]\n- Sau vong 2: [2, 1, 5, 8]\n- Sau vong 3: [1, 2, 5, 8] - da sap xep xong",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2],
+        "forbidden_terms": ["quick sort", "merge sort", "O(n log n)"]
+      }
+    },
+    {
+      "id": "gs03",
+      "taxonomy": ["2_mo_ho_thieu_thong_tin"],
+      "usage_type": "common",
+      "survey_grounded": false,
+      "input": "[Trang 1] Chuong 7\n- Ket luan",
+      "expected": {
+        "insufficient_info": true,
+        "must_cover_pages": [],
+        "forbidden_terms": []
+      }
+    },
+    {
+      "id": "gs04",
+      "taxonomy": ["2_mo_ho_thieu_thong_tin"],
+      "usage_type": "common",
+      "survey_grounded": true,
+      "survey_ref": "canvas-cp1.md SS4 - quote P03 'Slide ngan gon nhung van thieu connect'; spec.md SS1 - cau tu luan bi cat chu ve 'mat ket noi voi slide goc'",
+      "input": "[Trang 1] Cac Design Pattern pho bien\n- Singleton\n- Factory\n- Observer\n- Strategy\n- Decorator",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1],
+        "forbidden_terms": ["khoi tao duy nhat mot instance", "tao doi tuong ma khong can chi ro lop cu the", "thong bao thay doi trang thai"]
+      }
+    },
+    {
+      "id": "gs05",
+      "taxonomy": ["4_dac_thu_nghiep_vu"],
+      "usage_type": "common",
+      "survey_grounded": false,
+      "input": "[Trang 1] Bai 3: Vong lap trong Python\n- Vong lap dung de lap lai mot khoi lenh nhieu lan\n- Hai loai vong lap chinh: for va while\n\n[Trang 2] Vong lap for\n- Dung khi biet truoc so lan lap\n- Cu phap: for bien in iterable:\n- Thuong dung voi range(), list, string\n\n[Trang 3] Vong lap while\n- Dung khi chua biet truoc so lan lap, lap den khi dieu kien sai\n- Cu phap: while dieu_kien:\n- Can than vong lap vo han neu quen cap nhat dieu kien\n\n[Trang 4] Loi thuong gap\n- Quen thut le (IndentationError)\n- Quen dau hai cham sau for/while\n- Vong lap vo han do quen break hoac cap nhat bien dieu kien",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2, 3, 4],
+        "forbidden_terms": ["list comprehension", "enumerate", "zip("]
+      },
+      "note": "Case da duoc test that bang API (xem v1_vs_v2_changelog.md) - dung lam moc doi chieu v1 vs v2."
+    },
+    {
+      "id": "gs06",
+      "taxonomy": ["4_dac_thu_nghiep_vu"],
+      "usage_type": "common",
+      "survey_grounded": false,
+      "input": "[Trang 1] Ham gop trong SQL (Aggregate Functions)\n- SUM(cot): tinh tong gia tri\n- AVG(cot): tinh trung binh\n- COUNT(cot): dem so dong\n- MAX(cot) / MIN(cot): gia tri lon nhat / nho nhat\n\n[Trang 2] Vi du\n- SELECT AVG(diem) FROM bang_diem WHERE mon = 'Toan'\n- Ket qua: diem trung binh mon Toan cua tat ca hoc vien",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2],
+        "forbidden_terms": ["GROUP BY", "HAVING", "JOIN"]
+      }
+    },
+    {
+      "id": "gs07",
+      "taxonomy": ["3_ngoai_pham_vi"],
+      "usage_type": "edge",
+      "survey_grounded": false,
+      "input": "[Trang 1] (Chi co hinh minh hoa kien truc client-server, khong co chu thich text kem theo)",
+      "expected": {
+        "insufficient_info": true,
+        "must_cover_pages": [],
+        "forbidden_terms": ["client gui yeu cau", "server xu ly va tra ve"]
+      }
+    },
+    {
+      "id": "gs08",
+      "taxonomy": ["3_ngoai_pham_vi"],
+      "usage_type": "common",
+      "survey_grounded": false,
+      "input": "[Trang 1] Lap trinh Python co ban\nGiang vien: Nguyen Van A\nKhoa hoc K4 - Lop 3A\nNgay cap nhat: 15/09/2026",
+      "expected": {
+        "insufficient_info": true,
+        "must_cover_pages": [],
+        "forbidden_terms": ["bien", "ham", "vong lap", "kieu du lieu"]
+      }
+    },
+    {
+      "id": "gs09",
+      "taxonomy": ["4_dac_thu_nghiep_vu"],
+      "usage_type": "edge",
+      "survey_grounded": true,
+      "survey_ref": "spec.md SS2 - danh gia rui ro nhom tu khai: cay tu 1 bai giang dai de bo sot trang neu khong kiem soat (da xac nhan bang test that o gs05/changelog)",
+      "input": "[Trang 1] Mo hinh OSI 7 tang\n- Chuan hoa cach cac thiet bi mang giao tiep voi nhau\n\n[Trang 2] Tang 1 - Physical\n- Truyen tin hieu dien/quang qua day cap\n\n[Trang 3] Tang 2 - Data Link\n- Dong khung du lieu (frame), kiem tra loi co ban\n\n[Trang 4] Tang 3 - Network\n- Dinh tuyen (routing), dia chi IP\n\n[Trang 5] Tang 4 - Transport\n- Dam bao du lieu den dung noi, dung thu tu (TCP/UDP)\n\n[Trang 6] Tang 5 - Session\n- Quan ly phien lam viec giua 2 thiet bi\n\n[Trang 7] Tang 6 - Presentation\n- Chuyen doi dinh dang du lieu, ma hoa/giai ma\n\n[Trang 8] Tang 7 - Application\n- Giao dien voi ung dung nguoi dung, vi du: HTTP, FTP",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2, 3, 4, 5, 6, 7, 8],
+        "forbidden_terms": ["mo hinh TCP/IP 4 tang"]
+      }
+    },
+    {
+      "id": "gs10",
+      "taxonomy": ["1_nguon_su_that"],
+      "usage_type": "common",
+      "survey_grounded": true,
+      "survey_ref": "spec.md SS1 - 46.7% (7/15) ket qua cuoi cung la 'khong nam chac moi lien he giua cac phan kien thuc'",
+      "input": "[Trang 1] Bien va kieu du lieu trong Python\n- Bien dung de luu tru gia tri, khong can khai bao kieu truoc\n- Cac kieu co ban: int, float, str, bool\n\n[Trang 2] Ep kieu (Type casting)\n- int(\"5\") chuyen chuoi thanh so nguyen\n- str(5) chuyen so thanh chuoi\n- float(\"3.14\") chuyen chuoi thanh so thuc",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2],
+        "forbidden_terms": ["list", "dictionary", "tuple", "set"]
+      }
+    },
+    {
+      "id": "gs11",
+      "taxonomy": ["2_mo_ho_thieu_thong_tin"],
+      "usage_type": "common",
+      "survey_grounded": false,
+      "input": "[Trang 1] Cau truc dieu khien if-else\n- Dung de re nhanh chuong trinh theo dieu kien\n- Cu phap: if dieu_kien: ... else: ...\n\n[Trang 2] (Trang nay bi loi khi xuat file, khong doc duoc noi dung)",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1],
+        "forbidden_terms": ["elif", "switch case"]
+      },
+      "note": "Trang 2 khong co noi dung doc duoc - ky vong AI khong bia noi dung cho trang nay, chi trich xuat Trang 1."
+    },
+    {
+      "id": "gs12",
+      "taxonomy": ["1_nguon_su_that"],
+      "usage_type": "common",
+      "survey_grounded": true,
+      "survey_ref": "spec.md SS1 - 53.3% (8/15) 'tu ve/tom tat duoc nhung ton rat nhieu thoi gian'",
+      "input": "[Trang 1] Ham trong lap trinh (Function)\n- Ham la mot khoi lenh duoc dat ten, co the goi lai nhieu lan\n- Loi ich: tai su dung code, de bao tri\n\n[Trang 2] Tham so va gia tri tra ve\n- Tham so (parameter): du lieu dau vao cua ham\n- return: gia tri ham tra ve sau khi thuc thi\n- Ham khong co return se tra ve None (trong Python)",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2],
+        "forbidden_terms": ["default parameter", "*args", "**kwargs", "lambda"]
+      }
+    },
+    {
+      "id": "gs13",
+      "taxonomy": ["4_dac_thu_nghiep_vu"],
+      "usage_type": "common",
+      "survey_grounded": true,
+      "survey_ref": "canvas-cp1.md SS5 - 46.7% gap tinh trang qua tai slide >=3 lan/tuan, can on lai nhieu lan nen slide co cau truc bang/khoa lien ket de nho lau hon",
+      "input": "[Trang 1] Co so du lieu quan he (Relational Database)\n- Du lieu duoc luu trong cac bang (table), moi bang co cac cot (column) va dong (row)\n- Khoa chinh (primary key): xac dinh duy nhat 1 dong trong bang\n\n[Trang 2] Khoa ngoai (Foreign Key)\n- Lien ket giua 2 bang voi nhau\n- Vi du: bang don_hang co cot ma_khach_hang lien ket toi bang khach_hang",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2],
+        "forbidden_terms": ["normalization", "chuan hoa du lieu", "1NF", "2NF", "3NF"]
+      }
+    },
+    {
+      "id": "gs14",
+      "taxonomy": ["3_ngoai_pham_vi"],
+      "usage_type": "edge",
+      "survey_grounded": false,
+      "input": "[Trang 1] Question 1: Ket qua cua doan code sau la gi?\nprint(2 + 3 * 2)\nA. 10   B. 8   C. 12   D. 7\n\n[Trang 2] Question 2: Vong lap nao dung khi khong biet truoc so lan lap?\nA. for   B. while   C. do-while   D. foreach",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2],
+        "forbidden_terms": ["dap an dung la", "correct answer is"]
+      },
+      "note": "Day la de trac nghiem, khong phai noi dung bai giang - ky vong AI trich xuat cau truc (chu de: cau hoi on tap) chu khong tu dua ra dap an (dap an khong co trong slide)."
+    },
+    {
+      "id": "gs15",
+      "taxonomy": ["1_nguon_su_that"],
+      "usage_type": "common",
+      "survey_grounded": true,
+      "survey_ref": "spec.md SS1 - 60% (9/15) doc slide de 'nam tong quan truoc khi di sau chi tiet'",
+      "input": "[Trang 1] Lap trinh huong doi tuong (OOP) - Tong quan\n- 4 tinh chat co ban: tinh dong goi, tinh ke thua, tinh da hinh, tinh truu tuong\n\n[Trang 2] Lop va doi tuong\n- Lop (class): khuon mau dinh nghia thuoc tinh va phuong thuc\n- Doi tuong (object): mot the hien cu the duoc tao tu lop",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2],
+        "forbidden_terms": ["interface", "abstract class"]
+      }
+    },
+    {
+      "id": "gs16",
+      "taxonomy": ["2_mo_ho_thieu_thong_tin"],
+      "usage_type": "common",
+      "survey_grounded": false,
+      "input": "[Trang 1] Xu ly ngoai le (Exception Handling)\n- try/except dung de bat loi khong mong muon khi chay chuong trinh",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1],
+        "forbidden_terms": ["finally", "raise", "custom exception"]
+      },
+      "note": "Noi dung it (1 cau) nhung van co 1 khai niem ro rang - ky vong AI van dung nen (khong ep insufficient_info) nhung confidence o muc medium/low vi thong tin mong."
+    },
+    {
+      "id": "gs17",
+      "taxonomy": ["4_dac_thu_nghiep_vu"],
+      "usage_type": "common",
+      "survey_grounded": true,
+      "survey_ref": "spec.md SS1 - 26.7% (4/15) chon 'mat qua nhieu thoi gian, cong suc neu phai tu ngoi ve so do' la rao can lon nhat",
+      "input": "[Trang 1] Kiem thu phan mem - Unit Test\n- Kiem tra tung don vi nho nhat cua code (vi du: 1 ham) hoat dong dung\n- Trong Python thuong dung thu vien unittest hoac pytest\n\n[Trang 2] Cau truc mot test case\n- Chuan bi du lieu dau vao (input)\n- Goi ham can test\n- So sanh ket qua thuc te voi ket qua mong doi (assert)",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2],
+        "forbidden_terms": ["mock", "test coverage", "TDD"]
+      }
+    },
+    {
+      "id": "gs18",
+      "taxonomy": ["1_nguon_su_that"],
+      "usage_type": "common",
+      "survey_grounded": false,
+      "input": "[Trang 1] Thuat toan tim kiem nhi phan (Binary Search)\n- Chi ap dung duoc voi mang da sap xep\n- Y tuong: so sanh gia tri can tim voi phan tu giua mang, thu hep pham vi tim kiem mot nua sau moi buoc\n- Do phuc tap: O(log n)",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1],
+        "forbidden_terms": ["linear search", "O(n)"]
+      }
+    },
+    {
+      "id": "gs19",
+      "taxonomy": ["3_ngoai_pham_vi"],
+      "usage_type": "edge",
+      "survey_grounded": false,
+      "input": "[Trang 1] Thong bao\nLop hoc ngay 20/09 se doi sang phong E402 do bao tri phong E403.\nCac ban chu y kiem tra lich hoc cap nhat tren VLearn.",
+      "expected": {
+        "insufficient_info": true,
+        "must_cover_pages": [],
+        "forbidden_terms": []
+      },
+      "note": "Day la thong bao hanh chinh, khong phai noi dung hoc thuat - ky vong AI nhan ra khong co khai niem nao de dung cay, tra ve insufficient_info thay vi co ep noi dung thanh 1 'khai niem'."
+    },
+    {
+      "id": "gs20",
+      "taxonomy": ["4_dac_thu_nghiep_vu"],
+      "usage_type": "common",
+      "survey_grounded": true,
+      "survey_ref": "canvas-cp1.md SS3 - nguoi hoc kho nhin ra mach logic va moi lien he giua cac khai niem khi doc slide dai nhieu chu",
+      "input": "[Trang 1] Git va quan ly phien ban\n- Git la he thong quan ly phien ban phan tan, theo doi thay doi cua code theo thoi gian\n\n[Trang 2] Cac lenh co ban\n- git init: khoi tao repo\n- git add: dua file vao staging area\n- git commit: luu thay doi thanh 1 phien ban\n- git push: day len remote repo",
+      "expected": {
+        "insufficient_info": false,
+        "must_cover_pages": [1, 2],
+        "forbidden_terms": ["git rebase", "git merge", "git branch"]
+      }
+    }
+  ]
+}

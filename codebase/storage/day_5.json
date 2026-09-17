@@ -1,0 +1,140 @@
+{
+  "day": 5,
+  "code": "DAY_05",
+  "title": "AI Product Thinking & Requirements",
+  "subtitle": "Product Thinking, Responsible AI & 8 Phần PRD Chuẩn",
+  "pdf_file": "day05-ai-product-thinking-requirements.pdf",
+  "total_slides": 44,
+  "tree": {
+    "id": "d5_root",
+    "title": "Day 05: AI Product PRD",
+    "summary": "Tư duy sản phẩm AI, Responsible AI, 8 phần PRD chuẩn và Risk Matrix.",
+    "slide_page": "Slide 1-6",
+    "type": "root",
+    "children": [
+      {
+        "id": "d5_sec1",
+        "title": "Tư Duy Sản Phẩm AI",
+        "summary": "Khác biệt bản chất giữa AI Product (xác suất) và Software thông thường (deterministic).",
+        "slide_page": "Slide 6-11",
+        "type": "branch",
+        "children": [
+          {
+            "id": "d5_ai_vs_software",
+            "title": "AI Product vs Software",
+            "summary": "Output xác suất có biến thiên, yêu cầu threshold chất lượng, SLA và fallback.",
+            "slide_page": "Slide 8",
+            "cross_link": {
+              "target_day": 2,
+              "target_node_id": "d2_4_core_questions",
+              "label": "🔗 Đối chiếu bài toán cần AI Day 02 [Slide 3]"
+            },
+            "detail": {
+              "title": "AI Product Khác Gì Phần Mềm Truyền Thống?",
+              "slide_page": "Slide 8",
+              "excerpt": "So sánh cốt lõi:\n● Output: Phần mềm truyền thống deterministic (100% giống nhau), AI Product có tính xác suất và biến thiên.\n● Kỳ vọng User: Thường kỳ vọng AI thông minh như con người nên dễ thất vọng nếu không có Mental Model rõ ràng.\n● Definition of Done: Cần threshold chất lượng (ví dụ >= 90% chính xác), SLA và luồng Fallback khi AI trả lời sai.\n● Vòng đời: Không phải build rồi ship một lần, mà là build -> test -> observe -> calibrate -> re-ship.",
+              "key_takeaway": "Đừng viết requirement cho AI như một form CRUD thông thường. Phải thiết kế vùng dung sai lỗi.",
+              "ai_tutor_explanation": "Vì AI có tính xác suất, chúng ta thiết kế nút '⚡ Test CLARIFY' và '⚠️ Test LỖI' trong prototype để hệ thống luôn có phương án dự phòng thân thiện khi AI không tự tin.",
+              "code_snippet": null,
+              "quick_quiz": "Khái niệm nào sau đây là BẮT BUỘC khi định nghĩa tiêu chí hoàn thành (DoD) cho tính năng AI?\nA. Phải đúng 100% không bao giờ sai sót\nB. Ngưỡng chất lượng chấp nhận được (Threshold) kèm cơ chế Fallback\nC. Viết code bằng C++\n(Đáp án đúng: B)"
+            }
+          },
+          {
+            "id": "d5_success_metrics",
+            "title": "North Star & JTBD",
+            "summary": "Jobs-to-be-Done và chỉ số North Star Metric đo lường giá trị thực tế của AI.",
+            "slide_page": "Slide 9-11",
+            "cross_link": {
+              "target_day": 2,
+              "target_node_id": "d2_freq_impact_matrix",
+              "label": "🔗 Tác động đo lường từ Ma trận Day 02 [Slide 54]"
+            },
+            "detail": {
+              "title": "Jobs-to-be-Done (JTBD) và North Star Metric Cho AI Product",
+              "slide_page": "Slide 9-11",
+              "excerpt": "■ JTBD: Người dùng không muốn 'dùng AI', họ muốn hoàn thành công việc nhanh hơn và bớt áp lực hơn.\n■ North Star Metric ví dụ: 'Tỷ lệ học viên tự tìm thấy câu trả lời trong slide dưới 60 giây mà không cần tag hỏi Trợ giảng'.\n■ Cảnh báo: Tránh dùng các metric ảo như 'Số lượng token đã tiêu thụ' hay 'Số lượt click vào nút AI'.",
+              "key_takeaway": "Đo lường thành công của AI bằng thời gian tiết kiệm được và giá trị tạo ra cho người dùng.",
+              "ai_tutor_explanation": "Một sản phẩm AI tốt là sản phẩm giúp người dùng đạt mục đích học tập nhanh nhất, chứ không phải giữ chân người dùng chat lòng vòng vô tận.",
+              "code_snippet": null,
+              "quick_quiz": "Chỉ số nào sau đây phản ánh đúng giá trị thực tế của một công cụ AI hỗ trợ học tập?\nA. Tổng số token API đã tiêu thụ\nB. Thời gian trung bình học viên nắm bắt được khái niệm cốt lõi\nC. Số lượng từ AI đã viết ra\n(Đáp án đúng: B)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "d5_sec2",
+        "title": "Responsible AI & Đạo Đức",
+        "summary": "5 trụ cột Responsible AI, giảm thiểu Bias, bảo vệ Privacy và tuân thủ EU AI Act.",
+        "slide_page": "Slide 12-15",
+        "type": "branch",
+        "children": [
+          {
+            "id": "d5_responsible_ai",
+            "title": "5 Trụ Cột Responsible AI",
+            "summary": "Công bằng, Minh bạch, Bảo mật dữ liệu, An toàn và Trách nhiệm giải trình.",
+            "slide_page": "Slide 13-15",
+            "cross_link": {
+              "target_day": 2,
+              "target_node_id": "d2_pair_6_chapters",
+              "label": "🔗 Triển khai từ Google PAIR Day 02 [Slide 8]"
+            },
+            "detail": {
+              "title": "5 Trụ Cột Cốt Lõi Của Responsible AI",
+              "slide_page": "Slide 13",
+              "excerpt": "1. Fairness (Công bằng): Không phân biệt đối xử hoặc thiên lệch bất công.\n2. Transparency (Minh bạch): Người dùng luôn biết họ đang tương tác với AI và nguồn gốc thông tin.\n3. Privacy & Security: Bảo mật dữ liệu cá nhân của người dùng, không dùng dữ liệu nhạy cảm để train lại model mà không có sự đồng ý.\n4. Safety: Có rào chắn an toàn (Guardrails) ngăn chặn nội dung độc hại.\n5. Accountability: Con người luôn chịu trách nhiệm cuối cùng về kết quả.",
+              "key_takeaway": "Mọi tính năng AI đưa ra thị trường đều phải có đánh giá rủi ro đạo đức và bảo mật dữ liệu.",
+              "ai_tutor_explanation": "Nguyên tắc minh bạch được thể hiện qua huy hiệu trích dẫn `[Slide X]` trên mỗi node Mindmap: học viên luôn kiểm chứng được câu trả lời bắt nguồn từ trang slide nào của giảng viên.",
+              "code_snippet": null,
+              "quick_quiz": "Hành động nào thể hiện tính Minh bạch (Transparency) trong thiết kế Mindmap AI?\nA. Giấu nguồn dữ liệu để tăng tính huyền bí cho AI\nB. Hiển thị rõ số trang slide trích dẫn [Slide X] và cho phép học viên đối chiếu\nC. Đổi tên toàn bộ bài giảng của thầy cô thành tác phẩm của AI\n(Đáp án đúng: B)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "d5_sec3",
+        "title": "Kỹ Thuật Viết PRD Cho AI",
+        "summary": "8 phần cốt lõi của một PRD AI chuẩn, Acceptance Criteria và Risk Matrix.",
+        "slide_page": "Slide 20-38",
+        "type": "branch",
+        "children": [
+          {
+            "id": "d5_prd_8_parts",
+            "title": "8 Phần Của Một AI PRD",
+            "summary": "Problem, Target User, Success Metrics, Architecture, Features, NFR, Acceptance, Risks.",
+            "slide_page": "Slide 25",
+            "cross_link": {
+              "target_day": 2,
+              "target_node_id": "d2_problem_discovery",
+              "label": "🔗 Dữ liệu đầu vào từ Discovery Day 02 [Slide 15]"
+            },
+            "detail": {
+              "title": "Cấu Trúc Chuẩn 8 Phần Của Một Bản PRD Sản Phẩm AI",
+              "slide_page": "Slide 25",
+              "excerpt": "1. Problem: Bài toán cụ thể và nỗi đau của người dùng.\n2. Target User: Chân dung đối tượng sử dụng chính.\n3. Success Metrics: Các chỉ số đo lường hiệu quả (Product & Model metrics).\n4. Technical Architecture: Kiến trúc pipeline (LLM, RAG, Cache, Frontend).\n5. Feature Requirements: Yêu cầu chức năng chi tiết.\n6. Non-functional Requirements (NFR): Độ trễ, chi phí token, bảo mật.\n7. Acceptance Criteria: Tiêu chuẩn nghiệm thu từng tính năng.\n8. Risk Matrix: Ma trận rủi ro và phương án ứng phó.",
+              "key_takeaway": "PRD tốt là tài liệu giúp cả team kỹ thuật, sản phẩm và giảng viên cùng chung một tầm nhìn rõ ràng.",
+              "ai_tutor_explanation": "Trong Checkpoint 1 và 2 vừa qua, nhóm BungChay đã xây dựng hoàn chỉnh khung này qua `spec.md` và `canvas-cp1.md`, đặt nền móng vững chắc cho bản Prototype hôm nay!",
+              "code_snippet": null,
+              "quick_quiz": "Phần nào trong PRD giúp xác định khi nào một tính năng AI được coi là đạt yêu cầu để đưa lên production?\nA. Technical Architecture\nB. Acceptance Criteria & Quality Thresholds\nC. Target User\n(Đáp án đúng: B)"
+            }
+          },
+          {
+            "id": "d5_risk_matrix",
+            "title": "Ma Trận Rủi Ro (Risk Matrix)",
+            "summary": "Xác định rủi ro Hallucination, trễ API, chi phí token và kế hoạch giảm thiểu.",
+            "slide_page": "Slide 31",
+            "cross_link": null,
+            "detail": {
+              "title": "Risk Matrix: Nhận Diện & Giảm Thiểu Rủi Ro Vận Hành AI",
+              "slide_page": "Slide 31",
+              "excerpt": "■ Rủi ro 1: Vượt hạn ngạch API (Rate Limit 15 RPM) -> Giải pháp: Caching cục bộ và giới hạn gọi batch 1 lần.\n■ Rủi ro 2: AI ảo giác (Hallucination) -> Giải pháp: Ép output kèm trích dẫn số trang slide cụ thể.\n■ Rủi ro 3: Trễ mạng khi tải -> Giải pháp: Render giao diện tức thì với local storage trước khi sync.",
+              "key_takeaway": "Không có hệ thống AI nào hoàn hảo, chỉ có hệ thống chuẩn bị sẵn kế hoạch ứng phó rủi ro tốt.",
+              "ai_tutor_explanation": "Bằng việc nạp sẵn dữ liệu trích xuất vào `codebase/storage/`, chúng ta triệt tiêu hoàn toàn rủi ro bị khóa API trong buổi demo trực tiếp trước ban giám khảo!",
+              "code_snippet": null,
+              "quick_quiz": "Giải pháp hiệu quả nhất để giải quyết rủi ro giới hạn 15 RPM / 500 RPD trong buổi demo là gì?\nA. Mua thêm 100 tài khoản trả phí\nB. Áp dụng Local Caching thông minh và nạp dữ liệu trích xuất sẵn\nC. Huỷ bỏ bài thuyết trình\n(Đáp án đúng: B)"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

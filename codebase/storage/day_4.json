@@ -1,0 +1,136 @@
+{
+  "day": 4,
+  "code": "DAY_04",
+  "title": "Prompt Engineering & Tool Calling",
+  "subtitle": "Kỹ Thuật RTCF, Context Engineering & Structured Output",
+  "pdf_file": "day04-prompt-engineering-tool-calling_v3.pdf",
+  "total_slides": 98,
+  "tree": {
+    "id": "d4_root",
+    "title": "Day 04: Prompt & Tools",
+    "summary": "Khung viết prompt RTCF, Context Engineering, Tool Calling và phòng thủ lỗ hổng.",
+    "slide_page": "Slide 1-6",
+    "type": "root",
+    "children": [
+      {
+        "id": "d4_sec1",
+        "title": "Kỹ Thuật RTCF",
+        "summary": "4 thành phần của một prompt chuẩn: Role, Task, Context, Format.",
+        "slide_page": "Slide 10-17",
+        "type": "branch",
+        "children": [
+          {
+            "id": "d4_rtcf_framework",
+            "title": "4 Thành Phần RTCF",
+            "summary": "Role (Vai trò), Task (Nhiệm vụ), Context (Bối cảnh), Format (Định dạng kết quả).",
+            "slide_page": "Slide 10",
+            "cross_link": {
+              "target_day": 5,
+              "target_node_id": "d5_prd_8_parts",
+              "label": "🔗 Chuẩn hoá format PRD trong Day 05 [Slide 25]"
+            },
+            "detail": {
+              "title": "Khung Viết Prompt Thực Chiến RTCF",
+              "slide_page": "Slide 10",
+              "excerpt": "● ROLE (Vai trò): 'Đóng vai trò Chuyên gia Tóm tắt Bài giảng Đại học.'\n● TASK (Nhiệm vụ): 'Trích xuất cây sơ đồ tư duy từ nội dung slide.'\n● CONTEXT (Bối cảnh): 'Dành cho sinh viên ôn tập nhanh trước kỳ thi, hiển thị trên màn hình web.'\n● FORMAT (Định dạng): 'Xuất ra JSON có các trường: title (2-4 từ), summary (<= 15 từ), slide_page.'\nRule of thumb: Bắt đầu với Task + Format. Thêm Role và Context khi cần cải thiện độ chính xác.",
+              "key_takeaway": "Task và Format là hai yếu tố quyết định 80% chất lượng của prompt kỹ thuật.",
+              "ai_tutor_explanation": "Trong bài toán tạo Mindmap này, Format là cốt lõi: chúng ta chỉ thị rõ ràng `summary <= 15 từ` và `output JSON` để model không bao giờ viết tràn lan phá hỏng giao diện trực quan.",
+              "code_snippet": "prompt = '''\n[ROLE]: AI Study Assistant\n[TASK]: Tóm tắt khái niệm chính của slide được cung cấp\n[CONTEXT]: Khóa học VLearn AI Hackathon\n[FORMAT]: JSON object { \"title\": str, \"summary\": str }\n'''",
+              "quick_quiz": "Theo nguyên tắc 'Rule of thumb', hai thành phần nào nên bắt đầu viết đầu tiên trong RTCF?\nA. Role và Context\nB. Task và Format\nC. Role và Format\n(Đáp án đúng: B)"
+            }
+          },
+          {
+            "id": "d4_iteration_rules",
+            "title": "Prompt Iteration",
+            "summary": "Quy trình tinh chỉnh prompt từ mơ hồ đến xuất sắc kèm token budget.",
+            "slide_page": "Slide 12-15",
+            "cross_link": null,
+            "detail": {
+              "title": "Quy Trình Tinh Chỉnh Prompt & Token Budget Awareness",
+              "slide_page": "Slide 12-15",
+              "excerpt": "■ Prompt dài hơn KHÔNG đồng nghĩa prompt tốt hơn.\n■ Tránh phủ định mập mờ ('đừng làm lan man'), thay bằng chỉ thị tích cực cụ thể ('chỉ trả lời trong 15 từ').\n■ Token Budget Awareness: Mỗi từ trong prompt và response đều tiêu tốn chi phí và tăng độ trễ.",
+              "key_takeaway": "Tối ưu hoá mật độ thông tin trên mỗi token là thước đo của một AI Engineer chuyên nghiệp.",
+              "ai_tutor_explanation": "Khi làm việc với free tier 15 RPM / 500 RPD, việc cắt giảm 50% độ dài prompt thừa giúp bạn tránh lỗi RateLimit và tăng gấp đôi tốc độ sinh phản hồi của hệ thống.",
+              "code_snippet": null,
+              "quick_quiz": "Cách viết nào sau đây hiệu quả hơn khi muốn giới hạn độ dài câu trả lời của AI?\nA. 'Xin đừng viết dài quá nhé'\nB. 'Tóm tắt nội dung chính trong tối đa 15 từ'\nC. 'Hãy trả lời thật ngắn gọn và xúc tích'\n(Đáp án đúng: B)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "d4_sec2",
+        "title": "Tool Calling & Function Calling",
+        "summary": "Cơ chế LLM kích hoạt các hàm Python bên ngoài thông qua JSON Schema.",
+        "slide_page": "Slide 42-50, 85",
+        "type": "branch",
+        "children": [
+          {
+            "id": "d4_tool_calling",
+            "title": "Cơ Chế Tool Calling",
+            "summary": "Mô hình sinh lời gọi hàm có cấu trúc thay vì trả lời text tự do.",
+            "slide_page": "Slide 42, 85",
+            "cross_link": {
+              "target_day": 3,
+              "target_node_id": "d3_react_loop",
+              "label": "🔗 Thực thi Action trong vòng lặp ReAct Day 03 [Slide 20]"
+            },
+            "detail": {
+              "title": "Tool Calling: Biến LLM Thành Hệ Thống Hành Động",
+              "slide_page": "Slide 85",
+              "excerpt": "Tool Calling cho phép mô hình ngôn ngữ không trực tiếp thực thi code mà sinh ra một JSON chỉ định tên hàm và các đối số (function name & arguments). Ứng dụng client sẽ chạy hàm thực tế rồi trả kết quả (Observation) về cho LLM.",
+              "key_takeaway": "Tool calling phân tách an toàn giữa khả năng suy luận của LLM và quyền thực thi code của hệ điều hành.",
+              "ai_tutor_explanation": "Ví dụ bạn cung cấp tool `get_slide_content(day: int, page: int)`. Khi người dùng hỏi về Git, LLM sẽ xuất `{\"name\": \"get_slide_content\", \"args\": {\"day\": 1, \"page\": 9}}`. Code Python của bạn chạy hàm này và đưa text trả lại cho model.",
+              "code_snippet": "def search_slide(keyword: str) -> str:\n    '''Tìm kiếm slide chứa từ khoá'''\n    pass\n\n# Đăng ký tool với Gemini SDK\ntools = [search_slide]\nresponse = client.models.generate_content(\n    model='gemini-2.5-flash',\n    contents='Tìm slide cài Git',\n    config={'tools': tools}\n)",
+              "quick_quiz": "Khi LLM kích hoạt một Tool Call, ai là người trực tiếp chạy hàm code đó?\nA. Chính máy chủ của Google/OpenAI\nB. Ứng dụng phía Client / Server của bạn\nC. Trình duyệt web của người dùng\n(Đáp án đúng: B)"
+            }
+          },
+          {
+            "id": "d4_structured_output",
+            "title": "Structured Output",
+            "summary": "Ép LLM trả về đúng JSON Schema bằng Pydantic hoặc Response Schema.",
+            "slide_page": "Slide 69",
+            "cross_link": null,
+            "detail": {
+              "title": "Structured Output: Đảm Bảo 100% Khớp Schema",
+              "slide_page": "Slide 69",
+              "excerpt": "Cảnh báo kỹ thuật: Không nên dùng regex hoặc ép format bằng prompt tự do. Các model hiện đại (Gemini 2.5, GPT-4o) hỗ trợ tính năng Structured Outputs với Pydantic model hoặc JSON Schema, đảm bảo JSON trả về không bao giờ bị gãy cú pháp.",
+              "key_takeaway": "Structured Output loại bỏ hoàn toàn lỗi JSONDecodeError trong các pipeline sản phẩm thực tế.",
+              "ai_tutor_explanation": "Trong pipeline tạo Mindmap của chúng ta, Pydantic class `MindmapTree` được truyền trực tiếp vào tham số `response_schema` để Gemini ép output khớp 100% với cấu trúc D3.js cần vẽ.",
+              "code_snippet": "from pydantic import BaseModel\n\nclass ConceptNode(BaseModel):\n    title: str\n    summary: str\n    slide_page: str\n\n# config={'response_mime_type': 'application/json', 'response_schema': ConceptNode}",
+              "quick_quiz": "Phương pháp nào đáng tin cậy nhất để đảm bảo LLM trả về đúng cấu trúc dữ liệu cho Frontend?\nA. Viết prompt van xin 'làm ơn chỉ trả JSON'\nB. Dùng tính năng Structured Output với JSON Schema / Pydantic\nC. Dùng hàm eval() của Python\n(Đáp án đúng: B)"
+            }
+          }
+        ]
+      },
+      {
+        "id": "d4_sec3",
+        "title": "Context & Bảo Mật",
+        "summary": "Context Engineering, phòng thủ EchoLeak CVE-2025-32711 và Boundary Setting.",
+        "slide_page": "Slide 50-56",
+        "type": "branch",
+        "children": [
+          {
+            "id": "d4_context_engineering",
+            "title": "Context Engineering",
+            "summary": "Chỉ đưa vào context cần thiết, cắt giảm history thừa và đặt ranh giới an toàn.",
+            "slide_page": "Slide 50",
+            "cross_link": {
+              "target_day": 5,
+              "target_node_id": "d5_responsible_ai",
+              "label": "🔗 Liên kết với Trụ cột Bảo mật Day 05 [Slide 12]"
+            },
+            "detail": {
+              "title": "Context Engineering: Chọn Đúng Context Cần Thiết",
+              "slide_page": "Slide 50",
+              "excerpt": "Checklist Context Engineering:\n□ Đã cắt bỏ history không liên quan đến task hiện tại?\n□ Đã nén và tóm tắt các đoạn hội thoại dài trước khi gửi lại model?\n□ Đặt ranh giới rõ ràng giữa dữ liệu người dùng (Untrusted Input) và chỉ thị hệ thống (System Prompt).",
+              "key_takeaway": "Context ngắn gọn và chuẩn xác giúp giảm độ trễ, tiết kiệm chi phí và tăng độ tập trung của LLM.",
+              "ai_tutor_explanation": "Thay vì nhét toàn bộ 100 trang slide vào prompt mỗi lần hỏi, pipeline thông minh sẽ chỉ trích xuất phần tóm tắt mục lục và các đoạn văn bản tương ứng.",
+              "code_snippet": null,
+              "quick_quiz": "Lợi ích lớn nhất của việc cắt bỏ lịch sử chat không liên quan trước khi gửi API là gì?\nA. Giúp giao diện nhìn đẹp hơn\nB. Tiết kiệm token, giảm độ trễ và tránh làm loãng ngữ cảnh của mô hình\nC. Làm tăng RAM máy chủ\n(Đáp án đúng: B)"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

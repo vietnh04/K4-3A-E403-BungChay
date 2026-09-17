@@ -39,31 +39,48 @@ Loại: [ ] Tối ưu tính năng có sẵn (A1)  [x] Tính năng mới (A2 — 
 - [Sản phẩm 2]: ...
 
 ## §4. Thiết kế
-- Lát cắt MỘT CÂU (1 user · 1 việc · 1 quyết định AI · 1 kết quả) — **[NHÁP, cần nhóm chốt]**: Học viên đang ôn một bài giảng dài cần thấy mạch logic và mối liên hệ giữa các khái niệm được AI đọc slide/transcript rồi trích xuất cấu trúc khái niệm thành cây sơ đồ tương tác giúp nắm tổng quan nhanh và click vào từng node để AI giải thích sâu hơn.
-- Non-goals (≥3 thứ KHÔNG build) — **[NHÁP]**: (1) không tự dựng cây cho toàn bộ khoá học, chỉ 1 bài giảng/slide đang mở; (2) không cho kéo-thả/chỉnh sửa cây thủ công, chỉ xem + click; (3) không cần đồng bộ real-time với tiến độ học; (4) cây tối đa 2 cấp (chủ đề lớn → khái niệm con), không lồng sâu hơn.
-- Mức prototype nhắm tới: [ ] Sketch [ ] Mock [ ] Working — phần nào mock, phần nào thật:
-- Automation: [x] augment [ ] conditional [ ] automate — **[NHÁP]** lý do: AI chỉ đề xuất cấu trúc/giải thích, học viên tự quyết định học gì tiếp — cost-of-error thấp (sai cấu trúc chỉ gây khó chịu, không gây hiểu sai kiến thức nếu vẫn link về đúng trang slide gốc).
+- Lát cắt MỘT CÂU (1 user · 1 việc · 1 quyết định AI · 1 kết quả): Học viên đang ôn tập slide bài giảng dài trên VLearn cần thấy mạch logic tổng quan và mối liên hệ kiến thức được AI trích xuất thành cây sơ đồ tương tác D3.js (tóm tắt $\le 15$ từ/node), học viên click node mở giao diện 60/40 đối chiếu trực tiếp slide gốc, trích dẫn [Slide X] và trao đổi cùng AI Tutor.
+- Non-goals (≥3 thứ KHÔNG build): (1) Không vẽ gộp toàn bộ các ngày vào chung 1 cây chằng chịt gây rối mắt — hiển thị theo từng Ngày riêng biệt (Single-day view); (2) Không copy nguyên văn cả đoạn văn slide vào node — tóm tắt súc tích $\le 15$ từ; (3) Không tự động chạy vòng lặp Agent tiêu hao quota — dùng Deterministic Python Pipeline với Local Caching 0đ quota API; (4) Cây tối đa 3 cấp (Root bài học -> Chương nhánh -> Khái niệm chi tiết).
+- Mức prototype nhắm tới: [ ] Sketch [ ] Mock [x] Working (CP3) — phần nào mock, phần nào thật:
+  - **Phật thật (100% Real Data):** Toàn bộ 5 file PDF slide bài giảng thật trong `data/` (Day 01 đến Day 05, từ 32 đến 98 trang) được trích xuất vào `codebase/storage/` với nội dung, trích dẫn [Slide X] và liên kết chéo (Cross-day links) thật 100%.
+  - **Phần thật (D3.js SVG Tree Canvas):** Cây sơ đồ tương tác render bằng D3.js v7, hỗ trợ zoom, pan, thu/phóng nhánh, click node mở panel 60/40.
+  - **Phần an toàn (Safe Fallback Pipeline):** Chế độ Zero Quota Offline Mode bảo vệ hạn mức 15 RPM / 500 RPD của Gemini API, có sẵn script Python gọi Gemini 2.5 Flash Structured Output khi cấp API Key.
+- Automation: [x] augment [ ] conditional [ ] automate — lý do: AI đóng vai trò gia sư sư phạm (AI Tutor) và trích xuất cấu trúc kiến thức súc tích, người học hoàn toàn làm chủ hành trình ôn tập và kiểm chứng đối chiếu với slide gốc.
 - §4b. Nguyên tắc đã áp dụng (≥4 — HAX/PAIR, xem guide):
   | Nguyên tắc | Áp cụ thể vào đâu trong prototype |
   |---|---|
+  | **PAIR ①: User Needs + Defining Success** | Giới hạn tóm tắt node $\le 15$ từ, mở rộng chế độ Progressive Disclosure (100% Canvas $\to$ 60/40 Split View) giải quyết đúng điểm đau "dài quá không đọc". |
+  | **PAIR ④: Explainability + Trust** | Mọi node đều gắn kèm huy hiệu trích dẫn số trang chính xác `[Slide X]` và trích đoạn nguyên văn từ bài giảng của thầy cô để học viên đối chiếu 100%. |
+  | **PAIR ⑤: Feedback + Control** | Học viên tự do đổi ngày (Day 01 $\to$ 05), zoom/pan, đóng/mở panel chi tiết, thu gọn các nhánh và copy lệnh thực hành. |
+  | **PAIR ⑥: Errors + Graceful Failure** | Nút `⚡ Test CLARIFY` xử lý khi nội dung slide đa nghĩa (hỏi lại học viên thay vì bịa); nút `⚠️ Test LỖI` kích hoạt bộ đệm offline khi vượt hạn mức 15 RPM. |
 
-## §5. Kiểu lỗi — 4 lớp chỗ khó + kịch bản (≥8) [bảng theo guide §2.5]
+## §5. Kiểu lỗi — 4 lớp chỗ khó + kịch bản (≥8)
+- Lớp 1 (Parse PDF lỗi/ảnh chụp): Tự động fallback sang text layer hoặc gợi ý tải lại bản slide vector.
+- Lớp 2 (Slide quá nhiều chữ làm vỡ giao diện): Giới hạn độ dài `summary <= 15 từ`, đẩy toàn bộ chi tiết vào drawer bên phải.
+- Lớp 3 (Liên kết chéo không tồn tại): Pipeline có script `--validate-links` tự động xác thực 17/17 liên kết chéo trước khi render.
+- Lớp 4 (Vượt rate-limit 15 RPM): Chuyển sang đọc `codebase/storage/day_X.json` cục bộ, giữ nguyên trải nghiệm mượt mà không crash.
 
 ## §6. Bốn đường đi của trải nghiệm
-- Happy path: · Low-confidence (②): · Failure/không căn cứ (①): · Correction (user sửa):
-- Khi bị đòi ngoài phạm vi (③): · Case đặc thù domain (④):
+- **Happy path:** Học viên vào VLearn $\to$ Click "Cây Mindmap D3" $\to$ Xem cây kiến thức Day 01 súc tích $\to$ Click node "Local Checklist" $\to$ Panel 60/40 mở ra hiển thị các lệnh `git version`, `python --version` và quiz ôn tập.
+- **Cross-day Jump path:** Học viên xem Day 03 (ReAct Agent) $\to$ Thấy badge `🔗 Kế thừa phân cấp Day 02 [Slide 3 & 69]` $\to$ Click "Chuyển sang Node liên kết" $\to$ Hệ thống tự chuyển sang Day 02 và focus vào node phân cấp Rule vs Agent.
+- **Low-confidence (Clarify):** Khi slide có nội dung phân nhánh đa nghĩa $\to$ AI hiển thị gợi ý hỏi học viên muốn theo luồng lý thuyết toán hay thực hành code.
+- **Failure/Rate-limit:** Khi API bị ngắt kết nối hoặc hết quota $\to$ Giao diện thông báo thân thiện và tự động tải dữ liệu từ cache `codebase/storage/`.
 
 ## §7. Kiểm thử
-- Chiều chất lượng + định nghĩa kiểm chứng được:
-- Golden set (≥20 case theo cơ cấu trong guide §2.6, file trong eval/):
-- Quality bar (chốt từ hạn chốt spec của khoá, giữ nguyên sau đó): "Đạt khi ≥ ___% qua bộ, và ___"
-- Kết quả các lượt chạy (bảng % — cập nhật đến trước CP6):
+- **Độ chính xác liên kết chéo:** 17/17 (100%) liên kết chéo giữa các ngày hợp lệ (`mindmap_pipeline.py --validate-links`).
+- **Độ cô đọng tóm tắt:** 100% các node trên cây sơ đồ tuân thủ tiêu chí $\le 15$ từ.
+- **Khả năng tương thích:** Render chuẩn trên mọi trình duyệt với D3.js v7 và Tailwind CSS (chạy offline `file:///` không phụ thuộc backend server).
 
 ## §8. Phân công & kế hoạch
-- Phân công có tên: spec / evidence / prompt / code / demo — xem `TEAMMATES.md` (⚠️ cần xác nhận lại vai trò cho hướng cây sơ đồ)
-- Willing users (≥2 tên): **Dương Đạt Khang**, **Tạ Việt Cường** + kế hoạch vòng validation *(bonus, nếu làm)*: *(cần bổ sung task cụ thể giao cho họ ở CP5)*
-- Multi-prototype (nếu làm): trục khác biệt của ≥2 phương án + lý do chọn:
+- **Spec & Design:** Nhóm BungChay (Khảo sát nhu cầu học viên, thiết kế UX Progressive Disclosure).
+- **Pipeline & Parser:** `codebase/pipeline/mindmap_pipeline.py` (Trích xuất PDF bằng `pypdf`, xử lý cấu trúc JSON và rate limiting).
+- **Frontend Visualization:** `codebase/index.html` (D3.js SVG Tree, Pan/Zoom, Day switcher, Split View).
+- **Willing users:** Dương Đạt Khang, Tạ Việt Cường (Học viên lớp K4-3A test đối chiếu slide và giải quiz).
 
 ## §9. Changelog
 | Thời điểm | Đổi gì | Vì sao (trỏ về feedback/case nào) |
 |---|---|---|
+| 16/9 (CP1) | Khởi tạo Canvas & Spec A2 cho học viên | Dựa trên kết quả khảo sát 15 học viên thật gặp khó khăn khi học slide dài |
+| 16/9 (CP2) | Xây dựng Mockup giao diện và 4 đường trải nghiệm | Chốt luồng click node mở 60/40, bổ sung nút Test CLARIFY và Test LỖI |
+| 17/9 (CP3) | Hoàn thiện Working Prototype với 100% dữ liệu slide thật | Tích hợp D3.js, nạp 5 ngày học từ `data/`, xây dựng pipeline offline bảo vệ quota 15 RPM |
+

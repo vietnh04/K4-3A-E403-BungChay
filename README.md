@@ -13,7 +13,32 @@
 | **Nguyễn Hoàng Việt** (Đội trưởng) | 2A202602602 | Prompt & golden set | Viết prompt cho AI trích xuất cấu trúc/cây sơ đồ, xây golden set ≥20 case |
 | Nguyễn Đỗ Chiến Thắng | 2A202602442 | Spec & validation | Viết spec.md, chuẩn bị vòng validation + demo |
 
-> ⚠️ **Vai trò/phần việc trên là nháp đề xuất, chưa được nhóm xác nhận cuối — đổi tên/hoán đổi theo thế mạnh thật của từng người.** Đội trưởng: **Nguyễn Hoàng Việt** (2A202602602) — dùng đúng MSSV này nộp cả 5 mốc CP1–CP5.
+## 🌟 CHECKPOINT 3 (CP3) DELIVERABLES — WORKING PROTOTYPE (D3.JS)
+
+Nhóm **BungChay** đã hoàn thiện bản **Working Prototype (CP3)** đáp ứng toàn bộ các tiêu chí kỹ thuật và sản phẩm:
+
+### 1. Kiến trúc & Tính năng nổi bật:
+- **D3.js SVG Tree Engine (`codebase/index.html`):** Cây sơ đồ tư duy tương tác mượt mà, hỗ trợ Pan/Zoom, phóng to thu nhỏ nhánh, tích hợp trực tiếp vào giao diện VLearn gốc.
+- **Progressive Disclosure UX:** 
+  - Mặc định mở ở tỷ lệ **100% full-canvas** thoáng đãng, chỉ hiển thị khái niệm cô đọng ($\le 15$ từ/node).
+  - Khi click vào bất kỳ node nào: trượt mở **Drawer chi tiết 60/40**, hiển thị trích đoạn slide bài giảng thật, trích dẫn `[Slide X]`, giải thích sư phạm từ **AI Tutor**, lệnh terminal có nút sao chép và **Quick Quiz** tự đánh giá.
+- **Single-Day Focus & 5 Days Switcher:** Bộ chuyển đổi 5 ngày học linh hoạt (Day 01 $\to$ Day 05) tương ứng với 5 bộ slide PDF thật trong `data/`.
+- **Hệ Thống Liên Kết Chéo (Cross-Day Linking):** 17/17 liên kết kiến thức liên ngày đạt độ chính xác 100% (ví dụ: Day 4 Tool Calling $\leftrightarrow$ Day 3 ReAct Agent $\leftrightarrow$ Day 1 Setup & API). Click vào huy hiệu 🔗 sẽ tự động nhảy sang Ngày tương ứng và zoom vào node liên kết.
+- **Bảo Vệ Hạn Mức Free Tier (15 RPM / 500 RPD):** Pipeline dữ liệu `codebase/pipeline/mindmap_pipeline.py` tích hợp sẵn bộ đệm cục bộ `codebase/storage/day_X.json`, cho phép chạy demo mượt mà **0đ chi phí token (Zero Quota Mode)**, đồng thời trang bị sẵn hàm gọi Gemini 2.5 Flash Structured Output khi người dùng cấp API Key.
+
+### 2. Cách chạy nhanh Prototype:
+- **Mở giao diện Web D3.js trực tiếp:**
+  - Nhấp đúp chuột mở file `codebase/index.html` trên bất kỳ trình duyệt nào (Chrome, Edge, Firefox), hoặc truy cập file mockup artifact.
+- **Chạy pipeline dữ liệu bằng Python:**
+  ```powershell
+  # Kiểm tra trạng thái kho lưu trữ và xác thực liên kết chéo
+  python codebase/pipeline/mindmap_pipeline.py --status --validate-links
+
+  # Nạp hoặc sinh cây cho một ngày cụ thể (mặc định offline cache an toàn)
+  python codebase/pipeline/mindmap_pipeline.py --day 1
+  ```
+
+---
 
 > Nhóm copy nguyên file README này về repo của mình, rồi điền bảng trên. Cột **Phần việc đảm nhiệm** ghi càng cụ thể càng tốt.
 

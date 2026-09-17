@@ -1,13 +1,13 @@
 {
-  "prompt_ref": "codebase/prompts/system_prompt_v2.md",
-  "note_taxonomy": "Ca ③ va ④ duoc dien giai trong pham vi 1 loi goi AI duy nhat (trich xuat cau truc tu slide), vi san pham hien chi co prompt nay. ③ = noi dung dua vao khong phai bai giang that (AI khong duoc bia cay gia). ④ = slide co dinh dang dac thu (code, cong thuc, bang) can trich xuat dung khong vo cau truc. Xem eval/README.md.",
+  "prompt_ref": "codebase/backend/prompts.py::SLIDE_MINDMAP_EXTRACTION_PROMPT",
+  "note_taxonomy": "Bo case nay chay qua dung prompt that dang duoc backend goi (build_upload_slide_prompt trong codebase/backend/mindmap_service.py). Prompt that da duoc bo sung rule 1b (SLIDE FILTERING) va 1c (INSUFFICIENT INFO) de co the tra insufficient_info=true khi noi dung khong du can cu, thay vi bi ep dung cay gia. ① = AI khong duoc bia khai niem/thuat ngu ngoai slide goc. ② = slide qua ngan/mo ho, AI phai bao insufficient_info dung, khong ep bia cho du. ③ = noi dung khong phai bai giang that (trang bia, de thi, thong bao hanh chinh, anh khong chu) - AI phai loc bo theo rule 1b. ④ = slide co dinh dang dac thu (code, cong thuc SQL, cau truc du lieu) can trich xuat dung ky thuat, khong lam hong thuat ngu. Xem eval/README.md.",
   "scoring_rules": {
     "pass_conditions": [
-      "response la JSON hop le, parse duoc truc tiep (khong bi bao trong ```)",
-      "neu expected.insufficient_info = true thi response.insufficient_info phai = true",
-      "neu expected.insufficient_info = false thi moi so trang trong expected.must_cover_pages phai xuat hien trong source_pages cua it nhat 1 node (cha hoac con)",
-      "response khong duoc chua bat ky cum tu nao trong expected.forbidden_terms (khong phan biet hoa/thuong, kiem tra tren toan bo title+summary) - co nghia AI bia them ngoai nguon",
-      "cau truc toi da 2 cap: node trong children khong duoc co children con"
+      "response la JSON hop le, parse duoc truc tiep (khong bi bao trong ```) - luu y: backend co fallback tu strip ``` truoc khi parse, nhung eval van cham nghiem ngat de phat hien prompt chua tuan thu OUTPUT FORMAT",
+      "neu expected.insufficient_info = true thi response.insufficient_info phai = true VA response.children phai rong (khong duoc bia node gia cho du cau truc)",
+      "neu expected.insufficient_info = false thi: (a) response.insufficient_info phai = false, (b) moi so trang trong expected.must_cover_pages phai xuat hien trong field slide_page cua it nhat 1 node o bat ky cap nao trong cay (khong chi cap 1-2), (c) cay phai dat toi thieu 3 cap sau (root -> children -> children.children) dung theo RULE 2 (MULTI-LEVEL DEEP HIERARCHY) cua prompt that, khong duoc dung lai o 1 cap",
+      "response khong duoc chua bat ky cum tu nao trong expected.forbidden_terms (khong phan biet hoa/thuong), kiem tra tren toan bo title + summary + detail.excerpt + detail.ai_tutor_explanation cua MOI node trong cay - co nghia AI bia them ngoai nguon",
+      "cau truc khong vuot qua 5 cap (theo tran cua RULE 2: Root -> Cap1 -> Cap2 -> Cap3 -> Cap4+)"
     ],
     "fail_if_any_condition_not_met": true
   },

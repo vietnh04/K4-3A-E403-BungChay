@@ -1,0 +1,204 @@
+{
+  "run_at": "2026-09-17T14:57:06.018151",
+  "provider": "nvidia",
+  "model": "deepseek-ai/deepseek-v4-flash-0731",
+  "passed": 13,
+  "total": 20,
+  "results": [
+    {
+      "id": "gs01",
+      "taxonomy": [
+        "1_nguon_su_that"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 166.9
+    },
+    {
+      "id": "gs02",
+      "taxonomy": [
+        "1_nguon_su_that"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 153.8
+    },
+    {
+      "id": "gs03",
+      "taxonomy": [
+        "2_mo_ho_thieu_thong_tin"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 9.4
+    },
+    {
+      "id": "gs04",
+      "taxonomy": [
+        "2_mo_ho_thieu_thong_tin"
+      ],
+      "status": "FAIL",
+      "errors": [
+        "LOI KY THUAT: ReadTimeout: HTTPSConnectionPool(host='integrate.api.nvidia.com', port=443): Read timed out. (read timeout=240)"
+      ],
+      "elapsed_sec": 240.3
+    },
+    {
+      "id": "gs05",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "FAIL",
+      "errors": [
+        "LOI KY THUAT: ReadTimeout: HTTPSConnectionPool(host='integrate.api.nvidia.com', port=443): Read timed out. (read timeout=240)"
+      ],
+      "elapsed_sec": 240.4
+    },
+    {
+      "id": "gs06",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "FAIL",
+      "errors": [
+        "chua tu khoa cam (nghi ngo bia noi dung): ['group by']"
+      ],
+      "elapsed_sec": 201.2
+    },
+    {
+      "id": "gs07",
+      "taxonomy": [
+        "3_ngoai_pham_vi"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 9.5
+    },
+    {
+      "id": "gs08",
+      "taxonomy": [
+        "3_ngoai_pham_vi"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 29.8
+    },
+    {
+      "id": "gs09",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 226.6
+    },
+    {
+      "id": "gs10",
+      "taxonomy": [
+        "1_nguon_su_that"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 132.7
+    },
+    {
+      "id": "gs11",
+      "taxonomy": [
+        "2_mo_ho_thieu_thong_tin"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 72.3
+    },
+    {
+      "id": "gs12",
+      "taxonomy": [
+        "1_nguon_su_that"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 171.8
+    },
+    {
+      "id": "gs13",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "FAIL",
+      "errors": [
+        "LOI KY THUAT: ReadTimeout: HTTPSConnectionPool(host='integrate.api.nvidia.com', port=443): Read timed out. (read timeout=240)"
+      ],
+      "elapsed_sec": 240.4
+    },
+    {
+      "id": "gs14",
+      "taxonomy": [
+        "3_ngoai_pham_vi"
+      ],
+      "status": "FAIL",
+      "errors": [
+        "insufficient_info sai: ky vong False, thuc te True",
+        "cau truc chi sau 1 cap, yeu cau toi thieu 3 cap (RULE 2 cua prompt that)"
+      ],
+      "elapsed_sec": 77.4
+    },
+    {
+      "id": "gs15",
+      "taxonomy": [
+        "1_nguon_su_that"
+      ],
+      "status": "FAIL",
+      "errors": [
+        "LOI KY THUAT: ReadTimeout: HTTPSConnectionPool(host='integrate.api.nvidia.com', port=443): Read timed out. (read timeout=240)"
+      ],
+      "elapsed_sec": 240.3
+    },
+    {
+      "id": "gs16",
+      "taxonomy": [
+        "2_mo_ho_thieu_thong_tin"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 126.5
+    },
+    {
+      "id": "gs17",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 138.3
+    },
+    {
+      "id": "gs18",
+      "taxonomy": [
+        "1_nguon_su_that"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 172.3
+    },
+    {
+      "id": "gs19",
+      "taxonomy": [
+        "3_ngoai_pham_vi"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 17.6
+    },
+    {
+      "id": "gs20",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "FAIL",
+      "errors": [
+        "LOI KY THUAT: ReadTimeout: HTTPSConnectionPool(host='integrate.api.nvidia.com', port=443): Read timed out. (read timeout=240)"
+      ],
+      "elapsed_sec": 240.4
+    }
+  ]
+}

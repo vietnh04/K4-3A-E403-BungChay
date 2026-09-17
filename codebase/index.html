@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VLearn - Interactive ConceptMap (D3.js Tree Prototype)</title>
+  <title>VLearn - Interactive ConceptMap (D3.js Live System)</title>
   <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <style>
@@ -14,7 +14,6 @@
     .code-font {
       font-family: 'JetBrains Mono', monospace;
     }
-    /* D3 Link styling */
     .link-curve {
       fill: none;
       stroke: #CBD5E1;
@@ -27,7 +26,6 @@
       stroke-width: 3.5px;
       filter: drop-shadow(0 2px 6px rgba(37, 99, 235, 0.4));
     }
-    /* Node card styling */
     .node-card {
       box-sizing: border-box;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -42,7 +40,6 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22), 0 10px 20px -4px rgba(37, 99, 235, 0.25) !important;
       background: #FFFFFF !important;
     }
-    /* Custom Scrollbars */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -57,7 +54,6 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #94A3B8;
     }
-    /* Grid background pattern */
     .canvas-grid {
       background-color: #F8FAFC;
       background-image: radial-gradient(#E2E8F0 1.2px, transparent 1.2px);
@@ -70,11 +66,11 @@
   <!-- ================= TOP DEMO CONTROLS (HACKATHON BAR) ================= -->
   <header class="bg-indigo-950 text-white px-4 py-2 text-xs flex flex-wrap items-center justify-between gap-3 shadow-md z-50 border-b border-indigo-800 shrink-0">
     <div class="flex items-center gap-2">
-      <span class="px-2 py-0.5 rounded bg-blue-600 font-extrabold text-[10px] uppercase tracking-wider">CP3 PROTOTYPE</span>
+      <span class="px-2 py-0.5 rounded bg-blue-600 font-extrabold text-[10px] uppercase tracking-wider">CP3 LIVE SYSTEM</span>
       <span class="font-semibold text-indigo-100">D3.js ConceptMap &bull; Team BungChay (Track A - Batch 04)</span>
-      <span class="hidden md:inline-flex items-center gap-1 text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded text-[10px] border border-emerald-500/30">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-        Zero API Quota Used (100% Offline Real Data)
+      <span id="api-indicator-pill" class="inline-flex items-center gap-1.5 text-slate-300 bg-indigo-900/90 px-2.5 py-0.5 rounded text-[10px] border border-indigo-700">
+        <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span>
+        Đang kiểm tra kết nối API...
       </span>
     </div>
     
@@ -83,9 +79,9 @@
       <button onclick="setMode('slide')" id="btn-mode-slide" class="px-2.5 py-1 rounded bg-indigo-900 hover:bg-indigo-800 text-indigo-100 font-medium transition">
         1. Slide Gốc VLearn
       </button>
-      <button onclick="simulateScan()" id="btn-mode-ai" class="px-2.5 py-1 rounded bg-indigo-900 hover:bg-indigo-800 text-indigo-100 font-medium transition flex items-center gap-1">
-        <svg class="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        2. AI Quét Cây
+      <button onclick="openModal('modal-upload')" id="btn-mode-upload" class="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition flex items-center gap-1 shadow-xs">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        2. Tải Lên Slide Mới (Thật)
       </button>
       <button onclick="setMode('mindmap')" id="btn-mode-map" class="px-2.5 py-1 rounded bg-white text-indigo-950 font-bold shadow-sm transition flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -125,12 +121,21 @@
 
     <!-- Right: Trigger Buttons & User Profile -->
     <div class="flex items-center gap-3">
+      
+      <!-- REAL UPLOAD BUTTON -->
+      <button onclick="openModal('modal-upload')" class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-300 shadow-xs flex items-center gap-1.5 transition">
+        <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+        </svg>
+        <span>Upload Slide (PDF)</span>
+      </button>
+
       <button onclick="toggleConceptMap()" id="btn-header-mindmap" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition transform hover:scale-[1.02]">
         <svg class="w-3.5 h-3.5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
         <span>Cây Mindmap D3</span>
-        <span class="px-1.5 py-0.2 text-[9px] bg-white/20 rounded-full">New</span>
+        <span class="px-1.5 py-0.2 text-[9px] bg-white/20 rounded-full">Active</span>
       </button>
 
       <div class="flex items-center gap-2 border-l border-slate-200 pl-3">
@@ -142,26 +147,11 @@
     </div>
   </nav>
 
-  <!-- ================= DAY SWITCHER TABS (DAY 01 -> DAY 05) ================= -->
+  <!-- ================= DYNAMIC DAY SWITCHER TABS ================= -->
   <div class="bg-white border-b border-slate-200 px-5 py-2 flex items-center justify-between shrink-0 shadow-xs z-30">
-    <div class="flex items-center gap-1 overflow-x-auto py-0.5">
+    <div id="day-tabs-container" class="flex items-center gap-1 overflow-x-auto py-0.5">
       <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2 hidden md:inline">Chọn Ngày:</span>
-      <button onclick="switchDay(1)" id="tab-day-1" class="day-tab px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-blue-600 text-white shadow-xs">
-        <span class="w-2 h-2 rounded-full bg-white"></span>
-        Day 01: Setup & API
-      </button>
-      <button onclick="switchDay(2)" id="tab-day-2" class="day-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
-        Day 02: Xác Định Bài Toán
-      </button>
-      <button onclick="switchDay(3)" id="tab-day-3" class="day-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
-        Day 03: ReAct Agent
-      </button>
-      <button onclick="switchDay(4)" id="tab-day-4" class="day-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
-        Day 04: Prompt & Tools
-      </button>
-      <button onclick="switchDay(5)" id="tab-day-5" class="day-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5">
-        Day 05: Product PRD
-      </button>
+      <!-- Dynamic tabs will be rendered here -->
     </div>
 
     <!-- Quick Search & Stats -->
@@ -171,7 +161,7 @@
         <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
       </div>
       <div id="day-badge-stats" class="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md border border-slate-200">
-        32 Slides &bull; 7 Nodes
+        Đang tải...
       </div>
     </div>
   </div>
@@ -187,14 +177,13 @@
             <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
             <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
             <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
-            <span id="slide-viewer-title" class="ml-2 font-mono text-slate-400">day01_c401.pdf &bull; Slide 9 / 32</span>
+            <span id="slide-viewer-title" class="ml-2 font-mono text-slate-400">Slide Viewer</span>
           </div>
           <button onclick="setMode('mindmap')" class="px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold transition flex items-center gap-1.5">
             <span>Mở Cây Sơ Đồ Tư Duy</span> &rarr;
           </button>
         </div>
         
-        <!-- Authentic Slide Render View -->
         <div class="flex-1 p-8 bg-white text-slate-900 overflow-y-auto flex flex-col justify-center">
           <div class="max-w-2xl mx-auto w-full border border-slate-200 rounded-xl p-8 shadow-sm bg-gradient-to-b from-white to-slate-50">
             <div class="flex items-center justify-between border-b pb-4 mb-6">
@@ -205,9 +194,7 @@
               <span id="slide-view-tag" class="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-bold">Slide 9</span>
             </div>
             
-            <div id="slide-view-body" class="space-y-4 text-sm text-slate-700 leading-relaxed font-sans">
-              <!-- Dynamic slide content will be inserted here -->
-            </div>
+            <div id="slide-view-body" class="space-y-4 text-sm text-slate-700 leading-relaxed font-sans"></div>
 
             <div class="mt-8 pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
               <span>Giảng viên: VinUni AI Center</span>
@@ -275,7 +262,7 @@
               Chi Tiết Khái Niệm
             </span>
             <span id="detail-slide-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700 font-mono">
-              Slide 9
+              Slide
             </span>
           </div>
           <div class="flex items-center gap-1">
@@ -295,15 +282,13 @@
           <!-- Title & Core Takeaway -->
           <div>
             <h3 id="detail-title" class="text-xl font-black text-slate-900 tracking-tight">
-              Local Checklist
+              Khái Niệm
             </h3>
             <div class="mt-2.5 p-3 rounded-xl bg-blue-50/80 border border-blue-100">
               <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider block mb-1">
                 📌 Khái Quát Cốt Lõi (High-Level Takeaway)
               </span>
-              <p id="detail-takeaway" class="text-xs text-blue-950 font-semibold leading-relaxed">
-                Chuẩn bị Git, Python 3.11-3.13, VSCode và GitHub Classroom trước khi bắt đầu Lab.
-              </p>
+              <p id="detail-takeaway" class="text-xs text-blue-950 font-semibold leading-relaxed"></p>
             </div>
           </div>
 
@@ -314,12 +299,10 @@
                 🔗 Liên Kết Kiến Thức Liên Ngày
               </span>
               <span id="cross-target-badge" class="text-[10px] font-bold bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded">
-                Day 04
+                Day
               </span>
             </div>
-            <p id="cross-label-text" class="text-xs text-amber-900 mb-2">
-              Khái niệm này kế thừa kiến thức từ ngày khác.
-            </p>
+            <p id="cross-label-text" class="text-xs text-amber-900 mb-2"></p>
             <button id="btn-jump-cross" onclick="jumpToCrossLink()" class="w-full py-1.5 px-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-1.5">
               <span>Chuyển sang Node liên kết</span> &rarr;
             </button>
@@ -331,9 +314,7 @@
               <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
               Trích Đoạn Nội Dung Từ Slide Gốc
             </h4>
-            <div id="detail-excerpt" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans whitespace-pre-line">
-              Nội dung trích xuất trực tiếp từ file PDF...
-            </div>
+            <div id="detail-excerpt" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans whitespace-pre-line"></div>
           </div>
 
           <!-- Code Snippet / Terminal Command -->
@@ -358,9 +339,7 @@
               </div>
               <span class="text-xs font-bold text-indigo-900">AI Tutor &bull; Hướng Dẫn & Phân Tích Sư Phạm</span>
             </div>
-            <p id="detail-ai-tutor" class="text-xs text-indigo-950 leading-relaxed">
-              Giải thích thực tế từ AI Tutor...
-            </p>
+            <p id="detail-ai-tutor" class="text-xs text-indigo-950 leading-relaxed"></p>
           </div>
 
           <!-- Active Learning Quick Quiz -->
@@ -373,16 +352,14 @@
             <button onclick="toggleQuizAnswer()" id="btn-quiz-reveal" class="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
               <span>Xem giải thích đáp án</span> &rarr;
             </button>
-            <div id="detail-quiz-answer" class="hidden mt-2 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900">
-              Đáp án được trích xuất trực tiếp từ bài giảng.
-            </div>
+            <div id="detail-quiz-answer" class="hidden mt-2 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900"></div>
           </div>
 
         </div>
 
         <!-- Detail Footer -->
         <div class="p-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between text-xs shrink-0">
-          <span class="text-slate-500 font-medium">Bản quyền tài liệu: VinUni AICB</span>
+          <span class="text-slate-500 font-medium">Bản quyền: VinUni AICB &bull; Team BungChay</span>
           <button onclick="closeDetailPane()" class="text-slate-600 hover:text-slate-900 font-bold">
             Đóng &times;
           </button>
@@ -394,11 +371,76 @@
 
   </main>
 
-  <!-- ================= MODALS FOR HACKATHON CP2/CP3 EDGE CASES ================= -->
-  
-  <!-- MODAL: CLARIFY (HỎI LÀM RÕ) -->
+  <!-- ================= MODAL: REAL UPLOAD SLIDE MODAL ================= -->
+  <div id="modal-upload" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 border border-slate-200 transform transition-all">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Upload Slide & Gọi Gemini API Thật</h3>
+            <p class="text-xs text-slate-500">Tự động trích xuất cấu trúc Mindmap D3.js từ slide PDF</p>
+          </div>
+        </div>
+        <button onclick="closeModal('modal-upload')" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+      </div>
+
+      <!-- API Key Status in Modal -->
+      <div id="modal-api-status-box" class="mb-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span id="modal-api-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+          <span id="modal-api-text" class="font-medium text-slate-700">Đang đọc cấu hình từ .env...</span>
+        </div>
+        <span id="modal-api-model" class="font-mono text-[10px] text-slate-500 bg-slate-200 px-2 py-0.5 rounded font-bold">gemini</span>
+      </div>
+
+      <!-- Form -->
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Tiêu Đề Bài Giảng (Tuỳ chọn):</label>
+          <input type="text" id="upload-title-input" placeholder="Ví dụ: Day 06 · Multi-Agent Workflows & Teamwork" class="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:border-blue-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Chọn File Slide Bài Giảng (.PDF):</label>
+          <div class="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-xl p-6 text-center cursor-pointer bg-slate-50/50 transition" onclick="document.getElementById('upload-file-input').click()">
+            <input type="file" id="upload-file-input" accept=".pdf" class="hidden" onchange="handleFileSelect(this)">
+            <svg class="w-8 h-8 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            <p id="upload-file-name" class="text-xs font-bold text-slate-700">Kéo thả file PDF vào đây hoặc bấm để chọn</p>
+            <p class="text-[11px] text-slate-400 mt-1">Hỗ trợ các file slide bài giảng từ 10 đến 100+ trang</p>
+          </div>
+        </div>
+
+        <!-- Progress Box -->
+        <div id="upload-progress-box" class="hidden p-3.5 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 space-y-2">
+          <div class="flex items-center justify-between font-bold">
+            <span id="upload-step-title">1. Đang trích xuất text từ slide PDF...</span>
+            <span class="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></span>
+          </div>
+          <p id="upload-step-detail" class="text-[11px] text-blue-700">Đang đọc cấu trúc các trang slide bằng pypdf...</p>
+        </div>
+
+        <!-- Error Box -->
+        <div id="upload-error-box" class="hidden p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-900 whitespace-pre-line"></div>
+      </div>
+
+      <div class="mt-6 flex items-center justify-end gap-2">
+        <button onclick="closeModal('modal-upload')" class="px-4 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition">
+          Huỷ
+        </button>
+        <button id="btn-submit-upload" onclick="submitUpload()" class="px-4 py-2 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition flex items-center gap-1.5">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          <span>Bắt Đầu Xử Lý Với Gemini API</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CLARIFY -->
   <div id="modal-clarify" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200 transform transition-all">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-200">
       <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xl mb-4 font-bold">
         ⚡
       </div>
@@ -448,61 +490,110 @@
     </div>
   </div>
 
-  <!-- EMBEDDED REAL DATA FROM STORAGE -->
+  <!-- EMBEDDED REAL DATA (FALLBACK FOR OFFLINE FILE:// OPENING) -->
   <script>
     const KNOWLEDGE_BASE = {"metadata": {"course_title": "AI Product & Agentic Engineering (AICB-P1)", "institution": "VinUni / VLearn Platform", "team": "BungChay (Batch 04 - Track A)", "days": [{"day": 1, "code": "DAY_01", "title": "AI & LLM Foundation", "subtitle": "Setup & API Exploration", "pdf_file": "day01_c401.pdf", "total_slides": 32, "core_topics": ["Self-Attention", "LLM API Providers", "Local Checklist", "Git Classroom", ".env Setup"], "storage_file": "day_1.json"}, {"day": 2, "code": "DAY_02", "title": "Xác Định Bài Toán Cho AI", "subtitle": "Khung Lý Thuyết + Google PAIR", "pdf_file": "day02.pdf", "total_slides": 76, "core_topics": ["4 Câu Hỏi Trọng Tâm", "Rule vs Workflow vs Agent", "Google PAIR Guidebook", "Problem Discovery", "Ma Trận Tần Suất & Tác Động"], "storage_file": "day_2.json"}, {"day": 3, "code": "DAY_03", "title": "Từ Chatbot Đến Agentic Agent", "subtitle": "Phổ Hệ Thống + ReAct Pattern", "pdf_file": "day03-tu-chatbot-den-agentic-agent-react (1).pdf", "total_slides": 46, "core_topics": ["So Sánh 3 Hệ Thống", "Chatbot Baseline", "4 Tiêu Chí Agentic Fit", "Anti-Patterns", "Vòng Lặp ReAct", "Debug Checklist"], "storage_file": "day_3.json"}, {"day": 4, "code": "DAY_04", "title": "Prompt Engineering & Tool Calling", "subtitle": "Kỹ Thuật RTCF & Structured Output", "pdf_file": "day04-prompt-engineering-tool-calling_v3.pdf", "total_slides": 98, "core_topics": ["4 Thành Phần RTCF", "Prompt Iteration", "Tool Calling Flow", "Structured Output Schema", "Context Engineering"], "storage_file": "day_4.json"}, {"day": 5, "code": "DAY_05", "title": "AI Product Thinking & Requirements", "subtitle": "Product Thinking, Responsible AI & PRD", "pdf_file": "day05-ai-product-thinking-requirements.pdf", "total_slides": 44, "core_topics": ["AI Product vs Software", "North Star Metric & JTBD", "5 Trụ Cột Responsible AI", "8 Phần PRD Chuẩn", "Risk Matrix"], "storage_file": "day_5.json"}]}, "days": {"1": {"day": 1, "code": "DAY_01", "title": "AI & LLM Foundation", "subtitle": "Setup & Foundation + LAB 1: LLM API Exploration", "pdf_file": "day01_c401.pdf", "total_slides": 32, "tree": {"id": "d1_root", "title": "Day 01: AI Foundation", "summary": "Nền tảng LLM, môi trường phát triển và thực hành gọi API cơ bản.", "slide_page": "Slide 1-5", "type": "root", "children": [{"id": "d1_sec1", "title": "Cơ Chế LLM", "summary": "Hiểu kiến trúc Transformer, cơ chế Self-attention và cách LLM sinh token.", "slide_page": "Slide 6", "type": "branch", "children": [{"id": "d1_self_attention", "title": "Self-Attention Mechanism", "summary": "Mô hình tính toán tương quan ngữ cảnh giữa các từ trong câu.", "slide_page": "Slide 6", "cross_link": null, "detail": {"title": "Live Demo: Self-Attention Mechanism", "slide_page": "Slide 6", "excerpt": "Cơ chế Self-Attention cho phép mô hình ngôn ngữ lớn (LLM) cân nhắc mức độ liên quan của mọi token khác trong ngữ cảnh khi xử lý một token hiện tại, tạo nền tảng cho việc hiểu ngữ nghĩa sâu thay vì chỉ dịch tuần tự.", "key_takeaway": "Self-attention là cốt lõi biến Transformer thành kiến trúc thống trị các mô hình ngôn ngữ hiện đại.", "ai_tutor_explanation": "Khi đọc từ 'ngân hàng' trong câu 'Tôi ra bờ sông câu cá gần ngân hàng cây xanh', cơ chế Self-attention sẽ chú ý mạnh đến 'bờ sông' và 'cây xanh' để hiểu đây là bờ dải đất ven sông chứ không phải ngân hàng tài chính.", "code_snippet": null, "quick_quiz": "Cơ chế nào giúp Transformer hiểu mối liên hệ ngữ nghĩa giữa các từ cách xa nhau trong câu?\nA. Convolution\nB. Self-Attention\nC. Recurrent Loop\n(Đáp án đúng: B)"}}, {"id": "d1_llm_api_providers", "title": "Nhà Cung Cấp API", "summary": "Tích hợp dịch vụ LLM từ Google Gemini, OpenAI và Anthropic qua SDK.", "slide_page": "Slide 7", "cross_link": {"target_day": 3, "target_node_id": "d3_llm_chatbot", "label": "🔗 Làm nền tảng cho Chatbot Day 03 [Slide 8]"}, "detail": {"title": "Tổng quan Codelab: Tích Hợp 3 Nhà Cung Cấp LLM API", "slide_page": "Slide 7", "excerpt": "Triển khai tích hợp các dịch vụ LLM API từ 3 nhà cung cấp lớn: OpenAI (GPT-4o), Google (Gemini 2.5 Flash), Anthropic (Claude 3.5 Sonnet). Làm quen với việc quản lý API key, format request/response, và xử lý streaming.", "key_takeaway": "Nắm vững cách cấu hình client, truyền prompt và đọc câu trả lời từ các SDK chuẩn.", "ai_tutor_explanation": "Mỗi nhà cung cấp có cú pháp SDK khác nhau nhưng cùng chung nguyên lý: truyền chuỗi tin nhắn (System, User) và nhận về chuỗi text hoặc cấu trúc JSON. Trong khoá học, bạn sẽ dùng Gemini làm trọng tâm vì quota miễn phí thân thiện cho lab.", "code_snippet": "from google import genai\n\nclient = genai.Client(api_key='GEMINI_API_KEY')\nresponse = client.models.generate_content(\n    model='gemini-2.5-flash',\n    contents='Xin chào AI!'\n)\nprint(response.text)", "quick_quiz": "Khi làm việc với nhiều LLM API, yếu tố bảo mật quan trọng nhất ở local là gì?\nA. Commit API key lên GitHub\nB. Lưu API key trong file .env và thêm vào .gitignore\nC. Hardcode key vào file Python\n(Đáp án đúng: B)"}}]}, {"id": "d1_sec2", "title": "Chuẩn Bị Môi Trường", "summary": "Checklist cài đặt Git, Python chuẩn, VSCode và GitHub Classroom.", "slide_page": "Slide 8-16", "type": "branch", "children": [{"id": "d1_global_checklist", "title": "Global Checklist", "summary": "Kiểm tra tài khoản Email đăng ký và quyền truy cập tổ chức GitHub.", "slide_page": "Slide 8", "cross_link": null, "detail": {"title": "Global Checklist: Quyền Truy Cập & Tài Khoản", "slide_page": "Slide 8", "excerpt": "● Kiểm tra email của mình đã nằm trong danh sách đăng ký khoá học.\n● Kiểm tra quyền truy cập vào GitHub Organization của lớp học.\n● Xác nhận đã tham gia kênh Discord hỗ trợ kỹ thuật.", "key_takeaway": "Đảm bảo tài khoản và định danh chính xác để nhận quyền nộp bài tự động qua GitHub Classroom.", "ai_tutor_explanation": "Nếu bạn dùng email khác với email đã đăng ký với ban tổ chức, hệ thống chấm tự động (CI/CD) sẽ không thể ghi nhận điểm số của bạn.", "code_snippet": null, "quick_quiz": "Bạn cần kiểm tra tài khoản nào trước khi vào nhận repo bài tập?\nA. Email đã đăng ký với ban tổ chức\nB. Tài khoản Facebook cá nhân\nC. Tài khoản Zalo\n(Đáp án đúng: A)"}}, {"id": "d1_local_checklist", "title": "Local Checklist", "summary": "Kiểm tra phiên bản Git, Python 3.11-3.13, VSCode và Extension GitHub.", "slide_page": "Slide 9", "cross_link": {"target_day": 4, "target_node_id": "d4_tool_calling", "label": "🔗 Môi trường cho Lab Tool Calling Day 04 [Slide 85]"}, "detail": {"title": "Local Checklist: Cài Đặt Môi Trường Máy Cá Nhân", "slide_page": "Slide 9", "excerpt": "● Trên máy đã cài đặt Git (Mở cmd chạy `git version` để kiểm tra)\n● Trên máy đã cài đặt Python < 3.14 & > 3.11 (Mở cmd chạy `python --version` để kiểm tra)\n● Trên máy đã có IDE Visual Studio Code (VSCode).\n● Đã cài đặt Extension GitHub Classroom trên VSCode.\n● Đã đăng nhập vào GitHub trên VSCode.", "key_takeaway": "Môi trường chuẩn giúp bạn chạy mượt mà tất cả các bài lab từ Day 1 đến Day 5 mà không bị xung đột thư viện.", "ai_tutor_explanation": "Lưu ý phiên bản Python: khuyến nghị dùng Python 3.11 hoặc 3.12 để đảm bảo tương thích tốt nhất với các thư viện như `pydantic`, `google-genai` và tránh các lỗi cú pháp không tương thích.", "code_snippet": "# Kiểm tra nhanh qua Terminal:\ngit version\npython --version\ncode --version", "quick_quiz": "Phiên bản Python nào được khuyến nghị trong bài học Day 01?\nA. Python 2.7\nB. Python > 3.11 và < 3.14\nC. Python 3.8\n(Đáp án đúng: B)"}}, {"id": "d1_classroom_flow", "title": "GitHub Classroom Flow", "summary": "Quy trình nhận repo bài tập, clone về máy và cấu hình VSCode.", "slide_page": "Slide 10-16", "cross_link": null, "detail": {"title": "Quy Trình 6 Bước Nhận Bài Tập Codelab", "slide_page": "Slide 10-16", "excerpt": "Bước 1: Quét mã link Lab.\nBước 2: Đăng nhập vào GitHub.\nBước 3: Chọn Skip to next step.\nBước 4: Kiểm tra email xác nhận.\nBước 5: Accept assignment.\nBước 6: Kéo xuống và chọn 'Open in Visual Studio Code'.", "key_takeaway": "Hoàn tất luồng liên kết GitHub Classroom để chuẩn bị nộp bài tập tự động bằng Git Push.", "ai_tutor_explanation": "Khi bạn click 'Accept Assignment', GitHub Classroom sẽ tự động tạo một repository riêng cho bạn dựa trên template của giảng viên.", "code_snippet": "git clone https://github.com/K4-VinUni/your-assignment.git\ncd your-assignment", "quick_quiz": "Nút bấm nào giúp bạn mở trực tiếp repo bài tập vào trình soạn thảo code?\nA. Open in Terminal\nB. Open in Visual Studio Code\nC. Download ZIP\n(Đáp án đúng: B)"}}]}, {"id": "d1_sec3", "title": "Cấu Trúc Codelab", "summary": "Cấu trúc template.py, quản lý biến môi trường .env và chạy test.", "slide_page": "Slide 18-22", "type": "branch", "children": [{"id": "d1_files_overview", "title": "Files & Template", "summary": "Cấu trúc code mẫu template.py, main runner và file kiểm tra test.py.", "slide_page": "Slide 18", "cross_link": null, "detail": {"title": "Tổng Quan Các Files Trong Bài Thực Hành", "slide_page": "Slide 18", "excerpt": "● template.py: File chứa khung code thực hành với các hàm TODO cần hoàn thiện.\n● main.py: Script điều khiển chính để chạy thử nghiệm các tính năng.\n● test.py: Bộ kiểm thử tự động để học viên tự đánh giá trước khi nộp.", "key_takeaway": "Chỉ chỉnh sửa các vùng TODO được chỉ định trong template.py để đảm bảo test runner hoạt động chuẩn.", "ai_tutor_explanation": "File template.py đã định nghĩa sẵn các interface hàm và kiểu dữ liệu trả về. Nhiệm vụ của bạn là điền logic gọi API và xử lý chuỗi vào bên trong.", "code_snippet": "# template.py snippet\ndef call_gemini(prompt: str) -> str:\n    # TODO: Khởi tạo client và gọi generate_content\n    pass", "quick_quiz": "File nào chứa bộ kiểm thử tự động để bạn kiểm tra kết quả code của mình?\nA. template.py\nB. test.py\nC. README.md\n(Đáp án đúng: B)"}}, {"id": "d1_env_setup", "title": "Biến Môi Trường .env", "summary": "Thiết lập API key trong .env và bảo vệ bằng .gitignore.", "slide_page": "Slide 19", "cross_link": null, "detail": {"title": "Cấu Hình API Key Với File .env", "slide_page": "Slide 19", "excerpt": "Tạo file `.env` ở thư mục gốc repo:\nGEMINI_API_KEY=AIzaSy...\nOPENAI_API_KEY=sk-...\nANTHROPIC_API_KEY=sk-ant-...\nĐảm bảo file `.env` đã được liệt kê trong `.gitignore`.", "key_takeaway": "Không bao giờ để lộ API Key công khai trên kho mã nguồn.", "ai_tutor_explanation": "Nếu bạn push nhầm API key lên GitHub công khai, bot quét của Google hoặc OpenAI sẽ tự động vô hiệu hoá key đó trong vòng vài phút để bảo vệ tài khoản của bạn.", "code_snippet": "echo GEMINI_API_KEY=your_key_here > .env\necho .env >> .gitignore", "quick_quiz": "Làm cách nào ngăn Git commit nhầm file chứa API key lên remote?\nA. Đổi tên file\nB. Thêm tên file vào .gitignore\nC. Xoá file trước khi push\n(Đáp án đúng: B)"}}]}]}}, "2": {"day": 2, "code": "DAY_02", "title": "Xác Định Bài Toán Cho AI", "subtitle": "Khung Lý Thuyết 4H + Google PAIR Guidebook", "pdf_file": "day02.pdf", "total_slides": 76, "tree": {"id": "d2_root", "title": "Day 02: Xác Định Bài Toán", "summary": "Khung đánh giá bài toán, phân cấp Rule vs Agent và cẩm nang Google PAIR.", "slide_page": "Slide 1-8", "type": "root", "children": [{"id": "d2_sec1", "title": "4 Câu Hỏi Trọng Tâm", "summary": "Quy trình đánh giá bài toán từ nhu cầu đến quyết định Go/No-Go.", "slide_page": "Slide 3", "type": "branch", "children": [{"id": "d2_4_core_questions", "title": "4 Câu Hỏi Trọng Tâm", "summary": "Cần AI không? Cấp độ Rule hay Agent? Statement rõ chưa? Quyết định Go/No-go?", "slide_page": "Slide 3", "cross_link": {"target_day": 3, "target_node_id": "d3_agentic_fit", "label": "🔗 Cơ sở cho Agentic Fit Framework Day 03 [Slide 10]"}, "detail": {"title": "Bốn Câu Hỏi Trọng Tâm Khi Thiết Kế Giải Pháp AI", "slide_page": "Slide 3", "excerpt": "01. Bài toán có thực sự cần AI giải quyết?\n02. Nếu có, giải pháp ở cấp độ nào: Rule, Workflow, hay Agent?\n03. Problem Statement đã đủ rõ ràng để triển khai?\n04. Khi nào quyết định: Go, Not Yet, hay No-Go?", "key_takeaway": "Tránh bẫy 'búa AI đi tìm đinh'. Chỉ áp dụng AI khi bài toán đòi hỏi xử lý ngữ nghĩa, suy luận hoặc tính thích ứng cao.", "ai_tutor_explanation": "Nhiều kỹ sư vội vã dùng LLM cho các bài toán tính toán số học hoặc kiểm tra logic cứng (như if/else). Câu hỏi 01 và 02 buộc bạn phải xác định đúng mức độ phức tạp tối thiểu cần thiết.", "code_snippet": null, "quick_quiz": "Khi gặp một bài toán có quy tắc cố định 100%, bạn nên chọn giải pháp nào?\nA. Multi-Agent System\nB. Rule-based if/else\nC. Fine-tuning LLM\n(Đáp án đúng: B)"}}, {"id": "d2_rule_workflow_agent", "title": "Phân Cấp Cấp Độ Giải Pháp", "summary": "So sánh 3 cấp độ: Rule cố định, Workflow tuần tự và Autonomous Agent linh hoạt.", "slide_page": "Slide 3, 69", "cross_link": {"target_day": 3, "target_node_id": "d3_3_systems", "label": "🔗 Chi tiết hoá thành 3 Kiểu Hệ Thống Day 03 [Slide 8]"}, "detail": {"title": "Phân Cấp: Rule vs. Workflow vs. Agent", "slide_page": "Slide 69", "excerpt": "● Rule: Xử lý theo logic cố định (deterministic), độ tin cậy tuyệt đối, chi phí cực thấp.\n● Workflow: Luồng nhiều bước kết hợp gọi LLM ở một số trạm xử lý văn bản, luồng đi được lập trình sẵn.\n● Agent: Mô hình tự lập kế hoạch (Plan), tự chọn công cụ (Tool Use), tự quan sát và thích ứng.", "key_takeaway": "Bắt đầu với giải pháp đơn giản nhất (Rule -> Workflow), chỉ nâng lên Agent khi bài toán có độ bất định cao.", "ai_tutor_explanation": "Quy tắc kinh điển của Google ML: Luôn triển khai heuristic đơn giản làm baseline trước. Nếu baseline giải quyết được 80% vấn đề với chi phí 0đ, bạn không cần dùng LLM đắt đỏ.", "code_snippet": null, "quick_quiz": "Theo khuyến nghị từ Anthropic và Google, khi nào mới nên nâng cấp lên Agent?\nA. Khi muốn khoe công nghệ mới\nB. Khi quy tắc nghiệp vụ cố định\nC. Khi bài toán đòi hỏi tự quyết định bước đi tiếp theo dựa trên quan sát\n(Đáp án đúng: C)"}}]}, {"id": "d2_sec2", "title": "Google PAIR Guidebook", "summary": "6 chương cẩm nang thiết kế sản phẩm AI lấy con người làm trung tâm.", "slide_page": "Slide 8", "type": "branch", "children": [{"id": "d2_pair_6_chapters", "title": "6 Trụ Cột Google PAIR", "summary": "User Needs, Data, Mental Models, Explainability, Feedback, Errors & Graceful Failure.", "slide_page": "Slide 8", "cross_link": {"target_day": 5, "target_node_id": "d5_responsible_ai", "label": "🔗 Mở rộng sang Responsible AI Day 05 [Slide 12]"}, "detail": {"title": "Google PAIR: People + AI Guidebook (6 Chương Cốt Lõi)", "slide_page": "Slide 8", "excerpt": "1. User Needs + Defining Success: Xác định giá trị thực sự cho người dùng.\n2. Data Collection + Evaluation: Thu thập và đánh giá chất lượng dữ liệu.\n3. Mental Models: Định hình kỳ vọng của người dùng về năng lực AI.\n4. Explainability + Trust: Tính minh bạch và giải thích được quyết định.\n5. Feedback + Control: Trao quyền cho người dùng can thiệp và sửa sai.\n6. Errors + Graceful Failure: Xử lý lỗi tinh tế, không làm người dùng bế tắc.", "key_takeaway": "Google PAIR là kim chỉ nam giúp thiết kế trải nghiệm người dùng với AI an toàn, tin cậy và có kiểm soát.", "ai_tutor_explanation": "Chương 6 (Graceful Failure) cực kỳ quan trọng cho ConceptMap này: khi AI không tìm thấy tài liệu liên quan hoặc trích xuất không tự tin, hệ thống phải hỏi làm rõ (Clarify) thay vì bịa đặt câu trả lời (Hallucination).", "code_snippet": null, "quick_quiz": "Trụ cột nào trong PAIR chịu trách nhiệm giúp người dùng hiểu vì sao AI đưa ra gợi ý đó?\nA. Explainability + Trust\nB. Data Collection\nC. Feedback + Control\n(Đáp án đúng: A)"}}, {"id": "d2_problem_discovery", "title": "Problem Discovery", "summary": "Khám phá điểm đau (Pain points), quan sát thực tế và viết Problem Statement.", "slide_page": "Slide 13-18", "cross_link": {"target_day": 5, "target_node_id": "d5_prd_8_parts", "label": "🔗 Điền vào Phần 1 PRD Day 05 [Slide 25]"}, "detail": {"title": "Problem Discovery & Phân Tích Điểm Đau (Pain Points)", "slide_page": "Slide 13-18", "excerpt": "Từ quan sát lớp học 1000 học viên (khóa K3 & K4): Trợ giảng quá tải ở khâu trả lời lặp đi lặp lại cùng một câu hỏi cài đặt môi trường. Học viên bế tắc khi gặp lỗi Git/Python mà không biết tìm slide nào hướng dẫn.", "key_takeaway": "Problem Statement tốt phải chỉ rõ: Đối tượng gặp vấn đề, bối cảnh xảy ra, tổn thất cụ thể và tiêu chí đo lường thành công.", "ai_tutor_explanation": "Đừng viết 'Người dùng cần AI để học nhanh hơn' (đây là mong muốn giải pháp, không phải vấn đề). Hãy viết: 'Học viên mất trung bình 45 phút tìm kiếm slide giải thích lệnh git do bài giảng dài hơn 100 trang'.", "code_snippet": null, "quick_quiz": "Một Problem Statement chuẩn phải bắt đầu từ yếu tố nào?\nA. Công nghệ AI xịn nhất muốn dùng\nB. Nỗi đau và tổn thất có thật của nhóm người dùng mục tiêu\nC. Số lượng tham số của mô hình\n(Đáp án đúng: B)"}}]}, {"id": "d2_sec3", "title": "Ma Trận Đánh Giá Tác Động", "summary": "Ma trận Tần suất & Tác động (Frequency vs Impact) để sàng lọc use-case AI.", "slide_page": "Slide 54", "type": "branch", "children": [{"id": "d2_freq_impact_matrix", "title": "Ma Trận Tần Suất & Tác Động", "summary": "Ưu tiên bài toán có Tần suất cao và Tác động lớn để tối đa hoá ROI.", "slide_page": "Slide 54", "cross_link": null, "detail": {"title": "Ma Trận Phân Loại: Tần Suất & Tác Động (Frequency vs Impact)", "slide_page": "Slide 54", "excerpt": "● Góc phần tư 1 (High Frequency, High Impact): Điểm vàng đầu tư AI (Core AI Use case).\n● Góc phần tư 2 (Low Frequency, High Impact): Dự phòng khủng hoảng, cần Human-in-the-loop.\n● Góc phần tư 3 (High Frequency, Low Impact): Tự động hoá bằng Rule/Macro đơn giản.\n● Góc phần tư 4 (Low Frequency, Low Impact): Bỏ qua, không lãng phí tài nguyên.", "key_takeaway": "Dùng ma trận để sàng lọc tính năng, tránh lãng phí chi phí phát triển AI vào các use case ít giá trị.", "ai_tutor_explanation": "Việc học viên tra cứu mục lục và tóm tắt slide diễn ra hàng chục lần mỗi buổi học (High Frequency) và giúp giảm tải 60% thời gian cho TA (High Impact), xứng đáng là tính năng lõi.", "code_snippet": null, "quick_quiz": "Bài toán có tần suất xảy ra cao nhưng tác động rất nhỏ nên giải quyết bằng cách nào?\nA. Xây dựng Multi-Agent đắt tiền\nB. Viết script tự động hoá hoặc rule đơn giản\nC. Bỏ qua hoàn toàn\n(Đáp án đúng: B)"}}]}]}}, "3": {"day": 3, "code": "DAY_03", "title": "Từ Chatbot Đến Agentic Agent", "subtitle": "3 Kiểu Hệ Thống AI + ReAct Design Pattern", "pdf_file": "day03-tu-chatbot-den-agentic-agent-react (1).pdf", "total_slides": 46, "tree": {"id": "d3_root", "title": "Day 03: ReAct Agent", "summary": "Phổ hệ thống AI, 4 tiêu chí Agentic Fit và kiến trúc vòng lặp ReAct.", "slide_page": "Slide 1-6", "type": "root", "children": [{"id": "d3_sec1", "title": "Phổ 3 Hệ Thống AI", "summary": "So sánh chi tiết Rule-based Bot, LLM Chatbot và Autonomous Agent.", "slide_page": "Slide 6-9", "type": "branch", "children": [{"id": "d3_3_systems", "title": "So Sánh 3 Hệ Thống", "summary": "So sánh về cách xử lý, bộ nhớ, công cụ, chi phí và rủi ro vận hành.", "slide_page": "Slide 8", "cross_link": {"target_day": 2, "target_node_id": "d2_rule_workflow_agent", "label": "🔗 Kế thừa phân cấp Day 02 [Slide 3 & 69]"}, "detail": {"title": "Bảng So Sánh Toàn Diện: Rule-based Bot vs Chatbot vs Agent", "slide_page": "Slide 8", "excerpt": "Tiêu chí: Cách xử lý | Bộ nhớ | Tool use | Chi phí | Rủi ro\n● Rule-based: If/else cố định | Không | Hard-coded | Thấp nhất | Dễ kiểm soát logic\n● LLM Chatbot: Sinh text theo context | Ngắn hạn trong context | Gọi tool theo chỉ định | Trung bình | Hallucination\n● Agent: Plan -> Act -> Observe -> Adapt | Ngắn hạn + Long-term | Chủ động chọn tool | Cao hơn do loop | Loop vô tận + Tool misuse", "key_takeaway": "Agent mạnh hơn nhưng chi phí cao hơn và rủi ro loop, chỉ dùng khi chatbot không giải quyết được.", "ai_tutor_explanation": "Nếu bài toán chỉ là hỏi-đáp tài liệu một lượt (Single-turn QA), LLM Chatbot hoặc RAG đơn giản là phương án tối ưu. Chỉ khi hệ thống cần tự kiểm tra kết quả và thử lại nhiều lần mới cần Agent.", "code_snippet": null, "quick_quiz": "Rủi ro đặc thù lớn nhất khi triển khai Agent so với Chatbot là gì?\nA. Thiếu context window\nB. Rơi vào vòng lặp vô hạn (Infinite Loop) và gọi nhầm tool\nC. Không hỗ trợ tiếng Việt\n(Đáp án đúng: B)"}}, {"id": "d3_llm_chatbot", "title": "LLM Chatbot Baseline", "summary": "Hệ thống sinh câu trả lời theo context, đóng vai trò mốc so chuẩn.", "slide_page": "Slide 9", "cross_link": {"target_day": 1, "target_node_id": "d1_llm_api_providers", "label": "🔗 Sử dụng LLM API Day 01 [Slide 7]"}, "detail": {"title": "Xây Dựng Chatbot Baseline Trước Khi Lên Agent", "slide_page": "Slide 9", "excerpt": "Trong thực hành kỹ thuật, luôn xây dựng Chatbot baseline trước. Baseline cung cấp mốc đo lường (benchmark) về độ chính xác, tốc độ và chi phí token để so sánh xem việc nâng cấp lên ReAct Agent có thực sự đem lại giá trị vượt trội.", "key_takeaway": "Không có baseline, bạn không thể chứng minh Agent của mình hiệu quả hơn hay chỉ làm tốn thêm token.", "ai_tutor_explanation": "Bài Lab 3 yêu cầu bạn tạo 1 bot trả lời câu hỏi tìm vé máy bay trước, sau đó mới tích hợp thêm tool tra cứu API và vòng lặp ReAct.", "code_snippet": "# Chatbot Baseline đơn giản\nresponse = client.models.generate_content(\n    model='gemini-2.5-flash',\n    contents=[{'role': 'user', 'parts': [{'text': user_query}]}]\n)", "quick_quiz": "Mục đích quan trọng nhất của việc xây dựng Chatbot Baseline là gì?\nA. Để nộp bài cho nhanh\nB. Làm mốc đo lường đối chứng chi phí và độ chính xác trước khi lên Agent\nC. Thay thế hoàn toàn Agent\n(Đáp án đúng: B)"}}]}, {"id": "d3_sec2", "title": "Agentic Fit Framework", "summary": "4 tiêu chí cốt lõi và ma trận chấm điểm để quyết định có cần Agent.", "slide_page": "Slide 10-15", "type": "branch", "children": [{"id": "d3_agentic_fit", "title": "4 Tiêu Chí Agentic Fit", "summary": "Multi-step Reasoning, Tool use, Dynamic decision và Uncertainty môi trường.", "slide_page": "Slide 11-12", "cross_link": {"target_day": 5, "target_node_id": "d5_success_metrics", "label": "🔗 Xác thực bài toán trong PRD Day 05 [Slide 25]"}, "detail": {"title": "4 Tiêu Chí Vàng Đánh Giá Agentic Fit", "slide_page": "Slide 11", "excerpt": "1. Multi-step Reasoning: Bài toán cần suy luận chuỗi qua nhiều bước phụ thuộc nhau.\n2. Tool Use: Cần tương tác với môi trường ngoài (Database, API, Search, Code Executor).\n3. Dynamic Decisions: Bước đi tiếp theo phụ thuộc vào kết quả trả về của bước trước.\n4. Environmental Uncertainty: Môi trường có độ biến thiên cao, không thể hardcode cây quyết định.", "key_takeaway": "Nếu use case chỉ thoả mãn 1 trong 4 tiêu chí, thường chỉ cần Chatbot hoặc Workflow.", "ai_tutor_explanation": "Tính năng tạo Mindmap tự động của chúng ta: (1) Đọc slide, (2) Tạo cây khái niệm, (3) Tìm liên kết chéo với ngày khác, (4) Kiểm tra tính súc tích <= 15 từ. Đây là chuỗi Multi-step + Tool use điển hình!", "code_snippet": null, "quick_quiz": "Use case nào sau đây ĐẠT tiêu chí Agentic Fit cao nhất?\nA. Tra cứu mã bưu chính của một tỉnh\nB. Dịch một đoạn văn bản ngắn sang tiếng Anh\nC. Đặt tour du lịch tự động: kiểm tra lịch, so sánh giá vé, gọi API book và gửi email xác nhận\n(Đáp án đúng: C)"}}, {"id": "d3_anti_patterns", "title": "Anti-Patterns Cần Tránh", "summary": "Lỗi dùng Agent sai bài: bài toán 1 bước, tra FAQ đơn giản, không có feedback loop.", "slide_page": "Slide 13", "cross_link": null, "detail": {"title": "Anti-Patterns: Khi Dùng Agent Là Sai Bài", "slide_page": "Slide 13", "excerpt": "□ Bài toán 1 bước: hỏi đáp, tra FAQ, phân loại cơ bản.\n□ Quy trình đã xác định 100% không đổi: dùng workflow code thường nhanh hơn 10x và rẻ hơn 100x.\n□ Thiếu cơ chế phản hồi từ môi trường (không có Observation trả về).\n□ Dùng Agent chỉ vì hiệu ứng truyền thông (FOMO công nghệ).", "key_takeaway": "Dùng Agent sai bài sẽ khiến hệ thống chạy chậm, tốn token vô ích và khó debug.", "ai_tutor_explanation": "Đó là lý do tại sao nhóm chúng ta quyết định: backend Mindmap dùng Deterministic Python Pipeline để gom slide, chỉ dùng LLM tạo JSON khái niệm, thay vì thả cho Agent tự chạy loop tốn hết quota 15 RPM!", "code_snippet": null, "quick_quiz": "Trường hợp nào sau đây là Anti-pattern khi dùng Agent?\nA. Viết script agent tự động duyệt và debug lỗi unit test\nB. Dùng agent để tra cứu định nghĩa một từ vựng trong từ điển\nC. Dùng agent phân tích dữ liệu nhiều nguồn và tổng hợp báo cáo\n(Đáp án đúng: B)"}}]}, {"id": "d3_sec3", "title": "Kiến Trúc ReAct Pattern", "summary": "Mô hình Reasoning + Acting: Thought -> Action -> Observation -> Final Answer.", "slide_page": "Slide 20-35", "type": "branch", "children": [{"id": "d3_react_loop", "title": "Vòng Lặp ReAct", "summary": "Chu trình Thought (Suy nghĩ) -> Action (Hành động) -> Observation (Quan sát) -> Final.", "slide_page": "Slide 20-24", "cross_link": {"target_day": 4, "target_node_id": "d4_tool_calling", "label": "🔗 Triển khai kỹ thuật Tool Calling Day 04 [Slide 42 & 85]"}, "detail": {"title": "ReAct: Synergizing Reasoning and Acting in Language Models", "slide_page": "Slide 20", "excerpt": "ReAct kết hợp suy luận chuỗi tư duy (Reasoning trace) với hành động cụ thể (Action execution):\n1. Thought: LLM phân tích hiện trạng và lên kế hoạch cho bước kế tiếp.\n2. Action: LLM xuất lệnh gọi Tool cụ thể kèm tham số.\n3. Observation: Môi trường trả về kết quả thực thi của Tool.\n4. Loop: LLM đọc kết quả và tiếp tục suy nghĩ cho đến khi hoàn thành bài toán.", "key_takeaway": "Vòng lặp ReAct giúp LLM có khả năng tự sửa sai và tương tác trực tiếp với thế giới bên ngoài.", "ai_tutor_explanation": "ReAct giống như một kỹ sư đang debug code: Bạn nghĩ lỗi ở đâu (Thought), bạn đặt print log để kiểm tra (Action), bạn đọc kết quả log trên màn hình (Observation), và sau đó quyết định sửa dòng code nào.", "code_snippet": "# ReAct Loop Pattern\nwhile steps < max_steps:\n    thought = agent.reason(context)\n    action = agent.decide_action(thought)\n    if action.is_finish:\n        return action.answer\n    observation = execute_tool(action.tool_name, action.params)\n    context.append((thought, action, observation))", "quick_quiz": "Thành phần nào trong ReAct đại diện cho dữ liệu môi trường trả về sau khi gọi Tool?\nA. Thought\nB. Action\nC. Observation\n(Đáp án đúng: C)"}}, {"id": "d3_debug_checklist", "title": "Debug Checklist Cho Agent", "summary": "Checklist gỡ lỗi: Xem trace trước, kiểm tra tool payload, giới hạn số vòng lặp.", "slide_page": "Slide 35", "cross_link": null, "detail": {"title": "Checklist Kỹ Thuật Khi Debug Hệ Thống Agent", "slide_page": "Slide 35", "excerpt": "● Nhìn vào trace log trước: xem Thought có hợp lý không trước khi trách Tool.\n● Kiểm tra schema input của Tool: LLM có truyền sai kiểu dữ liệu không?\n● Thiết lập `max_iterations`: luôn giới hạn số bước lặp (ví dụ tối đa 5 bước) để chống cạn kiệt tài nguyên.\n● Quan sát Observation: kết quả trả về có bị quá dài làm tràn context window không?", "key_takeaway": "Trace log và giới hạn vòng lặp là phao cứu sinh bắt buộc trong mọi hệ thống Agent.", "ai_tutor_explanation": "Nếu không đặt max_iterations, khi Tool bị lỗi kết nối mạng, Agent có thể thử lại hàng chục lần liên tục, làm cháy sạch quota 15 RPM / 500 RPD của bạn chỉ trong vài chục giây!", "code_snippet": "MAX_ITERATIONS = 5\nif iteration_count >= MAX_ITERATIONS:\n    return 'Fallback: Không thể hoàn thành sau số lần thử cho phép.'", "quick_quiz": "Để ngăn chặn Agent gọi tool vô tận khi gặp lỗi, biện pháp bắt buộc là gì?\nA. Tăng context window lên 2M token\nB. Thiết lập tham số max_iterations giới hạn số bước\nC. Đổi model khác\n(Đáp án đúng: B)"}}]}]}}, "4": {"day": 4, "code": "DAY_04", "title": "Prompt Engineering & Tool Calling", "subtitle": "Kỹ Thuật RTCF, Context Engineering & Structured Output", "pdf_file": "day04-prompt-engineering-tool-calling_v3.pdf", "total_slides": 98, "tree": {"id": "d4_root", "title": "Day 04: Prompt & Tools", "summary": "Khung viết prompt RTCF, Context Engineering, Tool Calling và phòng thủ lỗ hổng.", "slide_page": "Slide 1-6", "type": "root", "children": [{"id": "d4_sec1", "title": "Kỹ Thuật RTCF", "summary": "4 thành phần của một prompt chuẩn: Role, Task, Context, Format.", "slide_page": "Slide 10-17", "type": "branch", "children": [{"id": "d4_rtcf_framework", "title": "4 Thành Phần RTCF", "summary": "Role (Vai trò), Task (Nhiệm vụ), Context (Bối cảnh), Format (Định dạng kết quả).", "slide_page": "Slide 10", "cross_link": {"target_day": 5, "target_node_id": "d5_prd_8_parts", "label": "🔗 Chuẩn hoá format PRD trong Day 05 [Slide 25]"}, "detail": {"title": "Khung Viết Prompt Thực Chiến RTCF", "slide_page": "Slide 10", "excerpt": "● ROLE (Vai trò): 'Đóng vai trò Chuyên gia Tóm tắt Bài giảng Đại học.'\n● TASK (Nhiệm vụ): 'Trích xuất cây sơ đồ tư duy từ nội dung slide.'\n● CONTEXT (Bối cảnh): 'Dành cho sinh viên ôn tập nhanh trước kỳ thi, hiển thị trên màn hình web.'\n● FORMAT (Định dạng): 'Xuất ra JSON có các trường: title (2-4 từ), summary (<= 15 từ), slide_page.'\nRule of thumb: Bắt đầu với Task + Format. Thêm Role và Context khi cần cải thiện độ chính xác.", "key_takeaway": "Task và Format là hai yếu tố quyết định 80% chất lượng của prompt kỹ thuật.", "ai_tutor_explanation": "Trong bài toán tạo Mindmap này, Format là cốt lõi: chúng ta chỉ thị rõ ràng `summary <= 15 từ` và `output JSON` để model không bao giờ viết tràn lan phá hỏng giao diện trực quan.", "code_snippet": "prompt = '''\n[ROLE]: AI Study Assistant\n[TASK]: Tóm tắt khái niệm chính của slide được cung cấp\n[CONTEXT]: Khóa học VLearn AI Hackathon\n[FORMAT]: JSON object { \"title\": str, \"summary\": str }\n'''", "quick_quiz": "Theo nguyên tắc 'Rule of thumb', hai thành phần nào nên bắt đầu viết đầu tiên trong RTCF?\nA. Role và Context\nB. Task và Format\nC. Role và Format\n(Đáp án đúng: B)"}}, {"id": "d4_iteration_rules", "title": "Prompt Iteration", "summary": "Quy trình tinh chỉnh prompt từ mơ hồ đến xuất sắc kèm token budget.", "slide_page": "Slide 12-15", "cross_link": null, "detail": {"title": "Quy Trình Tinh Chỉnh Prompt & Token Budget Awareness", "slide_page": "Slide 12-15", "excerpt": "■ Prompt dài hơn KHÔNG đồng nghĩa prompt tốt hơn.\n■ Tránh phủ định mập mờ ('đừng làm lan man'), thay bằng chỉ thị tích cực cụ thể ('chỉ trả lời trong 15 từ').\n■ Token Budget Awareness: Mỗi từ trong prompt và response đều tiêu tốn chi phí và tăng độ trễ.", "key_takeaway": "Tối ưu hoá mật độ thông tin trên mỗi token là thước đo của một AI Engineer chuyên nghiệp.", "ai_tutor_explanation": "Khi làm việc với free tier 15 RPM / 500 RPD, việc cắt giảm 50% độ dài prompt thừa giúp bạn tránh lỗi RateLimit và tăng gấp đôi tốc độ sinh phản hồi của hệ thống.", "code_snippet": null, "quick_quiz": "Cách viết nào sau đây hiệu quả hơn khi muốn giới hạn độ dài câu trả lời của AI?\nA. 'Xin đừng viết dài quá nhé'\nB. 'Tóm tắt nội dung chính trong tối đa 15 từ'\nC. 'Hãy trả lời thật ngắn gọn và xúc tích'\n(Đáp án đúng: B)"}}]}, {"id": "d4_sec2", "title": "Tool Calling & Function Calling", "summary": "Cơ chế LLM kích hoạt các hàm Python bên ngoài thông qua JSON Schema.", "slide_page": "Slide 42-50, 85", "type": "branch", "children": [{"id": "d4_tool_calling", "title": "Cơ Chế Tool Calling", "summary": "Mô hình sinh lời gọi hàm có cấu trúc thay vì trả lời text tự do.", "slide_page": "Slide 42, 85", "cross_link": {"target_day": 3, "target_node_id": "d3_react_loop", "label": "🔗 Thực thi Action trong vòng lặp ReAct Day 03 [Slide 20]"}, "detail": {"title": "Tool Calling: Biến LLM Thành Hệ Thống Hành Động", "slide_page": "Slide 85", "excerpt": "Tool Calling cho phép mô hình ngôn ngữ không trực tiếp thực thi code mà sinh ra một JSON chỉ định tên hàm và các đối số (function name & arguments). Ứng dụng client sẽ chạy hàm thực tế rồi trả kết quả (Observation) về cho LLM.", "key_takeaway": "Tool calling phân tách an toàn giữa khả năng suy luận của LLM và quyền thực thi code của hệ điều hành.", "ai_tutor_explanation": "Ví dụ bạn cung cấp tool `get_slide_content(day: int, page: int)`. Khi người dùng hỏi về Git, LLM sẽ xuất `{\"name\": \"get_slide_content\", \"args\": {\"day\": 1, \"page\": 9}}`. Code Python của bạn chạy hàm này và đưa text trả lại cho model.", "code_snippet": "def search_slide(keyword: str) -> str:\n    '''Tìm kiếm slide chứa từ khoá'''\n    pass\n\n# Đăng ký tool với Gemini SDK\ntools = [search_slide]\nresponse = client.models.generate_content(\n    model='gemini-2.5-flash',\n    contents='Tìm slide cài Git',\n    config={'tools': tools}\n)", "quick_quiz": "Khi LLM kích hoạt một Tool Call, ai là người trực tiếp chạy hàm code đó?\nA. Chính máy chủ của Google/OpenAI\nB. Ứng dụng phía Client / Server của bạn\nC. Trình duyệt web của người dùng\n(Đáp án đúng: B)"}}, {"id": "d4_structured_output", "title": "Structured Output", "summary": "Ép LLM trả về đúng JSON Schema bằng Pydantic hoặc Response Schema.", "slide_page": "Slide 69", "cross_link": null, "detail": {"title": "Structured Output: Đảm Bảo 100% Khớp Schema", "slide_page": "Slide 69", "excerpt": "Cảnh báo kỹ thuật: Không nên dùng regex hoặc ép format bằng prompt tự do. Các model hiện đại (Gemini 2.5, GPT-4o) hỗ trợ tính năng Structured Outputs với Pydantic model hoặc JSON Schema, đảm bảo JSON trả về không bao giờ bị gãy cú pháp.", "key_takeaway": "Structured Output loại bỏ hoàn toàn lỗi JSONDecodeError trong các pipeline sản phẩm thực tế.", "ai_tutor_explanation": "Trong pipeline tạo Mindmap của chúng ta, Pydantic class `MindmapTree` được truyền trực tiếp vào tham số `response_schema` để Gemini ép output khớp 100% với cấu trúc D3.js cần vẽ.", "code_snippet": "from pydantic import BaseModel\n\nclass ConceptNode(BaseModel):\n    title: str\n    summary: str\n    slide_page: str\n\n# config={'response_mime_type': 'application/json', 'response_schema': ConceptNode}", "quick_quiz": "Phương pháp nào đáng tin cậy nhất để đảm bảo LLM trả về đúng cấu trúc dữ liệu cho Frontend?\nA. Viết prompt van xin 'làm ơn chỉ trả JSON'\nB. Dùng tính năng Structured Output với JSON Schema / Pydantic\nC. Dùng hàm eval() của Python\n(Đáp án đúng: B)"}}]}, {"id": "d4_sec3", "title": "Context & Bảo Mật", "summary": "Context Engineering, phòng thủ EchoLeak CVE-2025-32711 và Boundary Setting.", "slide_page": "Slide 50-56", "type": "branch", "children": [{"id": "d4_context_engineering", "title": "Context Engineering", "summary": "Chỉ đưa vào context cần thiết, cắt giảm history thừa và đặt ranh giới an toàn.", "slide_page": "Slide 50", "cross_link": {"target_day": 5, "target_node_id": "d5_responsible_ai", "label": "🔗 Liên kết với Trụ cột Bảo mật Day 05 [Slide 12]"}, "detail": {"title": "Context Engineering: Chọn Đúng Context Cần Thiết", "slide_page": "Slide 50", "excerpt": "Checklist Context Engineering:\n□ Đã cắt bỏ history không liên quan đến task hiện tại?\n□ Đã nén và tóm tắt các đoạn hội thoại dài trước khi gửi lại model?\n□ Đặt ranh giới rõ ràng giữa dữ liệu người dùng (Untrusted Input) và chỉ thị hệ thống (System Prompt).", "key_takeaway": "Context ngắn gọn và chuẩn xác giúp giảm độ trễ, tiết kiệm chi phí và tăng độ tập trung của LLM.", "ai_tutor_explanation": "Thay vì nhét toàn bộ 100 trang slide vào prompt mỗi lần hỏi, pipeline thông minh sẽ chỉ trích xuất phần tóm tắt mục lục và các đoạn văn bản tương ứng.", "code_snippet": null, "quick_quiz": "Lợi ích lớn nhất của việc cắt bỏ lịch sử chat không liên quan trước khi gửi API là gì?\nA. Giúp giao diện nhìn đẹp hơn\nB. Tiết kiệm token, giảm độ trễ và tránh làm loãng ngữ cảnh của mô hình\nC. Làm tăng RAM máy chủ\n(Đáp án đúng: B)"}}]}]}}, "5": {"day": 5, "code": "DAY_05", "title": "AI Product Thinking & Requirements", "subtitle": "Product Thinking, Responsible AI & 8 Phần PRD Chuẩn", "pdf_file": "day05-ai-product-thinking-requirements.pdf", "total_slides": 44, "tree": {"id": "d5_root", "title": "Day 05: AI Product PRD", "summary": "Tư duy sản phẩm AI, Responsible AI, 8 phần PRD chuẩn và Risk Matrix.", "slide_page": "Slide 1-6", "type": "root", "children": [{"id": "d5_sec1", "title": "Tư Duy Sản Phẩm AI", "summary": "Khác biệt bản chất giữa AI Product (xác suất) và Software thông thường (deterministic).", "slide_page": "Slide 6-11", "type": "branch", "children": [{"id": "d5_ai_vs_software", "title": "AI Product vs Software", "summary": "Output xác suất có biến thiên, yêu cầu threshold chất lượng, SLA và fallback.", "slide_page": "Slide 8", "cross_link": {"target_day": 2, "target_node_id": "d2_4_core_questions", "label": "🔗 Đối chiếu bài toán cần AI Day 02 [Slide 3]"}, "detail": {"title": "AI Product Khác Gì Phần Mềm Truyền Thống?", "slide_page": "Slide 8", "excerpt": "So sánh cốt lõi:\n● Output: Phần mềm truyền thống deterministic (100% giống nhau), AI Product có tính xác suất và biến thiên.\n● Kỳ vọng User: Thường kỳ vọng AI thông minh như con người nên dễ thất vọng nếu không có Mental Model rõ ràng.\n● Definition of Done: Cần threshold chất lượng (ví dụ >= 90% chính xác), SLA và luồng Fallback khi AI trả lời sai.\n● Vòng đời: Không phải build rồi ship một lần, mà là build -> test -> observe -> calibrate -> re-ship.", "key_takeaway": "Đừng viết requirement cho AI như một form CRUD thông thường. Phải thiết kế vùng dung sai lỗi.", "ai_tutor_explanation": "Vì AI có tính xác suất, chúng ta thiết kế nút '⚡ Test CLARIFY' và '⚠️ Test LỖI' trong prototype để hệ thống luôn có phương án dự phòng thân thiện khi AI không tự tin.", "code_snippet": null, "quick_quiz": "Khái niệm nào sau đây là BẮT BUỘC khi định nghĩa tiêu chí hoàn thành (DoD) cho tính năng AI?\nA. Phải đúng 100% không bao giờ sai sót\nB. Ngưỡng chất lượng chấp nhận được (Threshold) kèm cơ chế Fallback\nC. Viết code bằng C++\n(Đáp án đúng: B)"}}, {"id": "d5_success_metrics", "title": "North Star & JTBD", "summary": "Jobs-to-be-Done và chỉ số North Star Metric đo lường giá trị thực tế của AI.", "slide_page": "Slide 9-11", "cross_link": {"target_day": 2, "target_node_id": "d2_freq_impact_matrix", "label": "🔗 Tác động đo lường từ Ma trận Day 02 [Slide 54]"}, "detail": {"title": "Jobs-to-be-Done (JTBD) và North Star Metric Cho AI Product", "slide_page": "Slide 9-11", "excerpt": "■ JTBD: Người dùng không muốn 'dùng AI', họ muốn hoàn thành công việc nhanh hơn và bớt áp lực hơn.\n■ North Star Metric ví dụ: 'Tỷ lệ học viên tự tìm thấy câu trả lời trong slide dưới 60 giây mà không cần tag hỏi Trợ giảng'.\n■ Cảnh báo: Tránh dùng các metric ảo như 'Số lượng token đã tiêu thụ' hay 'Số lượt click vào nút AI'.", "key_takeaway": "Đo lường thành công của AI bằng thời gian tiết kiệm được và giá trị tạo ra cho người dùng.", "ai_tutor_explanation": "Một sản phẩm AI tốt là sản phẩm giúp người dùng đạt mục đích học tập nhanh nhất, chứ không phải giữ chân người dùng chat lòng vòng vô tận.", "code_snippet": null, "quick_quiz": "Chỉ số nào sau đây phản ánh đúng giá trị thực tế của một công cụ AI hỗ trợ học tập?\nA. Tổng số token API đã tiêu thụ\nB. Thời gian trung bình học viên nắm bắt được khái niệm cốt lõi\nC. Số lượng từ AI đã viết ra\n(Đáp án đúng: B)"}}]}, {"id": "d5_sec2", "title": "Responsible AI & Đạo Đức", "summary": "5 trụ cột Responsible AI, giảm thiểu Bias, bảo vệ Privacy và tuân thủ EU AI Act.", "slide_page": "Slide 12-15", "type": "branch", "children": [{"id": "d5_responsible_ai", "title": "5 Trụ Cột Responsible AI", "summary": "Công bằng, Minh bạch, Bảo mật dữ liệu, An toàn và Trách nhiệm giải trình.", "slide_page": "Slide 13-15", "cross_link": {"target_day": 2, "target_node_id": "d2_pair_6_chapters", "label": "🔗 Triển khai từ Google PAIR Day 02 [Slide 8]"}, "detail": {"title": "5 Trụ Cột Cốt Lõi Của Responsible AI", "slide_page": "Slide 13", "excerpt": "1. Fairness (Công bằng): Không phân biệt đối xử hoặc thiên lệch bất công.\n2. Transparency (Minh bạch): Người dùng luôn biết họ đang tương tác với AI và nguồn gốc thông tin.\n3. Privacy & Security: Bảo mật dữ liệu cá nhân của người dùng, không dùng dữ liệu nhạy cảm để train lại model mà không có sự đồng ý.\n4. Safety: Có rào chắn an toàn (Guardrails) ngăn chặn nội dung độc hại.\n5. Accountability: Con người luôn chịu trách nhiệm cuối cùng về kết quả.", "key_takeaway": "Mọi tính năng AI đưa ra thị trường đều phải có đánh giá rủi ro đạo đức và bảo mật dữ liệu.", "ai_tutor_explanation": "Nguyên tắc minh bạch được thể hiện qua huy hiệu trích dẫn `[Slide X]` trên mỗi node Mindmap: học viên luôn kiểm chứng được câu trả lời bắt nguồn từ trang slide nào của giảng viên.", "code_snippet": null, "quick_quiz": "Hành động nào thể hiện tính Minh bạch (Transparency) trong thiết kế Mindmap AI?\nA. Giấu nguồn dữ liệu để tăng tính huyền bí cho AI\nB. Hiển thị rõ số trang slide trích dẫn [Slide X] và cho phép học viên đối chiếu\nC. Đổi tên toàn bộ bài giảng của thầy cô thành tác phẩm của AI\n(Đáp án đúng: B)"}}]}, {"id": "d5_sec3", "title": "Kỹ Thuật Viết PRD Cho AI", "summary": "8 phần cốt lõi của một PRD AI chuẩn, Acceptance Criteria và Risk Matrix.", "slide_page": "Slide 20-38", "type": "branch", "children": [{"id": "d5_prd_8_parts", "title": "8 Phần Của Một AI PRD", "summary": "Problem, Target User, Success Metrics, Architecture, Features, NFR, Acceptance, Risks.", "slide_page": "Slide 25", "cross_link": {"target_day": 2, "target_node_id": "d2_problem_discovery", "label": "🔗 Dữ liệu đầu vào từ Discovery Day 02 [Slide 15]"}, "detail": {"title": "Cấu Trúc Chuẩn 8 Phần Của Một Bản PRD Sản Phẩm AI", "slide_page": "Slide 25", "excerpt": "1. Problem: Bài toán cụ thể và nỗi đau của người dùng.\n2. Target User: Chân dung đối tượng sử dụng chính.\n3. Success Metrics: Các chỉ số đo lường hiệu quả (Product & Model metrics).\n4. Technical Architecture: Kiến trúc pipeline (LLM, RAG, Cache, Frontend).\n5. Feature Requirements: Yêu cầu chức năng chi tiết.\n6. Non-functional Requirements (NFR): Độ trễ, chi phí token, bảo mật.\n7. Acceptance Criteria: Tiêu chuẩn nghiệm thu từng tính năng.\n8. Risk Matrix: Ma trận rủi ro và phương án ứng phó.", "key_takeaway": "PRD tốt là tài liệu giúp cả team kỹ thuật, sản phẩm và giảng viên cùng chung một tầm nhìn rõ ràng.", "ai_tutor_explanation": "Trong Checkpoint 1 và 2 vừa qua, nhóm BungChay đã xây dựng hoàn chỉnh khung này qua `spec.md` và `canvas-cp1.md`, đặt nền móng vững chắc cho bản Prototype hôm nay!", "code_snippet": null, "quick_quiz": "Phần nào trong PRD giúp xác định khi nào một tính năng AI được coi là đạt yêu cầu để đưa lên production?\nA. Technical Architecture\nB. Acceptance Criteria & Quality Thresholds\nC. Target User\n(Đáp án đúng: B)"}}, {"id": "d5_risk_matrix", "title": "Ma Trận Rủi Ro (Risk Matrix)", "summary": "Xác định rủi ro Hallucination, trễ API, chi phí token và kế hoạch giảm thiểu.", "slide_page": "Slide 31", "cross_link": null, "detail": {"title": "Risk Matrix: Nhận Diện & Giảm Thiểu Rủi Ro Vận Hành AI", "slide_page": "Slide 31", "excerpt": "■ Rủi ro 1: Vượt hạn ngạch API (Rate Limit 15 RPM) -> Giải pháp: Caching cục bộ và giới hạn gọi batch 1 lần.\n■ Rủi ro 2: AI ảo giác (Hallucination) -> Giải pháp: Ép output kèm trích dẫn số trang slide cụ thể.\n■ Rủi ro 3: Trễ mạng khi tải -> Giải pháp: Render giao diện tức thì với local storage trước khi sync.", "key_takeaway": "Không có hệ thống AI nào hoàn hảo, chỉ có hệ thống chuẩn bị sẵn kế hoạch ứng phó rủi ro tốt.", "ai_tutor_explanation": "Bằng việc nạp sẵn dữ liệu trích xuất vào `codebase/storage/`, chúng ta triệt tiêu hoàn toàn rủi ro bị khóa API trong buổi demo trực tiếp trước ban giám khảo!", "code_snippet": null, "quick_quiz": "Giải pháp hiệu quả nhất để giải quyết rủi ro giới hạn 15 RPM / 500 RPD trong buổi demo là gì?\nA. Mua thêm 100 tài khoản trả phí\nB. Áp dụng Local Caching thông minh và nạp dữ liệu trích xuất sẵn\nC. Huỷ bỏ bài thuyết trình\n(Đáp án đúng: B)"}}]}]}}}};
   </script>
 
-  <!-- ================= D3.JS INTERACTIVE MINDMAP ENGINE ================= -->
+  <!-- ================= D3.JS INTERACTIVE MINDMAP ENGINE & LIVE API LOGIC ================= -->
   <script>
-    // State
     let currentDay = 1;
     let currentNode = null;
     let isDetailOpen = false;
-    let currentMode = 'mindmap'; // 'slide' | 'mindmap'
+    let currentMode = 'mindmap';
     let svg, gMain, gLinks, gNodes;
     let d3Zoom;
     let rootData = null;
     let allNodesFlat = [];
     let isAllExpanded = true;
+    let isLiveServer = window.location.protocol.startsWith('http');
 
     const CARD_WIDTH = 250;
     const CARD_HEIGHT = 88;
 
-    // Initialize application
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       initD3();
+      renderDayTabs();
       switchDay(1);
+      checkBackendStatus();
     });
+
+    async function checkBackendStatus() {
+      const pill = document.getElementById('api-indicator-pill');
+      const modalDot = document.getElementById('modal-api-dot');
+      const modalText = document.getElementById('modal-api-text');
+      const modalModel = document.getElementById('modal-api-model');
+
+      if (!isLiveServer) {
+        pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Offline Standalone Mode (5 Days Ready)`;
+        modalDot.className = "w-2.5 h-2.5 rounded-full bg-blue-500";
+        modalText.innerText = "Chạy qua server backend: 'python run_server.py' để upload slide";
+        modalModel.innerText = "offline";
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        
+        modalModel.innerText = data.model || "gemini-2.5-flash";
+
+        if (data.has_api_key) {
+          pill.className = "inline-flex items-center gap-1.5 text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded text-[10px] border border-emerald-500/30";
+          pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Gemini API: Sẵn sàng (${data.model})`;
+          
+          modalDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+          modalText.innerText = `Đã tìm thấy API Key (${data.api_key_masked}). Sẵn sàng gọi thật!`;
+        } else {
+          pill.className = "inline-flex items-center gap-1.5 text-amber-300 bg-amber-950/80 px-2.5 py-0.5 rounded text-[10px] border border-amber-500/30";
+          pill.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> Chưa có GEMINI_API_KEY trong .env`;
+
+          modalDot.className = "w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse";
+          modalText.innerText = "Chưa có GEMINI_API_KEY trong file .env. Hãy điền key vào .env";
+        }
+
+        // Sync days from server
+        const daysRes = await fetch('/api/days');
+        const daysMeta = await daysRes.json();
+        if (daysMeta.days && daysMeta.days.length > 0) {
+          KNOWLEDGE_BASE.metadata.days = daysMeta.days;
+          renderDayTabs();
+        }
+      } catch (err) {
+        console.warn("Server check failed, using local offline fallback:", err);
+      }
+    }
+
+    function renderDayTabs() {
+      const container = document.getElementById('day-tabs-container');
+      const days = KNOWLEDGE_BASE.metadata.days || [];
+      
+      let html = '<span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2 hidden md:inline">Chọn Ngày:</span>';
+      days.forEach(d => {
+        const isActive = d.day === currentDay;
+        const btnClass = isActive 
+          ? "day-tab px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-blue-600 text-white shadow-xs"
+          : "day-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5";
+        
+        html += `
+          <button onclick="switchDay(${d.day})" id="tab-day-${d.day}" class="${btnClass}">
+            ${isActive ? '<span class="w-2 h-2 rounded-full bg-white"></span>' : ''}
+            Day 0${d.day}: ${d.title.split(':')[0].replace('Day 0', '').replace('Day ', '')}
+          </button>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
 
     function initD3() {
       const svgEl = d3.select("#mindmap-svg");
       svg = svgEl;
 
-      // Define drop shadow filters
-      const defs = svg.append("defs");
-      const filter = defs.append("filter")
-        .attr("id", "drop-shadow")
-        .attr("height", "130%");
-      filter.append("feGaussianBlur")
-        .attr("in", "SourceAlpha")
-        .attr("stdDeviation", 3)
-        .attr("result", "blur");
-      filter.append("feOffset")
-        .attr("in", "blur")
-        .attr("dx", 0)
-        .attr("dy", 3)
-        .attr("result", "offsetBlur");
-      const feMerge = filter.append("feMerge");
-      feMerge.append("feMergeNode").attr("in", "offsetBlur");
-      feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-
-      // Main container group
       gMain = svg.append("g").attr("class", "g-main");
       gLinks = gMain.append("g").attr("class", "g-links");
       gNodes = gMain.append("g").attr("class", "g-nodes");
 
-      // Zoom behavior
       d3Zoom = d3.zoom()
         .scaleExtent([0.2, 2.5])
         .on("zoom", (event) => {
@@ -512,65 +603,59 @@
       svg.call(d3Zoom);
     }
 
-    function switchDay(dayNum) {
+    async function switchDay(dayNum) {
       currentDay = dayNum;
-      
-      // Update Tab UI
-      document.querySelectorAll('.day-tab').forEach((btn, idx) => {
-        if (idx + 1 === dayNum) {
-          btn.className = "day-tab px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-blue-600 text-white shadow-xs";
-        } else {
-          btn.className = "day-tab px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100 transition flex items-center gap-1.5";
+      renderDayTabs();
+
+      // Check if data is already in memory or fetch from server
+      let dayInfo = KNOWLEDGE_BASE.days[dayNum];
+      if (!dayInfo && isLiveServer) {
+        try {
+          const res = await fetch(`/api/day/${dayNum}`);
+          if (res.ok) {
+            dayInfo = await res.json();
+            KNOWLEDGE_BASE.days[dayNum] = dayInfo;
+          }
+        } catch (e) {
+          console.error("Fetch day error:", e);
         }
-      });
+      }
 
-      // Update Nav titles
-      const dayInfo = KNOWLEDGE_BASE.days[dayNum];
-      document.getElementById('nav-lesson-title').innerText = `Lesson ${dayNum} &bull; ${dayInfo.code}`;
+      if (!dayInfo) return;
+
+      document.getElementById('nav-lesson-title').innerText = `Lesson ${dayNum} &bull; ${dayInfo.code || ('DAY_0' + dayNum)}`;
       document.getElementById('nav-lesson-subtitle').innerText = dayInfo.title;
-      document.getElementById('nav-progress-text').innerText = `${dayNum}/5 days &bull; ${dayInfo.total_slides} slides`;
-      document.getElementById('nav-progress-bar').style.width = `${(dayNum / 5) * 100}%`;
-      document.getElementById('day-badge-stats').innerText = `${dayInfo.total_slides} Slides &bull; ${dayInfo.pdf_file}`;
+      document.getElementById('nav-progress-text').innerText = `${dayNum}/${KNOWLEDGE_BASE.metadata.days.length} days &bull; ${dayInfo.total_slides} slides`;
+      document.getElementById('nav-progress-bar').style.width = `${(dayNum / KNOWLEDGE_BASE.metadata.days.length) * 100}%`;
+      document.getElementById('day-badge-stats').innerText = `${dayInfo.total_slides} Slides &bull; ${dayInfo.pdf_file || 'Slide bài giảng'}`;
 
-      // Load Day Tree
       loadTreeData(dayInfo.tree);
       closeDetailPane();
     }
 
     function loadTreeData(treeData) {
       rootData = d3.hierarchy(treeData);
-      
-      // Flatten nodes for search
       allNodesFlat = [];
       rootData.each(d => allNodesFlat.push(d));
-
-      // Calculate initial layout
       updateTree(rootData);
       fitTree();
     }
 
     function updateTree(source) {
-      const width = document.getElementById('canvas-container').clientWidth;
-      const height = document.getElementById('canvas-container').clientHeight;
-
-      // Tree layout: [height, width] separation
       const treeLayout = d3.tree()
         .nodeSize([110, 340])
-        .separation((a, b) => {
-          return (a.parent === b.parent ? 1.05 : 1.25);
-        });
+        .separation((a, b) => (a.parent === b.parent ? 1.05 : 1.25));
 
       treeLayout(rootData);
 
       const nodes = rootData.descendants();
       const links = rootData.links();
 
-      // Normalize for fixed-depth
       nodes.forEach(d => {
         d.y = d.depth * 330 + 60;
       });
 
-      // ----------------- LINKS -----------------
+      // Links
       const linkSelection = gLinks.selectAll(".link-curve")
         .data(links, d => d.target.data.id);
 
@@ -589,7 +674,7 @@
 
       linkSelection.exit().remove();
 
-      // ----------------- NODES -----------------
+      // Nodes
       const nodeSelection = gNodes.selectAll(".node-group")
         .data(nodes, d => d.data.id);
 
@@ -598,7 +683,6 @@
         .attr("class", "node-group")
         .attr("transform", d => `translate(${d.y}, ${d.x})`);
 
-      // Add HTML card inside foreignObject
       const fo = nodeEnter.append("foreignObject")
         .attr("width", CARD_WIDTH)
         .attr("height", CARD_HEIGHT)
@@ -611,7 +695,6 @@
         .on("click", (event, d) => onNodeClick(d))
         .html(d => renderCardHTML(d));
 
-      // Toggle Circle for expanding/collapsing children
       nodeEnter.each(function(d) {
         if (d.data.children && d.data.children.length > 0) {
           d3.select(this).append("circle")
@@ -629,7 +712,6 @@
         }
       });
 
-      // Update existing nodes position
       nodeSelection.transition().duration(400)
         .attr("transform", d => `translate(${d.y}, ${d.x})`);
 
@@ -639,7 +721,6 @@
     function getNodeCardClass(d) {
       const isRoot = d.depth === 0;
       const isBranch = d.depth === 1;
-      
       let base = "node-card rounded-xl p-2.5 h-full flex flex-col justify-between border select-none transition-all ";
       if (isRoot) {
         return base + "bg-blue-600 text-white border-blue-700 shadow-md";
@@ -719,13 +800,10 @@
 
     function onNodeClick(d) {
       currentNode = d;
-      
-      // Highlight active node
       d3.selectAll(".node-card").classed("active", false);
       const cardEl = document.getElementById(`card-${d.data.id}`);
       if (cardEl) cardEl.classList.add("active");
 
-      // Highlight active link path to root
       d3.selectAll(".link-curve").classed("active", false);
       let curr = d;
       while (curr.parent) {
@@ -742,16 +820,14 @@
       const pane = document.getElementById('detail-pane');
       isDetailOpen = true;
 
-      // Fill data
       document.getElementById('detail-title').innerText = data.title;
       document.getElementById('detail-slide-badge').innerText = data.slide_page || 'Slide Bài Giảng';
       document.getElementById('detail-takeaway').innerText = data.summary;
 
       const detail = data.detail || {};
-      document.getElementById('detail-excerpt').innerText = detail.excerpt || data.summary || "Đang đồng bộ dữ liệu slide...";
-      document.getElementById('detail-ai-tutor').innerText = detail.ai_tutor_explanation || "AI Tutor phân tích: Khái niệm cốt lõi cần nắm vững trong bài thi và ứng dụng thực tế.";
+      document.getElementById('detail-excerpt').innerText = detail.excerpt || data.summary || "Đang cập nhật...";
+      document.getElementById('detail-ai-tutor').innerText = detail.ai_tutor_explanation || "AI Tutor: Nắm vững khái niệm cốt lõi này để liên hệ với các bài thực hành kế tiếp.";
 
-      // Code snippet
       const codeBox = document.getElementById('detail-code-box');
       if (detail.code_snippet) {
         codeBox.classList.remove('hidden');
@@ -760,7 +836,6 @@
         codeBox.classList.add('hidden');
       }
 
-      // Cross-link
       const crossBox = document.getElementById('detail-cross-box');
       if (data.cross_link) {
         crossBox.classList.remove('hidden');
@@ -770,7 +845,6 @@
         crossBox.classList.add('hidden');
       }
 
-      // Quiz
       const quizBox = document.getElementById('detail-quiz-box');
       if (detail.quick_quiz) {
         quizBox.classList.remove('hidden');
@@ -780,7 +854,6 @@
         quizBox.classList.add('hidden');
       }
 
-      // Slide in drawer (40% width)
       pane.classList.remove('w-0', 'opacity-0');
       pane.classList.add('w-[420px]', 'xl:w-[480px]', 'opacity-100');
     }
@@ -797,15 +870,10 @@
     function jumpToCrossLink() {
       if (!currentNode || !currentNode.data.cross_link) return;
       const cl = currentNode.data.cross_link;
-      const targetDay = cl.target_day;
-      const targetNodeId = cl.target_node_id;
+      switchDay(cl.target_day);
 
-      // Switch day
-      switchDay(targetDay);
-
-      // Find and select node after render
       setTimeout(() => {
-        const targetNode = allNodesFlat.find(d => d.data.id === targetNodeId);
+        const targetNode = allNodesFlat.find(d => d.data.id === cl.target_node_id);
         if (targetNode) {
           onNodeClick(targetNode);
           centerOnNode(targetNode);
@@ -824,28 +892,15 @@
     function fitTree() {
       const containerWidth = document.getElementById('canvas-container').clientWidth;
       const containerHeight = document.getElementById('canvas-container').clientHeight;
-      
       const x = 50;
       const y = (containerHeight / 2) - 100;
       svg.transition().duration(500).call(d3Zoom.transform, d3.zoomIdentity.translate(x, y).scale(0.88));
     }
 
-    function zoomIn() {
-      svg.transition().duration(250).call(d3Zoom.scaleBy, 1.25);
-    }
-
-    function zoomOut() {
-      svg.transition().duration(250).call(d3Zoom.scaleBy, 0.8);
-    }
-
-    function resetZoom() {
-      fitTree();
-    }
-
-    function toggleQuizAnswer() {
-      const ans = document.getElementById('detail-quiz-answer');
-      ans.classList.toggle('hidden');
-    }
+    function zoomIn() { svg.transition().duration(250).call(d3Zoom.scaleBy, 1.25); }
+    function zoomOut() { svg.transition().duration(250).call(d3Zoom.scaleBy, 0.8); }
+    function resetZoom() { fitTree(); }
+    function toggleQuizAnswer() { document.getElementById('detail-quiz-answer').classList.toggle('hidden'); }
 
     function copyCode() {
       const code = document.getElementById('detail-code').innerText;
@@ -873,11 +928,8 @@
     }
 
     function toggleConceptMap() {
-      if (currentMode === 'slide') {
-        setMode('mindmap');
-      } else {
-        fitTree();
-      }
+      if (currentMode === 'slide') setMode('mindmap');
+      else fitTree();
     }
 
     function openSlideViewCurrent() {
@@ -893,11 +945,6 @@
         </div>
       `;
       setMode('slide');
-    }
-
-    function simulateScan() {
-      alert('AI Scanner: Đã nạp thành công 5 slide bài giảng từ folder data/ (Zero Quota Mode: Sử dụng bộ đệm lưu trữ cục bộ).');
-      setMode('mindmap');
     }
 
     function handleSearch(query) {
@@ -919,10 +966,110 @@
 
     function openModal(id) {
       document.getElementById(id).classList.remove('hidden');
+      if (id === 'modal-upload') checkBackendStatus();
     }
 
     function closeModal(id) {
       document.getElementById(id).classList.add('hidden');
+    }
+
+    // ================= REAL UPLOAD HANDLING =================
+    let selectedFile = null;
+
+    function handleFileSelect(input) {
+      if (input.files && input.files[0]) {
+        selectedFile = input.files[0];
+        document.getElementById('upload-file-name').innerText = `📄 ${selectedFile.name} (${(selectedFile.size / 1024 / 1024).toFixed(2)} MB)`;
+      }
+    }
+
+    async function submitUpload() {
+      if (!selectedFile) {
+        alert('Vui lòng chọn 1 file slide PDF trước khi bấm xử lý!');
+        return;
+      }
+
+      if (!isLiveServer) {
+        alert(
+          'ĐỂ CHẠY GỌI API THẬT:\n\n' +
+          '1. Mở Terminal và chạy lệnh: python run_server.py\n' +
+          '2. Truy cập web tại: http://127.0.0.1:8000\n' +
+          '3. Thêm GEMINI_API_KEY vào file .env và bấm Upload!'
+        );
+        return;
+      }
+
+      const pBox = document.getElementById('upload-progress-box');
+      const errBox = document.getElementById('upload-error-box');
+      const submitBtn = document.getElementById('btn-submit-upload');
+      const stepTitle = document.getElementById('upload-step-title');
+      const stepDetail = document.getElementById('upload-step-detail');
+
+      pBox.classList.remove('hidden');
+      errBox.classList.add('hidden');
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50');
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      const title = document.getElementById('upload-title-input').value.trim();
+      if (title) formData.append('custom_title', title);
+
+      try {
+        stepTitle.innerText = "1. Đang tải lên và trích xuất text từ slide PDF...";
+        stepDetail.innerText = "Sử dụng pypdf để phân tích và chuẩn hoá văn bản từng trang...";
+
+        // Step simulation for visual feedback
+        const timer1 = setTimeout(() => {
+          stepTitle.innerText = "2. Đang gửi prompt đến Google Gemini API...";
+          stepDetail.innerText = "Mô hình đang phân tích mạch logic, trích xuất cây 3 cấp và tạo liên kết chéo...";
+        }, 1500);
+
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        clearTimeout(timer1);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.detail || 'Lỗi xử lý file từ máy chủ.');
+        }
+
+        stepTitle.innerText = "3. Hoàn tất! Đang dựng cây Mindmap D3.js...";
+        stepDetail.innerText = "Lưu thành công vào kho lưu trữ. Tự động chuyển sang bài học mới...";
+
+        const newDay = data.data;
+        KNOWLEDGE_BASE.days[newDay.day] = newDay;
+        
+        // Refresh metadata
+        KNOWLEDGE_BASE.metadata.days.push({
+          day: newDay.day,
+          code: newDay.code,
+          title: newDay.title,
+          subtitle: newDay.subtitle,
+          pdf_file: newDay.pdf_file,
+          total_slides: newDay.total_slides
+        });
+
+        setTimeout(() => {
+          renderDayTabs();
+          switchDay(newDay.day);
+          closeModal('modal-upload');
+          pBox.classList.add('hidden');
+          submitBtn.disabled = false;
+          submitBtn.classList.remove('opacity-50');
+          alert(`🎉 Thành công! AI đã tạo cây sơ đồ tư duy cho "${newDay.title}"!`);
+        }, 800);
+
+      } catch (err) {
+        pBox.classList.add('hidden');
+        errBox.classList.remove('hidden');
+        errBox.innerText = `❌ ${err.message}`;
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50');
+      }
     }
   </script>
 </body>

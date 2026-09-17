@@ -43,8 +43,11 @@ except ImportError:
     pass
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR))
 DATA_DIR = BASE_DIR.parent / "data"
 STORAGE_DIR = BASE_DIR / "storage"
+
+from backend.prompts import build_pipeline_mindmap_prompt
 
 # Pydantic schemas for Gemini Structured Output
 if HAS_GENAI:
@@ -169,19 +172,8 @@ class MindmapPipeline:
         pages = self.extract_text_from_pdf(pdf_path, max_pages=30)
         concise_content = "\n\n".join([f"--- Slide {p['page']} ---\n{p['text'][:500]}" for p in pages[:15]])
 
-        prompt = f"""
-        [ROLE]: Chuyên gia Sư phạm & Kỹ sư AI VLearn.
-        [TASK]: Trích xuất cây sơ đồ tư duy (Concept Mindmap) cho Day {day}.
-        [QUY TẮC BẮT BUỘC]:
-        1. Cây có 3 cấp: Root (Ngày học) -> Branches (Chương/Phần) -> Leaf (Khái niệm cụ thể).
-        2. Title: Ngắn gọn từ 2 đến 4 từ (Ví dụ: 'Local Checklist', 'ReAct Pattern').
-        3. Summary: Khái quát cốt lõi KHÔNG QUÁ 40 TỪ. Nêu rõ ý chính, súc tích, không sao chép nguyên văn cả trang slide.
-        4. Ghi rõ số trang slide trích dẫn ('Slide X').
-        5. Chi tiết (detail): Có trích đoạn gốc, takeaway, giải thích của AI Tutor và câu hỏi trắc nghiệm nhanh.
-        
-        NỘI DUNG SLIDE TỔNG HỢP:
-        {concise_content}
-        """
+        # Tạo prompt (tách từ backend.prompts)
+        prompt = build_pipeline_mindmap_prompt(day=day, concise_content=concise_content)
 
         client = genai.Client(api_key=self.api_key)
         response = client.models.generate_content(

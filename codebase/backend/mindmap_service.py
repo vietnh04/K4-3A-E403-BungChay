@@ -38,6 +38,8 @@ try:
 except Exception as _e:
     pass
 
+from backend.prompts import build_upload_slide_prompt
+
 # Rate limiting tracker: min 4.2s for 15 RPM free tier
 _LAST_API_CALL = 0.0
 MIN_CALL_INTERVAL = 4.2
@@ -212,77 +214,11 @@ def process_uploaded_slide(
     # 2. Lấy bối cảnh các ngày trước để tìm liên kết chéo
     knowledge_context = get_existing_knowledge_context()
 
-    # 3. Tạo prompt RTCF
-    prompt = f"""
-[ROLE]: Chuyên gia Sư phạm & Kỹ sư Trực quan hoá Kiến thức VLearn AI.
-[TASK]: Phân tích nội dung slide bài giảng sau đây và trích xuất thành Cây Sơ Đồ Tư Duy (Mindmap Tree) tương tác định dạng JSON.
-
-[BỐI CẢNH CÁC NGÀY HỌC TRƯỚC ĐÓ (để tạo liên kết chéo nếu có liên quan)]:
-{knowledge_context}
-
-[QUY TẮC BẮT BUỘC VỀ NỘI DUNG (THEO ĐẶC TẢ VLEARN)]:
-1. Cấu trúc cây 3 cấp:
-   - Cấp 0 (Root): Tên bài giảng tổng quát.
-   - Cấp 1 (Chương/Phần): 2 đến 4 chương chính của bài giảng.
-   - Cấp 2 (Khái niệm cụ thể): 2 đến 4 khái niệm cốt lõi của mỗi chương.
-2. Tiêu đề node (title): RẤT NGẮN GỌN (từ 2 đến 4 từ tiếng Việt, ví dụ: 'Cơ Chế Attention', 'Vòng Lặp ReAct', 'Local Checklist').
-3. Tóm tắt node (summary): KHÔNG ĐƯỢC QUÁ 40 TỪ. Nêu rõ khái quát cốt lõi, súc tích, giải thích được ý niệm chính mà KHÔNG chép nguyên văn cả đoạn slide dài.
-4. Trích dẫn số trang (slide_page): Bắt buộc ghi rõ trang slide gốc (ví dụ 'Slide 4', 'Slide 9').
-5. Liên kết chéo (cross_link): Nếu một khái niệm kế thừa hoặc liên quan đến kiến thức của Day 1-5, hãy thêm:
-   "cross_link": {{
-       "target_day": 1..5,
-       "target_node_id": "id_ngay_truoc",
-       "label": "🔗 Kế thừa từ Day X [Slide Y]"
-   }}
-   Nếu không liên quan thì để null.
-6. Chi tiết mở rộng (detail):
-   - "title": Tiêu đề chi tiết
-   - "slide_page": Số trang trích dẫn
-   - "excerpt": Trích đoạn văn bản thực tế từ slide
-   - "key_takeaway": Điểm mấu chốt học viên cần nhớ
-   - "ai_tutor_explanation": Lời giảng giải sư phạm thực chiến từ AI Tutor
-   - "code_snippet": Lệnh terminal hoặc code mẫu (nếu bài học có code, nếu không thì null)
-   - "quick_quiz": Một câu hỏi trắc nghiệm nhanh kiểm tra độ hiểu bài kèm đáp án.
-
-[SCHEMA JSON TRẢ VỀ]:
-{{
-  "id": "node_root",
-  "title": "Tên Ngắn Gọn (2-4 từ)",
-  "summary": "Tóm tắt cốt lõi dưới 40 từ.",
-  "slide_page": "Slide 1",
-  "type": "root",
-  "children": [
-    {{
-      "id": "node_sec1",
-      "title": "Tên Chương (2-4 từ)",
-      "summary": "Tóm tắt chương dưới 40 từ.",
-      "slide_page": "Slide 2",
-      "type": "branch",
-      "children": [
-        {{
-          "id": "node_c1",
-          "title": "Tên Khái Niệm (2-4 từ)",
-          "summary": "Tóm tắt khái niệm dưới 40 từ.",
-          "slide_page": "Slide 5",
-          "cross_link": null,
-          "detail": {{
-            "title": "Tiêu đề đầy đủ",
-            "slide_page": "Slide 5",
-            "excerpt": "Trích đoạn gốc...",
-            "key_takeaway": "Khái quát cốt lõi...",
-            "ai_tutor_explanation": "Giải thích sư phạm...",
-            "code_snippet": null,
-            "quick_quiz": "Câu hỏi? A/B/C. Đáp án: A"
-          }}
-        }}
-      ]
-    }}
-  ]
-}}
-
-[DỮ LIỆU SLIDE CẦN XỬ LÝ]:
-{slide_corpus}
-"""
+    # 3. Tạo prompt RTCF (tách từ backend.prompts)
+    prompt = build_upload_slide_prompt(
+        knowledge_context=knowledge_context,
+        slide_corpus=slide_corpus
+    )
 
     # 4. Gọi Gemini API thật
     raw_json_str = call_gemini_api(prompt, config["api_key"], config["model"])

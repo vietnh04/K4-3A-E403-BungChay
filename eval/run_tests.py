@@ -54,7 +54,7 @@ def call_nvidia_api(prompt: str, api_key: str, model: str) -> str:
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.2,
         },
-        timeout=240,
+        timeout=350,
     )
     resp.raise_for_status()
     data = resp.json()

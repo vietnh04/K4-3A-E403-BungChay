@@ -1,0 +1,74 @@
+{
+  "run_at": "2026-09-17T15:37:23.897735",
+  "provider": "nvidia",
+  "model": "deepseek-ai/deepseek-v4-flash-0731",
+  "passed": 6,
+  "total": 7,
+  "results": [
+    {
+      "id": "gs04",
+      "taxonomy": [
+        "2_mo_ho_thieu_thong_tin"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 139.9
+    },
+    {
+      "id": "gs05",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 199.7
+    },
+    {
+      "id": "gs06",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 101.0
+    },
+    {
+      "id": "gs13",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 146.5
+    },
+    {
+      "id": "gs14",
+      "taxonomy": [
+        "3_ngoai_pham_vi"
+      ],
+      "status": "FAIL",
+      "errors": [
+        "LOI KY THUAT: HTTPError: 504 Server Error: Gateway Timeout for url: https://integrate.api.nvidia.com/v1/chat/completions"
+      ],
+      "elapsed_sec": 302.5
+    },
+    {
+      "id": "gs15",
+      "taxonomy": [
+        "1_nguon_su_that"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 120.3
+    },
+    {
+      "id": "gs20",
+      "taxonomy": [
+        "4_dac_thu_nghiep_vu"
+      ],
+      "status": "PASS",
+      "errors": [],
+      "elapsed_sec": 170.1
+    }
+  ]
+}

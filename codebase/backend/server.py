@@ -101,6 +101,27 @@ async def get_day_data(day_num: int):
         return json.load(f)
 
 
+@app.delete("/api/day/{day_num}")
+async def delete_day(day_num: int):
+    """
+    ENDPOINT XOÁ: Xoá bài giảng (slide & mindmap) theo số thứ tự ngày.
+    """
+    try:
+        from backend.mindmap_service import delete_day_data
+        result = delete_day_data(day_num)
+        return {
+            "success": True,
+            "message": f"Đã xoá thành công bài học Day {day_num} và cây Mindmap tương ứng.",
+            "data": result
+        }
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Lỗi khi xoá: {str(e)}")
+
+
 @app.post("/api/upload")
 async def upload_slide_deck(
     file: UploadFile = File(...),
@@ -165,3 +186,4 @@ def start():
 
 if __name__ == "__main__":
     start()
+

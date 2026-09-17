@@ -43,3 +43,4 @@ if __name__ == "__main__":
     print("=" * 60 + "\n")
 
     uvicorn.run("backend.server:app", app_dir=str(codebase_dir), host="127.0.0.1", port=8000, reload=True)
+

@@ -83,6 +83,20 @@
         "Risk Matrix"
       ],
       "storage_file": "day_5.json"
+    },
+    {
+      "day": 6,
+      "code": "DAY_06",
+      "title": "Bài Giảng: Day_1_v3",
+      "subtitle": "Trích xuất từ Day_1_v3.pdf",
+      "pdf_file": "Day_1_v3.pdf",
+      "total_slides": 35,
+      "core_topics": [
+        "Chuyển Từ Ý Định",
+        "Vibe Đến Agentic",
+        "Kỹ Thuật Ngữ Cảnh"
+      ],
+      "storage_file": "day_6.json"
     }
   ]
 }

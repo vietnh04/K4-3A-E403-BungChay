@@ -338,3 +338,97 @@ def process_uploaded_slide(
 
     print(f"[SUCCESS] Đã tạo thành công Day {next_day_num} từ slide thực tế!")
     return result_day
+
+
+def delete_day_data(day_num: int) -> Dict[str, Any]:
+    """
+    Xoá một bài học bao gồm:
+    1. File slide PDF trong data/uploads/ (nếu có)
+    2. File cấu trúc Mindmap day_{day_num}.json
+    3. Cập nhật và đánh chỉ mục lại các ngày còn lại trong metadata.json
+    """
+    meta_path = STORAGE_DIR / "metadata.json"
+    if not meta_path.exists():
+        raise FileNotFoundError("Không tìm thấy metadata.json")
+
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta = json.load(f)
+
+    days_list = meta.get("days", [])
+    if len(days_list) <= 1:
+        raise ValueError("Không thể xoá bài học duy nhất còn lại trong hệ thống.")
+
+    target_idx = -1
+    for idx, d in enumerate(days_list):
+        if d.get("day") == day_num:
+            target_idx = idx
+            break
+
+    if target_idx == -1:
+        raise FileNotFoundError(f"Không tìm thấy bài học Day {day_num} để xoá.")
+
+    target_day = days_list[target_idx]
+
+    # 1. Xoá file PDF nếu nằm trong thư mục uploads
+    pdf_name = target_day.get("pdf_file", "")
+    if pdf_name:
+        upload_pdf = UPLOAD_DIR / pdf_name
+        if upload_pdf.exists():
+            try:
+                upload_pdf.unlink()
+                print(f"[DELETE] Đã xoá file PDF upload: {pdf_name}")
+            except Exception as e:
+                print(f"[WARN] Không thể xoá file PDF: {e}")
+
+    # 2. Xoá file day_{day_num}.json
+    target_storage_file = STORAGE_DIR / f"day_{day_num}.json"
+    if target_storage_file.exists():
+        target_storage_file.unlink()
+        print(f"[DELETE] Đã xoá storage file: {target_storage_file.name}")
+
+    # 3. Loại bỏ khỏi danh sách
+    days_list.pop(target_idx)
+
+    # 4. Đánh chỉ mục lại (Re-index) các ngày còn lại từ 1 đến N
+    temp_records = []
+    for new_num, d in enumerate(days_list, start=1):
+        old_day_num = d["day"]
+        old_file = STORAGE_DIR / f"day_{old_day_num}.json"
+        temp_file = STORAGE_DIR / f"_temp_swap_{old_day_num}.json"
+        if old_file.exists():
+            old_file.rename(temp_file)
+            temp_records.append((temp_file, new_num, d))
+
+    new_days_list = []
+    for temp_file, new_num, d in temp_records:
+        with open(temp_file, "r", encoding="utf-8") as f:
+            day_data = json.load(f)
+
+        day_data["day"] = new_num
+        day_data["code"] = f"DAY_{new_num:02d}"
+        if "tree" in day_data:
+            day_data["tree"]["id"] = f"d{new_num}_root"
+
+        d["day"] = new_num
+        d["code"] = f"DAY_{new_num:02d}"
+        d["storage_file"] = f"day_{new_num}.json"
+
+        final_file = STORAGE_DIR / f"day_{new_num}.json"
+        with open(final_file, "w", encoding="utf-8") as f:
+            json.dump(day_data, f, ensure_ascii=False, indent=2)
+
+        temp_file.unlink()
+        new_days_list.append(d)
+
+    meta["days"] = new_days_list
+    with open(meta_path, "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
+
+    print(f"[DELETE SUCCESS] Đã xoá Day {day_num} và tái lập chỉ mục {len(new_days_list)} bài học thành công!")
+    return {
+        "deleted_day": day_num,
+        "total_remaining": len(new_days_list),
+        "days": new_days_list
+    }
+
+

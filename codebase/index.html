@@ -546,7 +546,7 @@
     let isLiveServer = window.location.protocol.startsWith('http');
 
     const CARD_WIDTH = 265;
-    const CARD_HEIGHT = 104;
+    const CARD_HEIGHT = 126;
 
     window.addEventListener('DOMContentLoaded', async () => {
       initD3();
@@ -679,7 +679,7 @@
 
     function updateTree(source) {
       const treeLayout = d3.tree()
-        .nodeSize([128, 350])
+        .nodeSize([152, 350])
         .separation((a, b) => (a.parent === b.parent ? 1.05 : 1.25));
 
       treeLayout(rootData);
@@ -772,6 +772,9 @@
     function renderCardHTML(d) {
       const data = d.data;
       const hasCross = !!data.cross_link;
+      const cleanCrossLabel = hasCross && data.cross_link.label
+        ? data.cross_link.label.replace(/^[🔗\s]+/, '')
+        : '';
 
       if (d.depth === 0) {
         return `
@@ -812,8 +815,8 @@
         <div>
           <p class="text-[10px] text-slate-500 line-clamp-3 leading-tight">${data.summary}</p>
           ${hasCross ? `
-            <div class="mt-1 flex items-center gap-1 text-[9px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/70 truncate">
-              <span>🔗</span> <span class="truncate">${data.cross_link.label}</span>
+            <div class="mt-1.5 flex items-center gap-1 text-[9px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/70 truncate" title="${data.cross_link.label}">
+              <span class="shrink-0">🔗</span> <span class="truncate">${cleanCrossLabel}</span>
             </div>
           ` : ''}
         </div>

@@ -6,3 +6,5 @@ storage/
 codebase/storage/
 *.log
 data/
+.venv/
+.codegraph/

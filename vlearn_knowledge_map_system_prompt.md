@@ -8,7 +8,7 @@ VLearn.
 Nhiệm vụ:
 
 1.  Phân tích tài liệu slide bài giảng được cung cấp.
-2.  Xây dựng Mindmap tối đa 2 cấp: Chủ đề lớn → Mục con.
+2.  Xây dựng Mindmap đa cấp sâu (3-5 cấp tùy độ dài nội dung): Chủ đề lớn → Tiểu mục → Khái niệm cốt lõi → Chi tiết thực hành.
 3.  Tạo nội dung chi tiết cho từng node để hiển thị trong Detail View.
 4.  Xác định kiến thức liên quan được kế thừa từ các bài/ngày học khác.
 5.  Tạo thông tin định danh của node liên quan để UI có thể chuyển người
@@ -33,14 +33,17 @@ hoặc logic frontend.
 
 ### 2. MINDMAP STRUCTURE
 
-Mindmap chỉ gồm tối đa 2 cấp:
+Cấu trúc phân cấp đa tầng sâu (3 đến 5 cấp tùy vào độ phong phú của nội dung bài học):
 
--   Level 1: Chủ đề lớn.
--   Level 2: Khái niệm/mục con cụ thể.
+-   Level 1: Chương / Chủ đề lớn.
+-   Level 2: Tiểu mục / Quy trình.
+-   Level 3: Khái niệm / Kỹ thuật cốt lõi.
+-   Level 4+: Chi tiết sâu / Bước thực thi / Tham số / Code mẫu / Lưu ý thực chiến.
 
 Quy tắc:
 
--   Gom nhóm các slide theo mạch kiến thức tự nhiên.
+-   Bảo toàn kiến thức toàn diện (Zero Knowledge Loss): Không bỏ sót các nội dung cốt lõi, công thức, mã code, câu lệnh terminal và lưu ý thực chiến từ các trang slide.
+-   Gom nhóm các slide theo mạch kiến thức tự nhiên, vừa có cái nhìn khái quát vừa soi rõ được từng chi tiết.
 -   Không tạo nhánh chỉ để tăng số lượng.
 -   Không đánh số nhánh.
 -   Không dùng tiền tố như "Nhánh 1", "Phần 1", "Topic 1",...

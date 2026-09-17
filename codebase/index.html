@@ -755,25 +755,25 @@
     }
 
     function getNodeCardClass(d) {
-      const isRoot = d.depth === 0;
-      const isBranch = d.depth === 1;
       let base = "node-card rounded-xl p-2.5 h-full flex flex-col justify-between border select-none transition-all ";
-      if (isRoot) {
+      if (d.depth === 0) {
         return base + "bg-blue-600 text-white border-blue-700 shadow-md";
-      } else if (isBranch) {
-        return base + "bg-white text-slate-800 border-indigo-200 shadow-xs hover:border-blue-400";
+      } else if (d.depth === 1) {
+        return base + "bg-white text-slate-800 border-indigo-200 shadow-xs hover:border-indigo-400";
+      } else if (d.depth === 2) {
+        return base + "bg-white text-slate-800 border-teal-200 shadow-xs hover:border-teal-400";
+      } else if (d.depth === 3) {
+        return base + "bg-white text-slate-800 border-amber-200 shadow-xs hover:border-amber-400";
       } else {
         return base + "bg-white text-slate-800 border-slate-200 shadow-xs hover:border-blue-400";
       }
     }
 
     function renderCardHTML(d) {
-      const isRoot = d.depth === 0;
-      const isBranch = d.depth === 1;
       const data = d.data;
       const hasCross = !!data.cross_link;
 
-      if (isRoot) {
+      if (d.depth === 0) {
         return `
           <div>
             <div class="flex items-center justify-between">
@@ -786,11 +786,24 @@
         `;
       }
 
+      let badgeText = "Chi tiết";
+      let badgeStyle = "bg-slate-100 text-slate-600 border border-slate-200/60";
+      if (d.depth === 1) {
+        badgeText = "Chương";
+        badgeStyle = "bg-indigo-50 text-indigo-700 border border-indigo-100";
+      } else if (d.depth === 2) {
+        badgeText = "Chủ đề";
+        badgeStyle = "bg-teal-50 text-teal-700 border border-teal-100";
+      } else if (d.depth === 3) {
+        badgeText = "Khái niệm";
+        badgeStyle = "bg-amber-50 text-amber-700 border border-amber-100";
+      }
+
       return `
         <div>
           <div class="flex items-center justify-between gap-1">
-            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isBranch ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-600'}">
-              ${isBranch ? 'Chương' : 'Khái niệm'}
+            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${badgeStyle}">
+              ${badgeText}
             </span>
             <span class="text-[9px] font-mono text-slate-400">${data.slide_page || ''}</span>
           </div>

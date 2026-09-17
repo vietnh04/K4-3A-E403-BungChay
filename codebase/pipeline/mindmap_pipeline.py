@@ -67,12 +67,12 @@ if HAS_GENAI:
 
     class ConceptNodeSchema(BaseModel):
         id: str = Field(description="Định danh duy nhất của node")
-        title: str = Field(description="Tiêu đề ngắn gọn (2-4 từ)")
+        title: str = Field(description="Tiêu đề ngắn gọn (2-5 từ)")
         summary: str = Field(description="Tóm tắt khái quát cốt lõi (tối đa 40 từ)")
         slide_page: str = Field(description="Trang slide ví dụ 'Slide 9'")
         cross_link: Optional[CrossLinkSchema] = None
         detail: Optional[DetailNodeSchema] = None
-        children: Optional[List['ConceptNodeSchema']] = None
+        children: Optional[List['ConceptNodeSchema']] = Field(default=None, description="Danh sách các node con phân cấp đa tầng sâu (Level 1, 2, 3, 4...)")
 
 
 class MindmapPipeline:
@@ -169,8 +169,8 @@ class MindmapPipeline:
                         break
         
         pdf_path = self.data_dir / pdf_name
-        pages = self.extract_text_from_pdf(pdf_path, max_pages=30)
-        concise_content = "\n\n".join([f"--- Slide {p['page']} ---\n{p['text'][:500]}" for p in pages[:15]])
+        pages = self.extract_text_from_pdf(pdf_path, max_pages=60)
+        concise_content = "\n\n".join([f"--- Slide {p['page']} ---\n{p['text'][:1500].strip()}" for p in pages if p['text'].strip()])
 
         # Tạo prompt (tách từ backend.prompts)
         prompt = build_pipeline_mindmap_prompt(day=day, concise_content=concise_content)

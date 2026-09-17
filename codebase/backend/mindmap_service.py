@@ -67,7 +67,7 @@ def get_api_config() -> Dict[str, Any]:
     }
 
 
-def extract_text_from_pdf(file_path: Path, max_pages: int = 40) -> List[Dict[str, Any]]:
+def extract_text_from_pdf(file_path: Path, max_pages: int = 100) -> List[Dict[str, Any]]:
     """Trích xuất text từng trang slide bằng pypdf."""
     reader = pypdf.PdfReader(str(file_path))
     pages_data = []
@@ -193,8 +193,8 @@ def process_uploaded_slide(
         )
 
     # 1. Trích xuất text
-    print(f"[EXTRACT] Đang trích xuất văn bản từ: {pdf_path.name}")
-    pages = extract_text_from_pdf(pdf_path, max_pages=35)
+    print(f"[EXTRACT] Đang trích xuất toàn bộ văn bản từ: {pdf_path.name}")
+    pages = extract_text_from_pdf(pdf_path, max_pages=80)
     total_pages = len(pages)
     if total_pages == 0:
         raise ValueError("File PDF không có trang nào hoặc không thể đọc được nội dung văn bản.")
@@ -202,14 +202,14 @@ def process_uploaded_slide(
     # Lấy tiêu đề từ trang đầu nếu không nhập
     doc_title = custom_title or f"Bài Giảng: {pdf_path.stem}"
     
-    # Chuẩn bị nội dung rút gọn các trang để gửi trong 1 request duy nhất (tiết kiệm token)
+    # Chuẩn bị toàn bộ nội dung các trang slide để gửi cho AI (đảm bảo không bị bỏ sót kiến thức)
     content_snippets = []
     for p in pages:
-        txt = p["text"][:400]
+        txt = p["text"][:1500].strip()
         if txt:
             content_snippets.append(f"--- Slide {p['page_num']} ---\n{txt}")
     
-    slide_corpus = "\n\n".join(content_snippets[:20])  # Giới hạn 20 slides quan trọng đầu tiên
+    slide_corpus = "\n\n".join(content_snippets)
 
     # 2. Lấy bối cảnh các ngày trước để tìm liên kết chéo
     knowledge_context = get_existing_knowledge_context()

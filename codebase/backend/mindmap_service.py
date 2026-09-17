@@ -226,7 +226,7 @@ def process_uploaded_slide(
    - Cấp 1 (Chương/Phần): 2 đến 4 chương chính của bài giảng.
    - Cấp 2 (Khái niệm cụ thể): 2 đến 4 khái niệm cốt lõi của mỗi chương.
 2. Tiêu đề node (title): RẤT NGẮN GỌN (từ 2 đến 4 từ tiếng Việt, ví dụ: 'Cơ Chế Attention', 'Vòng Lặp ReAct', 'Local Checklist').
-3. Tóm tắt node (summary): KHÔNG ĐƯỢC QUÁ 15 TỪ. Chỉ nêu khái quát cốt lõi nhất, KHÔNG chép cả đoạn văn dài.
+3. Tóm tắt node (summary): KHÔNG ĐƯỢC QUÁ 40 TỪ. Nêu rõ khái quát cốt lõi, súc tích, giải thích được ý niệm chính mà KHÔNG chép nguyên văn cả đoạn slide dài.
 4. Trích dẫn số trang (slide_page): Bắt buộc ghi rõ trang slide gốc (ví dụ 'Slide 4', 'Slide 9').
 5. Liên kết chéo (cross_link): Nếu một khái niệm kế thừa hoặc liên quan đến kiến thức của Day 1-5, hãy thêm:
    "cross_link": {{
@@ -248,21 +248,21 @@ def process_uploaded_slide(
 {{
   "id": "node_root",
   "title": "Tên Ngắn Gọn (2-4 từ)",
-  "summary": "Tóm tắt cốt lõi dưới 15 từ.",
+  "summary": "Tóm tắt cốt lõi dưới 40 từ.",
   "slide_page": "Slide 1",
   "type": "root",
   "children": [
     {{
       "id": "node_sec1",
       "title": "Tên Chương (2-4 từ)",
-      "summary": "Tóm tắt chương dưới 15 từ.",
+      "summary": "Tóm tắt chương dưới 40 từ.",
       "slide_page": "Slide 2",
       "type": "branch",
       "children": [
         {{
           "id": "node_c1",
           "title": "Tên Khái Niệm (2-4 từ)",
-          "summary": "Tóm tắt khái niệm dưới 15 từ.",
+          "summary": "Tóm tắt khái niệm dưới 40 từ.",
           "slide_page": "Slide 5",
           "cross_link": null,
           "detail": {{

@@ -118,3 +118,4 @@ Khi giao diện web mở ra tại `http://127.0.0.1:8000`:
 
 ### Lỗi 4: Thư mục `codebase/storage/` bị xoá hoặc thiếu file
 - **Cách sửa:** Đừng lo! Hệ thống có file `codebase/backend/seed_data.py`. Mỗi khi bạn chạy `python run_server.py`, nếu phát hiện thiếu `storage/`, server sẽ **tự động phục hồi lại toàn bộ 5 bài học mẫu** ngay lập tức.
+

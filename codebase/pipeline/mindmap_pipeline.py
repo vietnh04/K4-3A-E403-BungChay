@@ -65,7 +65,7 @@ if HAS_GENAI:
     class ConceptNodeSchema(BaseModel):
         id: str = Field(description="Định danh duy nhất của node")
         title: str = Field(description="Tiêu đề ngắn gọn (2-4 từ)")
-        summary: str = Field(description="Tóm tắt khái quát cốt lõi (tối đa 15 từ)")
+        summary: str = Field(description="Tóm tắt khái quát cốt lõi (tối đa 40 từ)")
         slide_page: str = Field(description="Trang slide ví dụ 'Slide 9'")
         cross_link: Optional[CrossLinkSchema] = None
         detail: Optional[DetailNodeSchema] = None
@@ -175,7 +175,7 @@ class MindmapPipeline:
         [QUY TẮC BẮT BUỘC]:
         1. Cây có 3 cấp: Root (Ngày học) -> Branches (Chương/Phần) -> Leaf (Khái niệm cụ thể).
         2. Title: Ngắn gọn từ 2 đến 4 từ (Ví dụ: 'Local Checklist', 'ReAct Pattern').
-        3. Summary: Khái quát cốt lõi KHÔNG QUÁ 15 TỪ. Tuyệt đối không sao chép nguyên văn cả đoạn văn bản.
+        3. Summary: Khái quát cốt lõi KHÔNG QUÁ 40 TỪ. Nêu rõ ý chính, súc tích, không sao chép nguyên văn cả trang slide.
         4. Ghi rõ số trang slide trích dẫn ('Slide X').
         5. Chi tiết (detail): Có trích đoạn gốc, takeaway, giải thích của AI Tutor và câu hỏi trắc nghiệm nhanh.
         

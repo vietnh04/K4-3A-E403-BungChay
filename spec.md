@@ -39,8 +39,8 @@ Loại: [ ] Tối ưu tính năng có sẵn (A1)  [x] Tính năng mới (A2 — 
 - [Sản phẩm 2]: ...
 
 ## §4. Thiết kế
-- Lát cắt MỘT CÂU (1 user · 1 việc · 1 quyết định AI · 1 kết quả): Học viên đang ôn tập slide bài giảng dài trên VLearn cần thấy mạch logic tổng quan và mối liên hệ kiến thức được AI trích xuất thành cây sơ đồ tương tác D3.js (tóm tắt $\le 15$ từ/node), học viên click node mở giao diện 60/40 đối chiếu trực tiếp slide gốc, trích dẫn [Slide X] và trao đổi cùng AI Tutor.
-- Non-goals (≥3 thứ KHÔNG build): (1) Không vẽ gộp toàn bộ các ngày vào chung 1 cây chằng chịt gây rối mắt — hiển thị theo từng Ngày riêng biệt (Single-day view); (2) Không copy nguyên văn cả đoạn văn slide vào node — tóm tắt súc tích $\le 15$ từ; (3) Không tự động chạy vòng lặp Agent tiêu hao quota — dùng Deterministic Python Pipeline với Local Caching 0đ quota API; (4) Cây tối đa 3 cấp (Root bài học -> Chương nhánh -> Khái niệm chi tiết).
+- Lát cắt MỘT CÂU (1 user · 1 việc · 1 quyết định AI · 1 kết quả): Học viên đang ôn tập slide bài giảng dài trên VLearn cần thấy mạch logic tổng quan và mối liên hệ kiến thức được AI trích xuất thành cây sơ đồ tương tác D3.js (tóm tắt $\le 40$ từ/node), học viên click node mở giao diện 60/40 đối chiếu trực tiếp slide gốc, trích dẫn [Slide X] và trao đổi cùng AI Tutor.
+- Non-goals (≥3 thứ KHÔNG build): (1) Không vẽ gộp toàn bộ các ngày vào chung 1 cây chằng chịt gây rối mắt — hiển thị theo từng Ngày riêng biệt (Single-day view); (2) Không copy nguyên văn cả đoạn văn slide vào node — tóm tắt súc tích $\le 40$ từ; (3) Không tự động chạy vòng lặp Agent tiêu hao quota — dùng Deterministic Python Pipeline với Local Caching 0đ quota API; (4) Cây tối đa 3 cấp (Root bài học -> Chương nhánh -> Khái niệm chi tiết).
 - Mức prototype nhắm tới: [ ] Sketch [ ] Mock [x] Working (CP3) — phần nào mock, phần nào thật:
   - **Phật thật (100% Real Data):** Toàn bộ 5 file PDF slide bài giảng thật trong `data/` (Day 01 đến Day 05, từ 32 đến 98 trang) được trích xuất vào `codebase/storage/` với nội dung, trích dẫn [Slide X] và liên kết chéo (Cross-day links) thật 100%.
   - **Phần thật (D3.js SVG Tree Canvas):** Cây sơ đồ tương tác render bằng D3.js v7, hỗ trợ zoom, pan, thu/phóng nhánh, click node mở panel 60/40.
@@ -49,14 +49,14 @@ Loại: [ ] Tối ưu tính năng có sẵn (A1)  [x] Tính năng mới (A2 — 
 - §4b. Nguyên tắc đã áp dụng (≥4 — HAX/PAIR, xem guide):
   | Nguyên tắc | Áp cụ thể vào đâu trong prototype |
   |---|---|
-  | **PAIR ①: User Needs + Defining Success** | Giới hạn tóm tắt node $\le 15$ từ, mở rộng chế độ Progressive Disclosure (100% Canvas $\to$ 60/40 Split View) giải quyết đúng điểm đau "dài quá không đọc". |
+  | **PAIR ①: User Needs + Defining Success** | Giới hạn tóm tắt node $\le 40$ từ, mở rộng chế độ Progressive Disclosure (100% Canvas $\to$ 60/40 Split View) giải quyết đúng điểm đau "dài quá không đọc". |
   | **PAIR ④: Explainability + Trust** | Mọi node đều gắn kèm huy hiệu trích dẫn số trang chính xác `[Slide X]` và trích đoạn nguyên văn từ bài giảng của thầy cô để học viên đối chiếu 100%. |
   | **PAIR ⑤: Feedback + Control** | Học viên tự do đổi ngày (Day 01 $\to$ 05), zoom/pan, đóng/mở panel chi tiết, thu gọn các nhánh và copy lệnh thực hành. |
   | **PAIR ⑥: Errors + Graceful Failure** | Nút `⚡ Test CLARIFY` xử lý khi nội dung slide đa nghĩa (hỏi lại học viên thay vì bịa); nút `⚠️ Test LỖI` kích hoạt bộ đệm offline khi vượt hạn mức 15 RPM. |
 
 ## §5. Kiểu lỗi — 4 lớp chỗ khó + kịch bản (≥8)
 - Lớp 1 (Parse PDF lỗi/ảnh chụp): Tự động fallback sang text layer hoặc gợi ý tải lại bản slide vector.
-- Lớp 2 (Slide quá nhiều chữ làm vỡ giao diện): Giới hạn độ dài `summary <= 15 từ`, đẩy toàn bộ chi tiết vào drawer bên phải.
+- Lớp 2 (Slide quá nhiều chữ làm vỡ giao diện): Giới hạn độ dài `summary <= 40 từ`, đẩy toàn bộ chi tiết vào drawer bên phải.
 - Lớp 3 (Liên kết chéo không tồn tại): Pipeline có script `--validate-links` tự động xác thực 17/17 liên kết chéo trước khi render.
 - Lớp 4 (Vượt rate-limit 15 RPM): Chuyển sang đọc `codebase/storage/day_X.json` cục bộ, giữ nguyên trải nghiệm mượt mà không crash.
 
@@ -68,7 +68,7 @@ Loại: [ ] Tối ưu tính năng có sẵn (A1)  [x] Tính năng mới (A2 — 
 
 ## §7. Kiểm thử
 - **Độ chính xác liên kết chéo:** 17/17 (100%) liên kết chéo giữa các ngày hợp lệ (`mindmap_pipeline.py --validate-links`).
-- **Độ cô đọng tóm tắt:** 100% các node trên cây sơ đồ tuân thủ tiêu chí $\le 15$ từ.
+- **Độ cô đọng tóm tắt:** 100% các node trên cây sơ đồ tuân thủ tiêu chí $\le 40$ từ.
 - **Khả năng tương thích:** Render chuẩn trên mọi trình duyệt với D3.js v7 và Tailwind CSS (chạy offline `file:///` không phụ thuộc backend server).
 
 ## §8. Phân công & kế hoạch

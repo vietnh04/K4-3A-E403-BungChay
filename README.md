@@ -20,7 +20,7 @@ Nhóm **BungChay** đã hoàn thiện bản **Working Prototype (CP3)** đáp �
 ### 1. Kiến trúc & Tính năng nổi bật:
 - **D3.js SVG Tree Engine (`codebase/index.html`):** Cây sơ đồ tư duy tương tác mượt mà, hỗ trợ Pan/Zoom, phóng to thu nhỏ nhánh, tích hợp trực tiếp vào giao diện VLearn gốc.
 - **Progressive Disclosure UX:** 
-  - Mặc định mở ở tỷ lệ **100% full-canvas** thoáng đãng, chỉ hiển thị khái niệm cô đọng ($\le 15$ từ/node).
+  - Mặc định mở ở tỷ lệ **100% full-canvas** thoáng đãng, chỉ hiển thị khái niệm cô đọng ($\le 40$ từ/node).
   - Khi click vào bất kỳ node nào: trượt mở **Drawer chi tiết 60/40**, hiển thị trích đoạn slide bài giảng thật, trích dẫn `[Slide X]`, giải thích sư phạm từ **AI Tutor**, lệnh terminal có nút sao chép và **Quick Quiz** tự đánh giá.
 - **Single-Day Focus & 5 Days Switcher:** Bộ chuyển đổi 5 ngày học linh hoạt (Day 01 $\to$ Day 05) tương ứng với 5 bộ slide PDF thật trong `data/`.
 - **Hệ Thống Liên Kết Chéo (Cross-Day Linking):** 17/17 liên kết kiến thức liên ngày đạt độ chính xác 100% (ví dụ: Day 4 Tool Calling $\leftrightarrow$ Day 3 ReAct Agent $\leftrightarrow$ Day 1 Setup & API). Click vào huy hiệu 🔗 sẽ tự động nhảy sang Ngày tương ứng và zoom vào node liên kết.

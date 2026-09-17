@@ -1422,10 +1422,9 @@ def init_default_storage():
         "days": ALL_DAYS
     }
     kb_json_str = json.dumps(full_kb, ensure_ascii=False)
-    # Thay thế biến KNOWLEDGE_BASE trong index.html
+    # Thay thế biến KNOWLEDGE_BASE trong index.html an toàn (dùng lambda để tránh re.sub tự ý unescape ký tự \n)
     pattern = r'const KNOWLEDGE_BASE = \{.*?\};'
-    replacement = f'const KNOWLEDGE_BASE = {kb_json_str};'
-    new_index_html, count = re.subn(pattern, replacement, index_html, flags=re.DOTALL)
+    new_index_html, count = re.subn(pattern, lambda _: f'const KNOWLEDGE_BASE = {kb_json_str};', index_html, flags=re.DOTALL)
     if count > 0:
         with open(index_path, "w", encoding="utf-8") as f:
             f.write(new_index_html)

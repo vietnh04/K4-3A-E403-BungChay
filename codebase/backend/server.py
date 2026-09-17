@@ -9,7 +9,7 @@ import shutil
 from pathlib import Path
 from typing import Optional
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import uvicorn
@@ -53,6 +53,18 @@ async def serve_index():
         raise HTTPException(status_code=404, detail="index.html not found")
     with open(index_file, "r", encoding="utf-8") as f:
         return f.read()
+
+
+@app.get("/.well-known/appspecific/com.chrome.devtools.json")
+async def chrome_devtools_probe():
+    """Bỏ qua request tự động kiểm tra workspace của Chrome DevTools để không gây log 404 đỏ."""
+    return {}
+
+
+@app.get("/favicon.ico")
+async def favicon_probe():
+    """Bỏ qua request favicon mặc định của trình duyệt để tránh log 404."""
+    return Response(status_code=204)
 
 
 @app.get("/api/status")

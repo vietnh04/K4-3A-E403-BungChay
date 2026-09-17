@@ -1,0 +1,23 @@
+# ====================================================================
+# VLearn Interactive ConceptMap & Mindmap Server
+# Team: BungChay | Hackathon Batch 04 - Track A (Room E403)
+# Cài đặt toàn bộ thư viện: pip install -r requirements.txt
+# Chạy server: python run_server.py
+# ====================================================================
+
+# Web Server & Backend API
+fastapi>=0.115.0
+uvicorn>=0.30.0
+python-multipart>=0.0.9
+python-dotenv>=1.0.0
+
+# PDF Extraction & Schema Validation
+pypdf>=5.0.0
+pydantic>=2.8.0
+
+# Google Gemini API SDKs (Hỗ trợ cả SDK mới và SDK truyền thống)
+google-genai>=2.0.0
+google-generativeai>=0.8.0
+
+# Utilities
+requests>=2.32.0

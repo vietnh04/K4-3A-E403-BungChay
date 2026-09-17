@@ -13,6 +13,12 @@ from typing import Dict, Any, Optional, List
 import pypdf
 import dotenv
 
+try:
+    import json_repair
+    HAS_JSON_REPAIR = True
+except ImportError:
+    HAS_JSON_REPAIR = False
+
 # Set UTF-8
 if hasattr(sys.stdout, 'reconfigure'):
     try:
@@ -172,6 +178,76 @@ def call_gemini_api(prompt: str, api_key: str, requested_model: str) -> str:
     raise RuntimeError(f"Không thể kết nối Gemini API với bất kỳ model nào. Chi tiết lỗi: {last_error}")
 
 
+def clean_and_parse_mindmap_json(raw_json_str: str) -> Dict[str, Any]:
+    """
+    Phân tích chuỗi JSON trả về từ Gemini một cách siêu bền bỉ (resilient):
+    1. Bóc tách markdown codeblock ```json ... ```
+    2. Trích xuất đúng phân đoạn { ... } ngoài cùng
+    3. Xóa trailing commas (dấu phẩy thừa trước } hoặc ])
+    4. Thử json.loads tiêu chuẩn với strict=False
+    5. Nếu lỗi cú pháp, dùng json_repair tự động sửa chữa
+    6. Tự động đóng ngoặc nếu chuỗi bị cắt cụt do chạm token limit
+    """
+    text = (raw_json_str or "").strip()
+
+    # 1. Bóc markdown block
+    if text.startswith("```json"):
+        text = text[7:]
+    elif text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
+
+    # 2. Tìm phân đoạn JSON ngoài cùng từ dấu { đầu tiên đến dấu } cuối cùng
+    start_idx = text.find('{')
+    if start_idx != -1:
+        end_idx = text.rfind('}')
+        if end_idx != -1 and end_idx > start_idx:
+            text = text[start_idx:end_idx + 1]
+        else:
+            text = text[start_idx:]
+
+    # 3. Làm sạch trailing commas phổ biến trước } và ]
+    cleaned = re.sub(r',\s*([\}\]])', r'\1', text)
+
+    # 4. Thử parse tiêu chuẩn với strict=False
+    last_err = None
+    try:
+        parsed = json.loads(cleaned, strict=False)
+        if isinstance(parsed, dict):
+            return parsed
+    except Exception as e1:
+        last_err = e1
+        print(f"[JSON SANITIZER] json.loads trực tiếp gặp lỗi ({e1}), đang kích hoạt bộ phục hồi...")
+
+    # 5. Dùng thư viện json_repair nếu có
+    if HAS_JSON_REPAIR:
+        try:
+            repaired = json_repair.repair_json(text, return_objects=True)
+            if isinstance(repaired, dict):
+                print("[JSON SANITIZER] Phục hồi JSON thành công bằng json_repair!")
+                return repaired
+        except Exception as e2:
+            print(f"[JSON SANITIZER] json_repair thất bại: {e2}")
+
+    # 6. Tự động cân bằng ngoặc đóng nếu JSON bị cắt cụt do token limit
+    try:
+        open_braces = text.count('{') - text.count('}')
+        open_brackets = text.count('[') - text.count(']')
+        patch = text.rstrip(' ,\n\r\t')
+        patch += (']' * max(0, open_brackets)) + ('}' * max(0, open_braces))
+        patch = re.sub(r',\s*([\}\]])', r'\1', patch)
+        parsed = json.loads(patch, strict=False)
+        if isinstance(parsed, dict):
+            print("[JSON SANITIZER] Phục hồi JSON thành công bằng auto-closing brackets!")
+            return parsed
+    except Exception as e3:
+        pass
+
+    raise ValueError(f"Không thể giải mã cấu trúc JSON từ AI (Lỗi gốc: {last_err}). Vui lòng thử tải lại slide.")
+
+
 def process_uploaded_slide(
     pdf_path: Path,
     custom_title: Optional[str] = None
@@ -232,8 +308,20 @@ def process_uploaded_slide(
     if clean_str.endswith("```"):
         clean_str = clean_str[:-3]
     clean_str = clean_str.strip()
+    # Làm sạch và parse JSON siêu bền bỉ (chống trailing commas, unescaped quotes, cắt cụt)
+    parsed_tree = clean_and_parse_mindmap_json(raw_json_str)
 
     parsed_tree = json.loads(clean_str)
+    # Kiểm tra nếu AI báo lỗi ngoại vi / out_of_scope
+    if parsed_tree.get("status") == "error":
+        msg = parsed_tree.get("message", "Tài liệu tải lên không phải bài giảng học tập hợp lệ.")
+        raise ValueError(f"AI từ chối phân tích: {msg}")
+
+    # Mở lớp vỏ envelope nếu AI bọc trong {'tree': ...} hoặc {'data': ...}
+    if "tree" in parsed_tree and isinstance(parsed_tree["tree"], dict):
+        parsed_tree = parsed_tree["tree"]
+    elif "data" in parsed_tree and isinstance(parsed_tree["data"], dict):
+        parsed_tree = parsed_tree["data"]
 
     # 5. Xác định số thứ tự ngày mới
     meta_path = STORAGE_DIR / "metadata.json"

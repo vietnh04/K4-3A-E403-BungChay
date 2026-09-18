@@ -14,7 +14,7 @@ import sys
 import json
 import time
 import argparse
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from pathlib import Path
 
 # Fix Windows console encoding for Vietnamese characters
@@ -51,6 +51,12 @@ from backend.prompts import build_pipeline_mindmap_prompt
 
 # Pydantic schemas for Gemini Structured Output
 if HAS_GENAI:
+    class QuickQuizSchema(BaseModel):
+        question: str = Field(description="Câu hỏi trắc nghiệm ngắn kiểm tra hiểu biết")
+        options: List[str] = Field(description="Danh sách lựa chọn, ví dụ ['A. Lựa chọn 1', 'B. Lựa chọn 2']")
+        answer: str = Field(description="Đáp án đúng, ví dụ 'A'")
+        explanation: str = Field(description="Lời giải thích ngắn gọn vì sao đáp án này đúng")
+
     class DetailNodeSchema(BaseModel):
         title: str = Field(description="Tiêu đề chi tiết của khái niệm")
         slide_page: str = Field(description="Số trang slide trích dẫn, ví dụ 'Slide 9'")
@@ -58,7 +64,7 @@ if HAS_GENAI:
         key_takeaway: str = Field(description="Khái quát cốt lõi nhất cần nhớ")
         ai_tutor_explanation: str = Field(description="Lời giải thích sư phạm từ AI Tutor")
         code_snippet: Optional[str] = Field(default=None, description="Lệnh terminal hoặc code mẫu nếu có")
-        quick_quiz: Optional[str] = Field(default=None, description="Câu hỏi trắc nghiệm nhanh kiểm tra hiểu biết")
+        quick_quiz: Optional[Union[QuickQuizSchema, str]] = Field(default=None, description="Trắc nghiệm nhanh kiểm tra hiểu biết")
 
     class CrossLinkSchema(BaseModel):
         target_day: int = Field(description="Số thứ tự ngày liên kết (1-5)")

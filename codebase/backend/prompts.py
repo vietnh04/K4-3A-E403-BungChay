@@ -35,12 +35,19 @@ SLIDE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Chuyên gia Sư phạm Cấp cao & 
    - "summary": BẮT BUỘC TỐI ĐA 40 TỪ. Trình bày súc tích, đi thẳng vào bản chất khái niệm hoặc vai trò kỹ thuật, không sao chép nguyên văn cả đoạn văn dài.
    - "slide_page": Bắt buộc ghi rõ số trang slide gốc (ví dụ: 'Slide 4', 'Slide 12-14').
 
-4. CHI TIẾT MỞ RỘNG (detail) TẠI NODE LÁ QUAN TRỌNG:
+4. CHI TIẾT MỞ RỘNG (detail) TẠI NODE LÁ VÀ KHÁI NIỆM QUAN TRỌNG:
    - Tại các node khái niệm (concept) hoặc chi tiết thực thi (detail) quan trọng, cung cấp object "detail" tinh gọn:
-     * "key_takeaway": Điểm mấu chốt học viên bắt buộc phải nhớ (1 câu, dưới 30 từ).
+     * "key_takeaway": Điểm cốt lõi học viên bắt buộc phải nhớ (1 câu, dưới 30 từ, khác biệt với excerpt).
+     * "excerpt": Trích đoạn văn bản thực tế từ slide gốc (Grounding & Zero-hallucination).
      * "ai_tutor_explanation": Lời giảng giải ngắn gọn, dễ hiểu từ AI Tutor (1-2 câu).
      * "code_snippet": Lệnh terminal, cú pháp code, hoặc cấu hình tham số (nếu có trên slide, không có thì null).
-     * "quick_quiz": Một câu trắc nghiệm ngắn kèm đáp án, ví dụ: "Câu hỏi kiểm tra? A. Lựa chọn 1 | B. Lựa chọn 2. Đáp án: A" (nếu không có thì null).
+     * "quick_quiz": Câu hỏi trắc nghiệm nhanh kiểm tra hiểu biết (CHỈ TẠO Ở CÁC NODE KHÁI NIỆM CỐT LÕI CẤP 2-3, các node khác để null để tiết kiệm token). Cấu trúc object:
+       {{
+         "question": "Câu hỏi ngắn kiểm tra bản chất khái niệm?",
+         "options": ["A. Lựa chọn 1", "B. Lựa chọn 2"],
+         "answer": "A",
+         "explanation": "Giải thích ngắn gọn 1 câu vì sao đáp án A đúng."
+       }}
 
 5. LIÊN KẾT CHÉO (cross_link):
    - Nếu có liên quan mật thiết với Day 1-5, thêm "cross_link": {{"target_day": 1..5, "target_node_id": "id_ngay_truoc", "label": "🔗 Kế thừa từ Day X [Slide Y]"}}, nếu không thì null.
@@ -85,9 +92,15 @@ Chỉ trả về 1 block JSON duy nhất, không kèm markdown hay lời dẫn:
                   "cross_link": null,
                   "detail": {{
                     "key_takeaway": "Điểm then chốt cần ghi nhớ...",
+                    "excerpt": "Trích đoạn thực tế từ trang slide...",
                     "ai_tutor_explanation": "Giải thích chi tiết từ góc nhìn thực hành...",
                     "code_snippet": "python -m venv .venv",
-                    "quick_quiz": "Lệnh trên dùng để làm gì? A. Tạo venv | B. Cài thư viện. Đáp án: A"
+                    "quick_quiz": {{
+                      "question": "Lệnh trên dùng để làm gì?",
+                      "options": ["A. Tạo môi trường ảo venv", "B. Cài thư viện pip"],
+                      "answer": "A",
+                      "explanation": "Lệnh 'python -m venv .venv' tạo một môi trường Python ảo biệt lập cho dự án."
+                    }}
                   }}
                 }}
               ]
@@ -116,8 +129,8 @@ PIPELINE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Chuyên gia Sư phạm Cấp cao
    Giúp người học vừa nắm được bức tranh tổng quan vừa tra cứu được tường tận từng chi tiết.
 3. TITLE: Cực kỳ ngắn gọn (từ 2 đến 5 từ tiếng Việt), nêu đúng tên chủ đề hoặc khái niệm kỹ thuật.
 4. SUMMARY: Khái quát cốt lõi KHÔNG QUÁ 40 TỪ. Nêu rõ ý chính, súc tích, không sao chép nguyên văn cả trang slide.
-5. SLIDE_PAGE: Ghi rõ số trang slide trích dẫn ('Slide X' hoặc 'Slide X-Y').
-6. DETAIL: Bắt buộc cung cấp detail đầy đủ (excerpt, key_takeaway, ai_tutor_explanation, code_snippet nếu có, quick_quiz) cho các node khái niệm và node chi tiết.
+6. DETAIL: Bắt buộc cung cấp detail đầy đủ (key_takeaway: câu đúc kết cốt lõi; excerpt: trích đoạn nguyên văn từ slide; ai_tutor_explanation; code_snippet nếu có).
+   - "quick_quiz": Trắc nghiệm tương tác compact tại các node khái niệm chính dạng {"question": "...", "options": ["A. ...", "B. ..."], "answer": "A", "explanation": "..."}. Node khác để null.
 
 NỘI DUNG SLIDE TỔNG HỢP:
 {concise_content}

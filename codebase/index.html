@@ -353,17 +353,40 @@
             <p id="detail-ai-tutor" class="text-xs text-indigo-950 leading-relaxed"></p>
           </div>
 
-          <!-- Active Learning Quick Quiz -->
-          <div id="detail-quiz-box" class="p-4 rounded-xl bg-slate-50 border border-slate-200">
-            <div class="flex items-center gap-2 mb-2">
-              <span class="text-sm">🎯</span>
-              <span class="text-xs font-bold text-slate-800">Câu Hỏi Tự Đánh Giá Nhanh</span>
+          <!-- Active Learning Quick Quiz (Interactive Active Recall) -->
+          <div id="detail-quiz-box" class="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/30 border border-slate-200/90 shadow-2xs">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-1.5">
+                <span class="text-sm">🎯</span>
+                <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Tự Đánh Giá Nhanh</span>
+              </div>
+              <span id="quiz-status-badge" class="hidden text-[9.5px] font-bold px-2 py-0.5 rounded-full"></span>
             </div>
-            <p id="detail-quiz-text" class="text-xs text-slate-700 whitespace-pre-line mb-3"></p>
-            <button onclick="toggleQuizAnswer()" id="btn-quiz-reveal" class="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
-              <span>Xem giải thích đáp án</span> &rarr;
-            </button>
-            <div id="detail-quiz-answer" class="hidden mt-2 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-900"></div>
+
+            <!-- Question text -->
+            <p id="detail-quiz-question" class="text-xs font-semibold text-slate-800 leading-snug mb-3"></p>
+
+            <!-- Clickable Options Container (Buttons A, B...) -->
+            <div id="detail-quiz-options" class="space-y-2 mb-3"></div>
+
+            <!-- Action buttons & explanation -->
+            <div class="flex items-center justify-between pt-1.5 border-t border-slate-200/70">
+              <button onclick="toggleQuizAnswer()" id="btn-quiz-reveal" class="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer transition">
+                <span id="btn-quiz-reveal-text">Xem giải thích đáp án</span> &rarr;
+              </button>
+              <button onclick="resetCurrentQuiz()" id="btn-quiz-retry" class="hidden text-[10.5px] font-medium text-slate-500 hover:text-slate-800 cursor-pointer underline">
+                Làm lại
+              </button>
+            </div>
+
+            <!-- Explanation Box -->
+            <div id="detail-quiz-answer" class="hidden mt-2.5 p-3 rounded-xl bg-emerald-50 border border-emerald-200/90 text-xs text-emerald-950 leading-relaxed shadow-2xs">
+              <div class="font-bold text-emerald-800 flex items-center gap-1 mb-1">
+                <span>✓</span>
+                <span id="quiz-answer-key">Đáp án đúng</span>
+              </div>
+              <div id="quiz-answer-explanation" class="text-[11px] text-emerald-900 leading-normal"></div>
+            </div>
           </div>
 
         </div>
@@ -899,9 +922,13 @@
 
       const quizBox = document.getElementById('detail-quiz-box');
       if (detail.quick_quiz) {
-        quizBox.classList.remove('hidden');
-        document.getElementById('detail-quiz-text').innerText = detail.quick_quiz;
-        document.getElementById('detail-quiz-answer').classList.add('hidden');
+        const quizObj = normalizeQuiz(detail.quick_quiz, detail.ai_tutor_explanation);
+        if (quizObj) {
+          quizBox.classList.remove('hidden');
+          renderQuizUI(quizObj);
+        } else {
+          quizBox.classList.add('hidden');
+        }
       } else {
         quizBox.classList.add('hidden');
       }
@@ -952,7 +979,189 @@
     function zoomIn() { svg.transition().duration(250).call(d3Zoom.scaleBy, 1.25); }
     function zoomOut() { svg.transition().duration(250).call(d3Zoom.scaleBy, 0.8); }
     function resetZoom() { fitTree(); }
-    function toggleQuizAnswer() { document.getElementById('detail-quiz-answer').classList.toggle('hidden'); }
+
+    // ==========================================
+    // INTERACTIVE ACTIVE RECALL QUIZ LOGIC
+    // ==========================================
+    let currentQuizData = null;
+    let currentQuizState = { selected: null, isAnswered: false };
+
+    function normalizeQuiz(rawQuiz, fallbackExplanation) {
+      if (!rawQuiz) return null;
+
+      // Case 1: Structured Object (Direction 1)
+      if (typeof rawQuiz === 'object' && rawQuiz !== null) {
+        const q = rawQuiz.question || rawQuiz.q || '';
+        const rawOpts = rawQuiz.options || rawQuiz.opts || [];
+        const ans = (rawQuiz.answer || rawQuiz.correct_answer || rawQuiz.ans || 'A').toUpperCase().trim();
+        const exp = rawQuiz.explanation || rawQuiz.exp || fallbackExplanation || 'Nắm vững khái niệm cốt lõi này để liên hệ bài tập.';
+
+        const options = rawOpts.map((opt, idx) => {
+          const defaultKey = String.fromCharCode(65 + idx);
+          if (typeof opt === 'object' && opt !== null) {
+            return { key: (opt.key || defaultKey).toUpperCase(), text: opt.text || '' };
+          }
+          const m = String(opt).match(/^([A-D])[\.\:\)]\s*(.+)/i);
+          if (m) {
+            return { key: m[1].toUpperCase(), text: m[2].trim() };
+          }
+          return { key: defaultKey, text: String(opt).trim() };
+        });
+
+        return { question: q, options, answer: ans, explanation: exp };
+      }
+
+      // Case 2: String fallback (handles legacy strings like "Câu hỏi? A. ... | B. ... Đáp án: A")
+      if (typeof rawQuiz === 'string') {
+        const str = rawQuiz.trim();
+        const ansMatch = str.match(/Đáp án\s*(?:đúng)?\s*[:：]?\s*([A-D])/i) || str.match(/\(([A-D])\)/i);
+        const ans = ansMatch ? ansMatch[1].toUpperCase() : 'A';
+
+        let cleanStr = str.replace(/Đáp án\s*(?:đúng)?\s*[:：]?\s*[A-D].*$/i, '').trim();
+        cleanStr = cleanStr.replace(/\(\s*Đáp án đúng\s*:\s*[A-D]\s*\)/i, '').trim();
+
+        let question = cleanStr;
+        const options = [];
+
+        // Find where option A starts
+        const firstOptMatch = cleanStr.match(/(?:^|\s)(?:A[\.\:\)]\s*)/i);
+        if (firstOptMatch && firstOptMatch.index !== undefined) {
+          question = cleanStr.substring(0, firstOptMatch.index).trim();
+          const optsStr = cleanStr.substring(firstOptMatch.index).trim();
+          const optMatches = [...optsStr.matchAll(/(?:^|\s+)([A-D])[\.\:\)]\s*(.*?)(?=(?:\s+[A-D][\.\:\)]|$))/gi)];
+          optMatches.forEach(m => {
+            options.push({
+              key: m[1].toUpperCase(),
+              text: m[2].trim().replace(/^[\s\|]+|[\s\|;\.]+$/g, '')
+            });
+          });
+        }
+
+        if (options.length === 0) {
+          const parts = cleanStr.split('|').map(s => s.trim());
+          if (parts.length > 1) {
+            question = parts[0];
+            for (let i = 1; i < parts.length; i++) {
+              const key = String.fromCharCode(64 + i);
+              options.push({ key, text: parts[i].replace(/^[A-D][\.\:\)]\s*/i, '') });
+            }
+          }
+        }
+
+        if (options.length === 0) {
+          options.push({ key: 'A', text: 'Tìm hiểu đúng vấn đề trọng tâm' });
+          options.push({ key: 'B', text: 'Triển khai giải pháp trực tiếp' });
+        }
+
+        return {
+          question: question || 'Khái niệm này tập trung vào bản chất gì?',
+          options,
+          answer: ans,
+          explanation: fallbackExplanation || 'Nắm vững kiến thức này để hoàn thành bài thực hành.'
+        };
+      }
+
+      return null;
+    }
+
+    function renderQuizUI(quiz) {
+      currentQuizData = quiz;
+      currentQuizState = { selected: null, isAnswered: false };
+
+      const questionEl = document.getElementById('detail-quiz-question');
+      const optionsContainer = document.getElementById('detail-quiz-options');
+      const badgeEl = document.getElementById('quiz-status-badge');
+      const answerBox = document.getElementById('detail-quiz-answer');
+      const answerKeyEl = document.getElementById('quiz-answer-key');
+      const answerExpEl = document.getElementById('quiz-answer-explanation');
+      const retryBtn = document.getElementById('btn-quiz-retry');
+      const revealBtnText = document.getElementById('btn-quiz-reveal-text');
+
+      if (badgeEl) {
+        badgeEl.className = "hidden text-[9.5px] font-bold px-2 py-0.5 rounded-full";
+        badgeEl.innerText = "";
+      }
+      if (answerBox) answerBox.classList.add('hidden');
+      if (retryBtn) retryBtn.classList.add('hidden');
+      if (revealBtnText) revealBtnText.innerText = "Xem giải thích đáp án";
+
+      if (questionEl) questionEl.innerText = quiz.question;
+      if (answerKeyEl) answerKeyEl.innerText = `Đáp án đúng: ${quiz.answer}`;
+      if (answerExpEl) answerExpEl.innerText = quiz.explanation;
+
+      if (optionsContainer) {
+        optionsContainer.innerHTML = quiz.options.map(opt => `
+          <button onclick="handleSelectQuizOption('${opt.key}')"
+                  id="btn-quiz-opt-${opt.key}"
+                  class="quiz-opt-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50/50 text-slate-800 text-xs font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-2xs group">
+            <span class="w-5 h-5 rounded-lg bg-slate-100 group-hover:bg-blue-100 text-slate-700 group-hover:text-blue-700 flex items-center justify-center font-bold text-[10px] shrink-0 transition-colors">
+              ${opt.key}
+            </span>
+            <span class="flex-1 leading-snug">${opt.text}</span>
+          </button>
+        `).join('');
+      }
+    }
+
+    function handleSelectQuizOption(chosenKey) {
+      if (!currentQuizData || currentQuizState.isAnswered) return;
+
+      currentQuizState.selected = chosenKey;
+      const isCorrect = (chosenKey.toUpperCase() === currentQuizData.answer.toUpperCase());
+      const badgeEl = document.getElementById('quiz-status-badge');
+      const retryBtn = document.getElementById('btn-quiz-retry');
+      const answerBox = document.getElementById('detail-quiz-answer');
+      const revealBtnText = document.getElementById('btn-quiz-reveal-text');
+
+      currentQuizData.options.forEach(opt => {
+        const btn = document.getElementById(`btn-quiz-opt-${opt.key}`);
+        if (btn) {
+          btn.className = "quiz-opt-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 text-xs font-medium transition-all flex items-center gap-2.5 opacity-60";
+        }
+      });
+
+      const chosenBtn = document.getElementById(`btn-quiz-opt-${chosenKey}`);
+
+      if (isCorrect) {
+        currentQuizState.isAnswered = true;
+        if (chosenBtn) {
+          chosenBtn.className = "quiz-opt-btn w-full text-left p-2.5 rounded-xl border-2 border-emerald-500 bg-emerald-50 text-emerald-950 text-xs font-bold transition-all flex items-center gap-2.5 shadow-xs";
+        }
+        if (badgeEl) {
+          badgeEl.className = "text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300";
+          badgeEl.innerText = "✓ Chính xác!";
+        }
+        if (answerBox) answerBox.classList.remove('hidden');
+        if (revealBtnText) revealBtnText.innerText = "Thu gọn giải thích";
+      } else {
+        if (chosenBtn) {
+          chosenBtn.className = "quiz-opt-btn w-full text-left p-2.5 rounded-xl border-2 border-rose-400 bg-rose-50 text-rose-950 text-xs font-semibold transition-all flex items-center gap-2.5 shadow-xs";
+        }
+        if (badgeEl) {
+          badgeEl.className = "text-[9.5px] font-bold px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-300";
+          badgeEl.innerText = "Chưa chính xác";
+        }
+        if (retryBtn) retryBtn.classList.remove('hidden');
+      }
+    }
+
+    function resetCurrentQuiz() {
+      if (!currentQuizData) return;
+      renderQuizUI(currentQuizData);
+    }
+
+    function toggleQuizAnswer() {
+      const answerBox = document.getElementById('detail-quiz-answer');
+      const btnText = document.getElementById('btn-quiz-reveal-text');
+      if (!answerBox) return;
+      if (answerBox.classList.contains('hidden')) {
+        answerBox.classList.remove('hidden');
+        if (btnText) btnText.innerText = "Thu gọn giải thích";
+      } else {
+        answerBox.classList.add('hidden');
+        if (btnText) btnText.innerText = "Xem giải thích đáp án";
+      }
+    }
 
     function copyCode() {
       const code = document.getElementById('detail-code').innerText;

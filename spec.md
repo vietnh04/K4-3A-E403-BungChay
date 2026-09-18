@@ -65,6 +65,10 @@ Loại: [ ] Tối ưu tính năng có sẵn (A1)  [x] Tính năng mới (A2 — 
   | **PAIR ⑤: Feedback + Control** | Học viên tự do đổi ngày (Day 01 $\to$ 05), zoom/pan, đóng/mở panel chi tiết, thu gọn các nhánh và copy lệnh thực hành. |
   | **PAIR ⑥: Errors + Graceful Failure** | Nút `⚡ Test CLARIFY` xử lý khi nội dung slide đa nghĩa (hỏi lại học viên thay vì bịa); nút `⚠️ Test LỖI` kích hoạt bộ đệm offline khi vượt hạn mức 15 RPM. |
 
+- §4c. Tính năng Active Recall & Trắc nghiệm tương tác (Interactive Quick Quiz):
+  - Chuẩn hóa schema `quick_quiz` dạng compact object `{ question, options, answer, explanation }` sinh tại các node khái niệm cốt lõi khi upload slide.
+  - UI tương tác tự động giấu đáp án, render các nút bấm lựa chọn A/B/C/D độc lập, tự động chấm điểm Đúng/Sai kèm đổi màu trực quan (xanh lá/đỏ) và mở phần giải thích sư phạm chi tiết khi xem đáp án.
+
 ## §5. Kiểu lỗi — 4 lớp chỗ khó + kịch bản (≥8)
 - **Lớp 1 (Parse PDF lỗi/ảnh chụp):**
   1. Slide scan dạng ảnh (không có text layer): Tự động fallback sang text layer hoặc gợi ý tải lại bản slide vector; nếu `pypdf` trích được 0 ký tự, báo lỗi rõ ràng thay vì trả cây rỗng im lặng.

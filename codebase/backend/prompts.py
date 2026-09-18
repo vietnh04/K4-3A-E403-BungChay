@@ -37,8 +37,7 @@ SLIDE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Chuyên gia Sư phạm Cấp cao & 
 
 4. CHI TIẾT MỞ RỘNG (detail) TẠI NODE LÁ VÀ KHÁI NIỆM QUAN TRỌNG:
    - Tại các node khái niệm (concept) hoặc chi tiết thực thi (detail) quan trọng, cung cấp object "detail" tinh gọn:
-     * "key_takeaway": Điểm cốt lõi học viên bắt buộc phải nhớ (1 câu, dưới 30 từ, khác biệt với excerpt).
-     * "excerpt": Trích đoạn văn bản thực tế từ slide gốc (Grounding & Zero-hallucination).
+     * "key_takeaway": Điểm cốt lõi học viên bắt buộc phải nhớ (1 câu, dưới 30 từ).
      * "ai_tutor_explanation": Lời giảng giải ngắn gọn, dễ hiểu từ AI Tutor (1-2 câu).
      * "code_snippet": Lệnh terminal, cú pháp code, hoặc cấu hình tham số (nếu có trên slide, không có thì null).
      * "quick_quiz": Câu hỏi trắc nghiệm nhanh kiểm tra hiểu biết (CHỈ TẠO Ở CÁC NODE KHÁI NIỆM CỐT LÕI CẤP 2-3, các node khác để null để tiết kiệm token). Cấu trúc object:
@@ -92,7 +91,6 @@ Chỉ trả về 1 block JSON duy nhất, không kèm markdown hay lời dẫn:
                   "cross_link": null,
                   "detail": {{
                     "key_takeaway": "Điểm then chốt cần ghi nhớ...",
-                    "excerpt": "Trích đoạn thực tế từ trang slide...",
                     "ai_tutor_explanation": "Giải thích chi tiết từ góc nhìn thực hành...",
                     "code_snippet": "python -m venv .venv",
                     "quick_quiz": {{
@@ -129,7 +127,7 @@ PIPELINE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Chuyên gia Sư phạm Cấp cao
    Giúp người học vừa nắm được bức tranh tổng quan vừa tra cứu được tường tận từng chi tiết.
 3. TITLE: Cực kỳ ngắn gọn (từ 2 đến 5 từ tiếng Việt), nêu đúng tên chủ đề hoặc khái niệm kỹ thuật.
 4. SUMMARY: Khái quát cốt lõi KHÔNG QUÁ 40 TỪ. Nêu rõ ý chính, súc tích, không sao chép nguyên văn cả trang slide.
-6. DETAIL: Bắt buộc cung cấp detail đầy đủ (key_takeaway: câu đúc kết cốt lõi; excerpt: trích đoạn nguyên văn từ slide; ai_tutor_explanation; code_snippet nếu có).
+6. DETAIL: Bắt buộc cung cấp detail đầy đủ (key_takeaway: câu đúc kết cốt lõi; ai_tutor_explanation; code_snippet nếu có).
    - "quick_quiz": Trắc nghiệm tương tác compact tại các node khái niệm chính dạng {"question": "...", "options": ["A. ...", "B. ..."], "answer": "A", "explanation": "..."}. Node khác để null.
 
 NỘI DUNG SLIDE TỔNG HỢP:

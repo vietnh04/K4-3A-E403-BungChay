@@ -60,7 +60,7 @@ if HAS_GENAI:
     class DetailNodeSchema(BaseModel):
         title: str = Field(description="Tiêu đề chi tiết của khái niệm")
         slide_page: str = Field(description="Số trang slide trích dẫn, ví dụ 'Slide 9'")
-        excerpt: str = Field(description="Trích đoạn nội dung thực tế từ slide")
+        excerpt: Optional[str] = Field(default=None, description="Trích đoạn nội dung thực tế từ slide (tùy chọn)")
         key_takeaway: str = Field(description="Khái quát cốt lõi nhất cần nhớ")
         ai_tutor_explanation: str = Field(description="Lời giải thích sư phạm từ AI Tutor")
         code_snippet: Optional[str] = Field(default=None, description="Lệnh terminal hoặc code mẫu nếu có")

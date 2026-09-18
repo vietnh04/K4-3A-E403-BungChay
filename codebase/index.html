@@ -319,14 +319,6 @@
             </button>
           </div>
 
-          <!-- Slide Authentic Excerpt -->
-          <div>
-            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-              <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              Trích Đoạn Nội Dung Từ Slide Gốc
-            </h4>
-            <div id="detail-excerpt" class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed font-sans whitespace-pre-line"></div>
-          </div>
 
           <!-- Code Snippet / Terminal Command -->
           <div id="detail-code-box" class="hidden">
@@ -900,7 +892,6 @@
       document.getElementById('detail-takeaway').innerText = data.summary;
 
       const detail = data.detail || {};
-      document.getElementById('detail-excerpt').innerText = detail.excerpt || data.summary || "Đang cập nhật...";
       document.getElementById('detail-ai-tutor').innerText = detail.ai_tutor_explanation || "AI Tutor: Nắm vững khái niệm cốt lõi này để liên hệ với các bài thực hành kế tiếp.";
 
       const codeBox = document.getElementById('detail-code-box');

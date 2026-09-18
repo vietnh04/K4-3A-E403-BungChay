@@ -224,28 +224,61 @@
       <!-- LEFT / MAIN: 100% or 60% D3.js SVG Tree Canvas -->
       <div id="canvas-container" class="flex-1 h-full relative canvas-grid transition-all duration-300">
         
-        <!-- Floating Canvas Toolbar Controls -->
-        <div class="absolute top-4 left-4 z-10 flex items-center gap-2 bg-white/95 backdrop-blur-md p-1.5 rounded-xl shadow-md border border-slate-200">
-          <button onclick="zoomIn()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-700 font-bold text-sm transition" title="Phóng to (+)">
-            +
+        <!-- High-End Floating Canvas Toolbar Controls -->
+        <div class="absolute top-4 left-4 z-10 flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl shadow-lg border border-slate-200/90 text-xs select-none whitespace-nowrap flex-nowrap max-w-[calc(100vw-32px)] overflow-x-auto">
+          
+          <!-- Zoom Controls & Percentage -->
+          <div class="flex items-center gap-0.5 bg-slate-100/80 p-0.5 rounded-xl border border-slate-200/60">
+            <button onclick="zoomIn()" class="w-7 h-7 rounded-lg hover:bg-white flex items-center justify-center text-slate-700 font-bold text-sm transition shadow-2xs" title="Phóng to (Phím +)">
+              +
+            </button>
+            <span id="zoom-level-text" class="w-11 text-center text-[11px] font-mono font-bold text-slate-600 select-none">88%</span>
+            <button onclick="zoomOut()" class="w-7 h-7 rounded-lg hover:bg-white flex items-center justify-center text-slate-700 font-bold text-sm transition shadow-2xs" title="Thu nhỏ (Phím -)">
+              &minus;
+            </button>
+          </div>
+
+          <!-- Fit to Screen (Keyboard shortcut F / Space) -->
+          <button onclick="fitTree()" class="px-2.5 h-7 rounded-lg hover:bg-blue-50 text-blue-600 hover:text-blue-700 font-bold text-xs transition flex items-center gap-1 border border-blue-200/60 bg-blue-50/40 cursor-pointer" title="Căn giữa toàn màn hình (Phím tắt: F hoặc Space)">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+            <span>Fit (F)</span>
           </button>
-          <button onclick="zoomOut()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-700 font-bold text-sm transition" title="Thu nhỏ (-)">
-            &minus;
-          </button>
-          <button onclick="resetZoom()" class="px-2.5 h-8 rounded-lg hover:bg-slate-100 text-xs font-semibold text-slate-700 transition" title="Khôi phục góc nhìn">
-            Reset
-          </button>
-          <button onclick="fitTree()" class="px-2.5 h-8 rounded-lg hover:bg-slate-100 text-xs font-semibold text-blue-600 transition" title="Căn giữa toàn bộ cây">
-            Căn Giữa
-          </button>
+
           <div class="h-4 w-px bg-slate-200 mx-1"></div>
-          <button onclick="toggleExpandAll()" id="btn-expand-all" class="px-2.5 h-8 rounded-lg hover:bg-slate-100 text-xs font-medium text-slate-600 transition">
-            Thu gọn nhánh
+
+          <!-- Depth Filter Group (Level 1, Level 2, All) -->
+          <div class="flex items-center gap-0.5 bg-slate-100/80 p-0.5 rounded-xl border border-slate-200/60 text-[11px]">
+            <span class="text-slate-400 font-semibold px-1 text-[10px] uppercase tracking-wider">Độ Sâu:</span>
+            <button onclick="filterDepth(1)" id="btn-depth-l1" class="px-2 py-0.5 rounded-lg font-medium text-slate-600 hover:bg-white transition cursor-pointer" title="Chỉ xem Cấp 1 (Chương lớn)">
+              Cấp 1
+            </button>
+            <button onclick="filterDepth(2)" id="btn-depth-l2" class="px-2 py-0.5 rounded-lg font-medium text-slate-600 hover:bg-white transition cursor-pointer" title="Xem đến Cấp 2 (Chủ đề)">
+              Cấp 2
+            </button>
+            <button onclick="filterDepth(99)" id="btn-depth-all" class="px-2 py-0.5 rounded-lg font-bold bg-blue-600 text-white shadow-2xs transition cursor-pointer" title="Mở rộng toàn bộ cây sơ đồ">
+              Tất Cả
+            </button>
+          </div>
+
+          <div class="h-4 w-px bg-slate-200 mx-1"></div>
+
+          <!-- Active Recall / Flashcard Mode Toggle -->
+          <button onclick="toggleFlashcardMode()" id="btn-flashcard-mode" class="px-2.5 h-7 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Chế độ Tự kiểm tra: Ẩn tóm tắt các node để tự khảo bài trước khi lật mở">
+            <span>🎯</span>
+            <span>Ôn Tập (Flashcard)</span>
           </button>
+
         </div>
 
-        <!-- Legend / Hint Badge -->
-        <div class="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-3 bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-sm border border-slate-200 text-xs text-slate-600">
+        <!-- Flashcard Study Mode Active Floating Banner -->
+        <div id="flashcard-banner" class="hidden absolute top-16 left-4 z-10 bg-amber-500/95 backdrop-blur-md text-white px-3.5 py-1.5 rounded-xl shadow-md border border-amber-400 text-xs font-bold flex items-center gap-2">
+          <span>🎯 Chế độ Flashcard:</span>
+          <span class="font-normal text-amber-100">Hãy tự đoán bản chất khái niệm trước khi click lật đáp án!</span>
+          <button onclick="toggleFlashcardMode()" class="text-amber-200 hover:text-white font-extrabold ml-1 cursor-pointer">&times;</button>
+        </div>
+
+        <!-- Legend / Hint Badge with Shortcuts -->
+        <div class="absolute bottom-4 left-4 z-10 hidden sm:flex items-center gap-3 bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-xl shadow-sm border border-slate-200 text-xs text-slate-600 select-none whitespace-nowrap">
           <div class="flex items-center gap-1.5">
             <span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
             <span>Click node: Mở chi tiết</span>
@@ -254,8 +287,8 @@
             <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
             <span>Huy hiệu 🔗: Liên kết chéo ngày</span>
           </div>
-          <div class="flex items-center gap-1.5">
-            <span class="text-slate-400">&bull; Lăn chuột để Zoom / Kéo để Pan</span>
+          <div class="flex items-center gap-1.5 text-slate-400">
+            <span>&bull; Phím [F] hoặc [Space]: Căn giữa &bull; Phím [+]/[-]: Zoom</span>
           </div>
         </div>
 
@@ -544,6 +577,9 @@
     let allNodesFlat = [];
     let isAllExpanded = true;
     let isLiveServer = window.location.protocol.startsWith('http');
+    let isFlashcardMode = false;
+    let revealedFlashcardIds = new Set();
+    let currentDepthFilter = 'all';
 
     const CARD_WIDTH = 265;
     const CARD_HEIGHT = 126;
@@ -635,6 +671,8 @@
         .scaleExtent([0.2, 2.5])
         .on("zoom", (event) => {
           gMain.attr("transform", event.transform);
+          const zoomEl = document.getElementById('zoom-level-text');
+          if (zoomEl) zoomEl.innerText = `${Math.round(event.transform.k * 100)}%`;
         });
 
       svg.call(d3Zoom);
@@ -732,21 +770,33 @@
         .html(d => renderCardHTML(d));
 
       nodeEnter.each(function(d) {
-        if (d.data.children && d.data.children.length > 0) {
-          d3.select(this).append("circle")
-            .attr("cx", CARD_WIDTH)
-            .attr("cy", CARD_HEIGHT / 2)
-            .attr("r", 8)
-            .attr("fill", "#2563EB")
-            .attr("stroke", "#FFFFFF")
-            .attr("stroke-width", 2)
-            .attr("class", "cursor-pointer")
+        if ((d.data.children && d.data.children.length > 0) || (d._children && d._children.length > 0)) {
+          const gToggle = d3.select(this).append("g")
+            .attr("class", "cursor-pointer toggle-btn-group")
+            .attr("transform", `translate(${CARD_WIDTH}, ${CARD_HEIGHT / 2})`)
             .on("click", (event, d) => {
               event.stopPropagation();
               toggleNode(d);
             });
+
+          gToggle.append("circle")
+            .attr("r", 9)
+            .attr("fill", "#2563EB")
+            .attr("stroke", "#FFFFFF")
+            .attr("stroke-width", 2);
+
+          gToggle.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dy", "3.5px")
+            .attr("fill", "#FFFFFF")
+            .attr("font-size", "11px")
+            .attr("font-weight", "bold")
+            .attr("class", "toggle-icon select-none pointer-events-none")
+            .text(d.children ? "−" : "+");
         }
       });
+
+      nodeSelection.select(".toggle-icon").text(d => d.children ? "−" : "+");
 
       nodeSelection.transition().duration(400)
         .attr("transform", d => `translate(${d.y}, ${d.x})`);
@@ -776,6 +826,14 @@
         ? data.cross_link.label.replace(/^[🔗\s]+/, '')
         : '';
 
+      const slideBadgeBtn = `
+        <button onclick="event.stopPropagation(); jumpToSourceSlide('${data.slide_page || ''}', '${data.id}')"
+                class="text-[9px] font-mono font-bold bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-700 px-1.5 py-0.5 rounded border border-slate-200/80 transition flex items-center gap-0.5 cursor-pointer shadow-2xs"
+                title="Đối chiếu trực tiếp trích dẫn slide gốc (${data.slide_page || 'Slide'})">
+          <span>📄</span> <span>${data.slide_page ? data.slide_page.replace('Slide ', 'P.') : 'P.1'}</span>
+        </button>
+      `;
+
       if (d.depth === 0) {
         return `
           <div>
@@ -802,18 +860,52 @@
         badgeStyle = "bg-amber-50 text-amber-700 border border-amber-100";
       }
 
+      // Flashcard / Active Recall Mode handling
+      let summaryHTML = '';
+      if (isFlashcardMode && d.depth >= 2) {
+        if (!revealedFlashcardIds.has(data.id)) {
+          summaryHTML = `
+            <div onclick="event.stopPropagation(); revealFlashcard('${data.id}')"
+                 class="mt-1 py-1.5 px-2 rounded-lg bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 border border-dashed border-amber-300 text-amber-900 flex items-center justify-between cursor-pointer transition select-none group shadow-2xs"
+                 title="Nhấp để lật mở đáp án khái niệm này">
+              <div class="flex items-center gap-1">
+                <span class="text-xs group-hover:scale-110 transition-transform">❓</span>
+                <span class="text-[9.5px] font-bold text-amber-800">Tự nhớ bản chất...</span>
+              </div>
+              <span class="text-[9px] font-extrabold text-blue-600 bg-white/90 px-1.5 py-0.5 rounded shadow-2xs border border-amber-200 group-hover:bg-blue-600 group-hover:text-white transition">Lật &rarr;</span>
+            </div>
+          `;
+        } else {
+          summaryHTML = `
+            <div>
+              <p class="text-[10px] text-slate-700 line-clamp-2 leading-tight">${data.summary}</p>
+              <div class="mt-1 flex items-center justify-between">
+                <span class="text-[8.5px] font-bold text-emerald-600 flex items-center gap-0.5">
+                  <span>✓</span> <span>Đã lật mở</span>
+                </span>
+                <button onclick="event.stopPropagation(); hideFlashcard('${data.id}')" class="text-[8.5px] font-medium text-slate-400 hover:text-amber-700 underline cursor-pointer">
+                  Ẩn lại
+                </button>
+              </div>
+            </div>
+          `;
+        }
+      } else {
+        summaryHTML = `<p class="text-[10px] text-slate-500 line-clamp-3 leading-tight">${data.summary}</p>`;
+      }
+
       return `
         <div>
           <div class="flex items-center justify-between gap-1">
             <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${badgeStyle}">
               ${badgeText}
             </span>
-            <span class="text-[9px] font-mono text-slate-400">${data.slide_page || ''}</span>
+            ${slideBadgeBtn}
           </div>
           <h4 class="font-bold text-xs text-slate-900 mt-1 truncate">${data.title}</h4>
         </div>
         <div>
-          <p class="text-[10px] text-slate-500 line-clamp-3 leading-tight">${data.summary}</p>
+          ${summaryHTML}
           ${hasCross ? `
             <div class="mt-1.5 flex items-center gap-1 text-[9px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/70 truncate" title="${data.cross_link.label}">
               <span class="shrink-0">🔗</span> <span class="truncate">${cleanCrossLabel}</span>
@@ -998,6 +1090,117 @@
       `;
       setMode('slide');
     }
+
+    function toggleFlashcardMode() {
+      isFlashcardMode = !isFlashcardMode;
+      const btn = document.getElementById('btn-flashcard-mode');
+      const banner = document.getElementById('flashcard-banner');
+
+      if (isFlashcardMode) {
+        btn.className = "px-2.5 h-7 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md ring-2 ring-amber-300";
+        if (banner) banner.classList.remove('hidden');
+      } else {
+        btn.className = "px-2.5 h-7 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs transition flex items-center gap-1.5 shadow-2xs";
+        if (banner) banner.classList.add('hidden');
+        revealedFlashcardIds.clear();
+      }
+
+      gNodes.selectAll(".node-card").html(d => renderCardHTML(d));
+    }
+
+    function revealFlashcard(nodeId) {
+      revealedFlashcardIds.add(nodeId);
+      const cardEl = document.getElementById(`card-${nodeId}`);
+      if (cardEl) {
+        const d = allNodesFlat.find(n => n.data.id === nodeId);
+        if (d) cardEl.innerHTML = renderCardHTML(d);
+      }
+    }
+
+    function hideFlashcard(nodeId) {
+      revealedFlashcardIds.delete(nodeId);
+      const cardEl = document.getElementById(`card-${nodeId}`);
+      if (cardEl) {
+        const d = allNodesFlat.find(n => n.data.id === nodeId);
+        if (d) cardEl.innerHTML = renderCardHTML(d);
+      }
+    }
+
+    function filterDepth(maxDepth) {
+      if (!rootData) return;
+      currentDepthFilter = maxDepth === 1 ? 'l1' : (maxDepth === 2 ? 'l2' : 'all');
+
+      ['l1', 'l2', 'all'].forEach(id => {
+        const btn = document.getElementById(`btn-depth-${id}`);
+        if (btn) {
+          if (id === currentDepthFilter) {
+            btn.className = "px-2 py-0.5 rounded-lg font-bold bg-blue-600 text-white shadow-2xs transition";
+          } else {
+            btn.className = "px-2 py-0.5 rounded-lg font-medium text-slate-600 hover:bg-white transition";
+          }
+        }
+      });
+
+      rootData.descendants().forEach(d => {
+        if (d.depth >= maxDepth) {
+          if (d.children) {
+            d._children = d.children;
+            d.children = null;
+          }
+        } else {
+          if (d._children) {
+            d.children = d._children;
+            d._children = null;
+          }
+        }
+      });
+      updateTree(rootData);
+      fitTree();
+    }
+
+    function jumpToSourceSlide(slidePage, nodeId) {
+      const targetNode = (nodeId ? allNodesFlat.find(d => d.data.id === nodeId) : null) || currentNode;
+      if (targetNode) {
+        onNodeClick(targetNode);
+        centerOnNode(targetNode);
+      }
+
+      // Flash highlight source slide badge and scroll into view in detail pane
+      const badge = document.getElementById('detail-slide-badge');
+      const excerpt = document.getElementById('detail-excerpt');
+      if (badge) {
+        badge.classList.add('ring-4', 'ring-blue-400', 'bg-blue-600', 'text-white');
+        setTimeout(() => {
+          badge.classList.remove('ring-4', 'ring-blue-400', 'bg-blue-600', 'text-white');
+        }, 1200);
+      }
+      if (excerpt) {
+        excerpt.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        excerpt.classList.add('border-blue-400', 'bg-blue-50/60');
+        setTimeout(() => {
+          excerpt.classList.remove('border-blue-400', 'bg-blue-50/60');
+        }, 1500);
+      }
+    }
+
+    // Keyboard Shortcuts (Space or F: Fit Tree, +/-: Zoom, 0: Reset)
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return;
+
+      if (e.key === 'f' || e.key === 'F' || (e.code === 'Space' && e.target === document.body)) {
+        e.preventDefault();
+        fitTree();
+      } else if (e.key === '+' || e.key === '=') {
+        e.preventDefault();
+        zoomIn();
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        zoomOut();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        fitTree();
+      }
+    });
 
     function handleSearch(query) {
       if (!query.trim()) {

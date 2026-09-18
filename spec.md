@@ -65,6 +65,13 @@ Loại: [ ] Tối ưu tính năng có sẵn (A1)  [x] Tính năng mới (A2 — 
   | **PAIR ⑤: Feedback + Control** | Học viên tự do đổi ngày (Day 01 $\to$ 05), zoom/pan, đóng/mở panel chi tiết, thu gọn các nhánh và copy lệnh thực hành. |
   | **PAIR ⑥: Errors + Graceful Failure** | Nút `⚡ Test CLARIFY` xử lý khi nội dung slide đa nghĩa (hỏi lại học viên thay vì bịa); nút `⚠️ Test LỖI` kích hoạt bộ đệm offline khi vượt hạn mức 15 RPM. |
 
+- §4c. Tiêu chuẩn UI/UX ứng dụng cao cấp (5 trụ cột nâng cấp):
+  1. **Bố cục 2 cột song song (Split-View Canvas & Source Viewer):** Cột trái (60–65%) là Infinite Canvas tương tác D3.js (Zoom, Pan, Drag). Cột phải (35–40%) là Smart Source Reader hiển thị chi tiết và tự động cuộn (smooth scroll) đến đúng slide gốc khi click node hoặc huy hiệu `[Slide X]` (tạo cảm giác Zero-hallucination feel).
+  2. **Thiết kế Node 2 tầng (Actionable Node Anatomy):** Tầng 1 (Keyword Header - in đậm, to rõ), Tầng 2 (Mini-summary $\le 40$ từ). Góc phải gắn badge neo nguồn clickable `[Slide X]`, đuôi nhánh có nút tròn gập/mở chủ động để học sâu.
+  3. **Progressive Generation (Hiển thị lũy tiến khi tải):** Khi AI phân tích bài giảng hoặc chuyển ngày, hiển thị Node trung tâm trước, bung dần các nhánh lớn kèm hiệu ứng skeleton shimmer, giảm perceived latency xuống còn 1–2 giây.
+  4. **Chế độ kiểm tra nhanh (Active Recall / Flashcard Study Mode):** Toggle chuyển đổi chế độ ôn thi. Khi bật, nội dung tóm tắt của các node con được che bởi mặt nạ ẩn `❓ Chạm để lật mở đáp án`, người học chủ động tự kiểm tra kiến thức trước khi lật mở.
+  5. **Bộ điều khiển Canvas chuẩn mực (Canvas Controls):** Thanh công cụ nổi trực quan: hiển thị tỉ lệ zoom %, nút Fit to Screen (phím tắt `Space` hoặc `F`), và Bộ lọc mức độ sâu (Depth Filter: Cấp 1 chỉ xem chương lớn, Cấp 2 xem chủ đề, Tất cả để mở toàn bộ sơ đồ).
+
 ## §5. Kiểu lỗi — 4 lớp chỗ khó + kịch bản (≥8)
 - **Lớp 1 (Parse PDF lỗi/ảnh chụp):**
   1. Slide scan dạng ảnh (không có text layer): Tự động fallback sang text layer hoặc gợi ý tải lại bản slide vector; nếu `pypdf` trích được 0 ký tự, báo lỗi rõ ràng thay vì trả cây rỗng im lặng.

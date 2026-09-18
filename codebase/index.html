@@ -40,6 +40,15 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.22), 0 10px 20px -4px rgba(37, 99, 235, 0.25) !important;
       background: #FFFFFF !important;
     }
+    .node-card.node-root:hover {
+      border-color: #93C5FD !important;
+    }
+    .node-card.node-root.active {
+      background: #3B82F6 !important;
+      border-color: #93C5FD !important;
+      box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.55), 0 10px 20px -4px rgba(37, 99, 235, 0.35) !important;
+      color: #FFFFFF !important;
+    }
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -788,7 +797,7 @@
     function getNodeCardClass(d) {
       let base = "node-card rounded-xl p-2.5 h-full flex flex-col justify-between border select-none transition-all ";
       if (d.depth === 0) {
-        return base + "bg-blue-600 text-white border-blue-700 shadow-md";
+        return base + "node-root bg-blue-600 text-white border-blue-700 shadow-md";
       } else if (d.depth === 1) {
         return base + "bg-white text-slate-800 border-indigo-200 shadow-xs hover:border-indigo-400";
       } else if (d.depth === 2) {

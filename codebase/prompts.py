@@ -1,6 +1,6 @@
 """
 VLearn Prompts Module Entrypoint
-Tiện ích import trực tiếp các system prompts và builder functions.
+Convenience entrypoint directly importing system prompts and builder functions.
 """
 
 from backend.prompts import (

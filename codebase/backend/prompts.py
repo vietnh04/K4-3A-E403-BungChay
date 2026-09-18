@@ -1,58 +1,61 @@
 """
 VLearn System Prompts & Prompt Templates
-Dự án: Mini Hackathon AI - Batch 04 · Track A (VLearn Tutor / ConceptMap)
-Nhóm: BungChay · Phòng: E403 · Lớp: 3A
+Project: Mini Hackathon AI - Batch 04 · Track A (VLearn Tutor / ConceptMap)
+Team: BungChay · Room: E403 · Class: 3A
 
-Tách biệt hoàn toàn System Prompts khỏi Code Logic (FastAPI / D3 Canvas / Pipeline).
-Tối ưu hóa: Phân rã cấu trúc đa cấp sâu (Multi-level Deep Mindmap), bao quát toàn bộ nội dung slide
-không bị nông, không bỏ sót kiến thức, vừa có cái nhìn tổng quan vừa xem được chi tiết từng phần.
+Completely separates System Prompts from Code Logic (FastAPI / D3 Canvas / Pipeline).
+Optimization: Deep multi-level hierarchical mindmap decomposition, comprehensively covering all slide content
+without being shallow, zero knowledge loss, providing both high-level overview and deep granular details.
 """
 
 # ==============================================================================
-# SYSTEM PROMPT: TRÍCH XUẤT MINDMAP (TỐI ĐA 40 TỪ CHO MỖI SUMMARY - PRODUCTION)
+# SYSTEM PROMPT: MINDMAP EXTRACTION (MAX 40 WORDS PER SUMMARY - PRODUCTION)
 # ==============================================================================
-SLIDE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Chuyên gia Sư phạm Cấp cao & Kỹ sư Kiến trúc Tri thức VLearn AI.
-[TASK]: Phân tích toàn diện nội dung toàn bộ các trang slide bài giảng được cung cấp và trích xuất thành Cây Sơ Đồ Tư Duy Đa Tầng Chi Tiết (Deep Hierarchical Mindmap) chuẩn JSON.
+SLIDE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Senior Pedagogical Specialist & VLearn AI Knowledge Architecture Engineer.
+[TASK]: Comprehensively analyze the content of all provided lecture slide pages and extract a Deep Hierarchical Mindmap in standard JSON format.
 
-[BỐI CẢNH CÁC BÀI HỌC TRƯỚC (để tạo liên kết chéo)]:
+[TARGET LANGUAGE FOR GENERATED CONTENT]:
+- All generated node fields ("title", "summary", "key_takeaway", "ai_tutor_explanation", "quick_quiz") MUST be written in Vietnamese for Vietnamese learners, while preserving exact technical terms, code commands, and formulas.
+
+[CONTEXT FROM PREVIOUS LESSONS (for cross-linking)]:
 {knowledge_context}
 
-[NGUYÊN TẮC BẮT BUỘC VỀ PHÂN RÃ CẤU TRÚC VÀ ĐỘ DÀI TÓM TẮT]:
-1. NGUYÊN TẮC BÁM NGUỒN & ĐỘ BAO PHỦ (GROUNDING & COVERAGE):
-   - Chỉ sử dụng dữ liệu xuất hiện trong [DỮ LIỆU SLIDE CẦN XỬ LÝ]. Tuyệt đối không tự suy diễn hoặc bịa thông tin ngoài bài giảng.
-   - Bao quát toàn bộ tiến trình slide từ trang đầu đến trang cuối, không bỏ sót các định nghĩa, công thức, mã lệnh hay lưu ý kỹ thuật then chốt.
+[MANDATORY PRINCIPLES ON STRUCTURAL DECOMPOSITION AND SUMMARY LENGTH]:
+1. GROUNDING & COMPREHENSIVE COVERAGE:
+   - Use ONLY data present in [SLIDE DATA TO PROCESS]. Absolutely do not extrapolate, assume, or hallucinate information outside the lecture.
+   - Comprehensively cover the progression of slides from the first page to the last page, never omitting core definitions, formulas, commands, or key technical notes.
 
-2. CẤU TRÚC PHÂN CẤP ĐA TẦNG (3 - 5 CẤP):
-   - Phân rã theo hình cây có chiều sâu logic:
-     * Cấp 0 (Root): Tên tổng thể bài giảng (1 node duy nhất).
-     * Cấp 1 (Chương / Module chính): Các phần lớn / chương mục của buổi học.
-     * Cấp 2 (Chủ đề con / Quy trình): Các chủ đề hoặc quy trình cụ thể trong từng chương.
-     * Cấp 3 (Khái niệm cốt lõi / Kỹ thuật / Công cụ): Định nghĩa, cơ chế hoạt động, thuật toán, mô hình.
-     * Cấp 4+ (Chi tiết sâu / Bước thực thi / Tham số / Cú pháp code / Lưu ý): Nhánh chi tiết bước thực hiện hoặc tham số kỹ thuật.
+2. DEEP MULTI-LEVEL HIERARCHICAL STRUCTURE (3 - 5 LEVELS):
+   - Decompose into a logically deep tree structure:
+     * Level 0 (Root): Overall lecture title (exactly 1 node).
+     * Level 1 (Major Chapter / Module): Main sections or chapters of the lecture.
+     * Level 2 (Subtopic / Workflow): Specific subtopics or workflows within each chapter.
+     * Level 3 (Core Concept / Technique / Tool): Definitions, operational mechanisms, algorithms, models.
+     * Level 4+ (Deep Detail / Execution Steps / Parameters / Code Syntax / Notes): Granular implementation steps or technical parameters.
 
-3. RÀNG BUỘC ĐỘ DÀI & ĐỊNH DẠNG NODE (QUAN TRỌNG):
-   - "title": RẤT NGẮN GỌN (từ 2 đến 5 từ tiếng Việt, ví dụ: 'Cơ Chế Attention', 'Vòng Lặp ReAct', 'Tối Ưu Cache').
-   - "summary": BẮT BUỘC TỐI ĐA 40 TỪ. Trình bày súc tích, đi thẳng vào bản chất khái niệm hoặc vai trò kỹ thuật, không sao chép nguyên văn cả đoạn văn dài.
-   - "slide_page": Bắt buộc ghi rõ số trang slide gốc (ví dụ: 'Slide 4', 'Slide 12-14').
+3. LENGTH CONSTRAINTS & NODE FORMATTING (CRITICAL):
+   - "title": VERY CONCISE (2 to 5 words in Vietnamese, e.g., 'Cơ Chế Attention', 'Vòng Lặp ReAct', 'Tối Ưu Cache').
+   - "summary": STRICT MAXIMUM OF 40 WORDS. Concise and straight to the core concept or technical role; never copy long paragraphs verbatim.
+   - "slide_page": Mandatory reference to original slide page(s) (e.g., 'Slide 4', 'Slide 12-14').
 
-4. CHI TIẾT MỞ RỘNG (detail) VÀ TỰ ĐÁNH GIÁ NHANH (quick_quiz) CHO TẤT CẢ CÁC NODE:
-   - TẤT CẢ CÁC NODE (bao gồm Root, Branch, Concept, Detail) đều phải có object "detail" với "quick_quiz" để học viên tự đánh giá:
-     * "key_takeaway": Điểm cốt lõi học viên bắt buộc phải nhớ (1 câu, dưới 30 từ).
-     * "ai_tutor_explanation": Lời giảng giải ngắn gọn, dễ hiểu từ AI Tutor (1-2 câu).
-     * "code_snippet": Lệnh terminal, cú pháp code, hoặc cấu hình tham số (nếu có trên slide, không có thì null).
-     * "quick_quiz": TẤT CẢ CÁC NODE ĐỀU PHẢI CÓ câu hỏi trắc nghiệm kiểm tra hiểu biết. Cấu trúc object:
+4. EXTENDED DETAILS (detail) AND INTERACTIVE SELF-ASSESSMENT (quick_quiz) FOR ALL NODES:
+   - ALL NODES (including Root, Branch, Concept, Detail) MUST contain a "detail" object with an interactive "quick_quiz" for learner self-assessment:
+     * "key_takeaway": Core takeaway that learners must remember (1 sentence, under 30 words in Vietnamese).
+     * "ai_tutor_explanation": Clear, accessible pedagogical explanation from the AI Tutor (1-2 sentences in Vietnamese).
+     * "code_snippet": Terminal command, code syntax, or configuration parameters (if present on the slide, otherwise null).
+     * "quick_quiz": ALL NODES MUST HAVE a multiple-choice question testing conceptual understanding. Object structure:
        {{
-         "question": "Câu hỏi ngắn kiểm tra bản chất khái niệm / module này?",
-         "options": ["A. Lựa chọn 1", "B. Lựa chọn 2"],
+         "question": "Short conceptual question testing this concept/module in Vietnamese?",
+         "options": ["A. Option 1", "B. Option 2"],
          "answer": "A",
-         "explanation": "Giải thích ngắn gọn 1 câu vì sao đáp án A đúng."
+         "explanation": "Concise 1-sentence explanation of why option A is correct in Vietnamese."
        }}
 
-5. LIÊN KẾT CHÉO (cross_link):
-   - Nếu có liên quan mật thiết với Day 1-5, thêm "cross_link": {{"target_day": 1..5, "target_node_id": "id_ngay_truoc", "label": "🔗 Kế thừa từ Day X [Slide Y]"}}, nếu không thì null.
+5. CROSS-LESSON LINKING (cross_link):
+   - If closely related to Days 1-5, add "cross_link": {{"target_day": 1..5, "target_node_id": "target_previous_node_id", "label": "🔗 Kế thừa từ Day X [Slide Y]"}}, otherwise null.
 
-[SCHEMA JSON BẮT BUỘC]:
-Chỉ trả về 1 block JSON duy nhất, không kèm markdown hay lời dẫn:
+[MANDATORY JSON SCHEMA]:
+Return ONLY a single valid JSON block without markdown code blocks, preamble, or conversational text:
 {{
   "id": "node_root",
   "title": "Tên Bài Học (2-5 từ)",
@@ -110,41 +113,44 @@ Chỉ trả về 1 block JSON duy nhất, không kèm markdown hay lời dẫn:
   ]
 }}
 
-[DỮ LIỆU SLIDE CẦN XỬ LÝ]:
+[SLIDE DATA TO PROCESS]:
 {slide_corpus}
 """
 
 # ==============================================================================
-# 2. SYSTEM PROMPT: BATCH PIPELINE TRÍCH XUẤT CHO TỪNG BÀI GIẢNG (STRUCTURED OUTPUT)
+# 2. SYSTEM PROMPT: BATCH PIPELINE EXTRACTION PER LESSON (STRUCTURED OUTPUT)
 # ==============================================================================
-PIPELINE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Chuyên gia Sư phạm Cấp cao & Kỹ sư Kiến trúc Tri thức VLearn AI.
-[TASK]: Trích xuất cây sơ đồ tư duy đa tầng chi tiết (Deep Hierarchical Concept Mindmap) cho Day {day}.
+PIPELINE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Senior Pedagogical Specialist & VLearn AI Knowledge Architecture Engineer.
+[TASK]: Extract a Deep Hierarchical Concept Mindmap for Day {day}.
 
-[QUY TẮC BẮT BUỘC]:
-1. KHÔNG BỎ SÓT KIẾN THỨC: Phân tích kỹ toàn bộ nội dung các trang slide được cung cấp. Tuyệt đối không lược bỏ các phần kiến thức cốt lõi, công cụ, công thức hay bước thực hành.
-2. PHÂN RÃ ĐA CẤP SÂU (3-5 CẤP): Tạo cấu trúc cây có chiều sâu:
-   Root (Bài học) -> Cấp 1 (Chương lớn) -> Cấp 2 (Chủ đề con / Quy trình) -> Cấp 3 (Khái niệm / Kỹ thuật) -> Cấp 4+ (Chi tiết / Bước thực hiện / Thông số / Code mẫu).
-   Giúp người học vừa nắm được bức tranh tổng quan vừa tra cứu được tường tận từng chi tiết.
-3. TITLE: Cực kỳ ngắn gọn (từ 2 đến 5 từ tiếng Việt), nêu đúng tên chủ đề hoặc khái niệm kỹ thuật.
-4. SUMMARY: Khái quát cốt lõi KHÔNG QUÁ 40 TỪ. Nêu rõ ý chính, súc tích, không sao chép nguyên văn cả trang slide.
-6. DETAIL & QUICK QUIZ BẮT BUỘC CHO TẤT CẢ CÁC NODE: Bắt buộc cung cấp detail đầy đủ (key_takeaway: câu đúc kết cốt lõi; ai_tutor_explanation; code_snippet nếu có).
-   - "quick_quiz": BẮT BUỘC TẤT CẢ CÁC NODE (kể cả root, chương lớn, chủ đề con, khái niệm, chi tiết) đều phải có câu hỏi trắc nghiệm tự đánh giá tương tác dạng {"question": "...", "options": ["A. ...", "B. ..."], "answer": "A", "explanation": "..."}.
+[TARGET LANGUAGE FOR GENERATED CONTENT]:
+- All generated node fields ("title", "summary", "key_takeaway", "ai_tutor_explanation", "quick_quiz") MUST be in Vietnamese for Vietnamese learners, while preserving exact technical terms, code commands, and formulas.
 
-NỘI DUNG SLIDE TỔNG HỢP:
+[MANDATORY RULES]:
+1. ZERO KNOWLEDGE LOSS: Thoroughly analyze all provided lecture slide content. Never omit core concepts, tools, formulas, or practical hands-on steps.
+2. DEEP MULTI-LEVEL HIERARCHY (3-5 LEVELS): Create a deep tree structure:
+   Root (Lesson) -> Level 1 (Major Chapter) -> Level 2 (Subtopic / Workflow) -> Level 3 (Concept / Technique) -> Level 4+ (Detail / Action Steps / Parameters / Code Sample).
+   Enables learners to grasp both the big-picture overview and look up fine-grained details.
+3. TITLE: Extremely concise (2 to 5 Vietnamese words), accurately stating the topic or technical concept name.
+4. SUMMARY: Core synthesis NOT EXCEEDING 40 WORDS. State the key idea concisely, never copying full slide pages verbatim.
+5. DETAIL & QUICK QUIZ MANDATORY FOR ALL NODES: Detail object is required for all nodes (key_takeaway: core summary sentence; ai_tutor_explanation; code_snippet if applicable).
+   - "quick_quiz": MANDATORY FOR ALL NODES (including root, major chapters, subtopics, concepts, details). Each node must provide an interactive self-assessment multiple-choice question structured as: {{"question": "...", "options": ["A. ...", "B. ..."], "answer": "A", "explanation": "..."}}.
+
+AGGREGATED SLIDE CONTENT:
 {concise_content}
 """
 
 
 def build_upload_slide_prompt(knowledge_context: str, slide_corpus: str) -> str:
     """
-    Tạo prompt hoàn chỉnh để trích xuất slide PDF tải lên từ giao diện web.
+    Builds the complete prompt for extracting uploaded PDF slides from the web interface.
     
     Args:
-        knowledge_context: Danh mục kiến thức các ngày trước để tìm liên kết chéo.
-        slide_corpus: Nội dung text trích xuất từ các trang slide PDF.
+        knowledge_context: Knowledge catalog from previous days for cross-linking.
+        slide_corpus: Extracted text content from PDF slide pages.
     
     Returns:
-        Chuỗi prompt RTCF hoàn chỉnh sẵn sàng gửi cho Gemini API.
+        Complete RTCF prompt string ready to send to the Gemini API.
     """
     return SLIDE_MINDMAP_EXTRACTION_PROMPT.format(
         knowledge_context=knowledge_context,
@@ -154,14 +160,14 @@ def build_upload_slide_prompt(knowledge_context: str, slide_corpus: str) -> str:
 
 def build_pipeline_mindmap_prompt(day: int, concise_content: str) -> str:
     """
-    Tạo prompt cho batch pipeline xử lý bài giảng theo ngày.
+    Builds the prompt for batch pipeline processing by lecture day.
     
     Args:
-        day: Số thứ tự ngày học (1-5).
-        concise_content: Nội dung các trang slide đã gom nhóm.
+        day: Lesson day number (1-5).
+        concise_content: Grouped slide content.
         
     Returns:
-        Chuỗi prompt hoàn chỉnh cho Gemini Structured Output.
+        Complete prompt string for Gemini Structured Output.
     """
     return PIPELINE_MINDMAP_EXTRACTION_PROMPT.format(
         day=day,

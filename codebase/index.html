@@ -912,14 +912,17 @@
       }
 
       const quizBox = document.getElementById('detail-quiz-box');
+      let quizObj = null;
       if (detail.quick_quiz) {
-        const quizObj = normalizeQuiz(detail.quick_quiz, detail.ai_tutor_explanation);
-        if (quizObj) {
-          quizBox.classList.remove('hidden');
-          renderQuizUI(quizObj);
-        } else {
-          quizBox.classList.add('hidden');
-        }
+        quizObj = normalizeQuiz(detail.quick_quiz, detail.ai_tutor_explanation);
+      }
+      if (!quizObj) {
+        quizObj = generateSmartQuizForNode(data);
+      }
+
+      if (quizObj) {
+        quizBox.classList.remove('hidden');
+        renderQuizUI(quizObj);
       } else {
         quizBox.classList.add('hidden');
       }
@@ -976,6 +979,53 @@
     // ==========================================
     let currentQuizData = null;
     let currentQuizState = { selected: null, isAnswered: false };
+
+    function generateSmartQuizForNode(data) {
+      if (!data) return null;
+      const title = data.title || 'Khái niệm';
+      const summary = (data.summary || '').trim();
+      const type = data.type || 'concept';
+      const detail = data.detail || {};
+
+      let question = '';
+      let correctText = '';
+      let wrongText = '';
+      let explanation = '';
+
+      if (type === 'root') {
+        question = `Mục tiêu đào tạo bao trùm của bài học "${title}" là gì?`;
+        correctText = summary || 'Trang bị toàn diện kiến thức nền tảng và phương pháp thực hành chuẩn.';
+        wrongText = 'Chỉ học lý thuyết trừu tượng và không áp dụng vào dự án thực tế.';
+        explanation = `Chính xác! Trọng tâm của "${title}": ${summary || 'giúp học viên làm chủ kiến thức và kỹ năng thực tế.'}`;
+      } else if (type === 'branch') {
+        question = `Vai trò kiến trúc của module "${title}" trong bài học là gì?`;
+        correctText = summary || 'Định hình quy trình cốt lõi và xâu chuỗi các kỹ thuật thành phần.';
+        wrongText = 'Chỉ là phần tài liệu đọc thêm, không ảnh hưởng đến luồng kiến thức chính.';
+        explanation = `Chính xác! Module "${title}" có vai trò: ${summary || 'kết nối các khái niệm then chốt trong bài học.'}`;
+      } else {
+        question = `Điểm then chốt cần ghi nhớ về "${title}" là gì?`;
+        correctText = summary || 'Nắm vững bản chất kỹ thuật và cách vận hành chuẩn xác.';
+        wrongText = 'Chỉ ghi nhớ tên gọi hình thức mà không cần hiểu cơ chế hoạt động.';
+        explanation = detail.ai_tutor_explanation || `Chính xác! Bản chất của "${title}": ${summary || 'cần nắm rõ để hoàn thành bài thực hành.'}`;
+      }
+
+      // Pseudo-randomize whether correct answer is A or B based on node id
+      const idStr = String(data.id || title);
+      const isB = (idStr.charCodeAt(idStr.length - 1) % 2 === 1);
+
+      return {
+        question: question,
+        options: isB ? [
+          { key: 'A', text: wrongText },
+          { key: 'B', text: correctText }
+        ] : [
+          { key: 'A', text: correctText },
+          { key: 'B', text: wrongText }
+        ],
+        answer: isB ? 'B' : 'A',
+        explanation: explanation
+      };
+    }
 
     function normalizeQuiz(rawQuiz, fallbackExplanation) {
       if (!rawQuiz) return null;

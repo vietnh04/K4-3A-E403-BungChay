@@ -35,14 +35,14 @@ SLIDE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Chuyên gia Sư phạm Cấp cao & 
    - "summary": BẮT BUỘC TỐI ĐA 40 TỪ. Trình bày súc tích, đi thẳng vào bản chất khái niệm hoặc vai trò kỹ thuật, không sao chép nguyên văn cả đoạn văn dài.
    - "slide_page": Bắt buộc ghi rõ số trang slide gốc (ví dụ: 'Slide 4', 'Slide 12-14').
 
-4. CHI TIẾT MỞ RỘNG (detail) TẠI NODE LÁ VÀ KHÁI NIỆM QUAN TRỌNG:
-   - Tại các node khái niệm (concept) hoặc chi tiết thực thi (detail) quan trọng, cung cấp object "detail" tinh gọn:
+4. CHI TIẾT MỞ RỘNG (detail) VÀ TỰ ĐÁNH GIÁ NHANH (quick_quiz) CHO TẤT CẢ CÁC NODE:
+   - TẤT CẢ CÁC NODE (bao gồm Root, Branch, Concept, Detail) đều phải có object "detail" với "quick_quiz" để học viên tự đánh giá:
      * "key_takeaway": Điểm cốt lõi học viên bắt buộc phải nhớ (1 câu, dưới 30 từ).
      * "ai_tutor_explanation": Lời giảng giải ngắn gọn, dễ hiểu từ AI Tutor (1-2 câu).
      * "code_snippet": Lệnh terminal, cú pháp code, hoặc cấu hình tham số (nếu có trên slide, không có thì null).
-     * "quick_quiz": Câu hỏi trắc nghiệm nhanh kiểm tra hiểu biết (CHỈ TẠO Ở CÁC NODE KHÁI NIỆM CỐT LÕI CẤP 2-3, các node khác để null để tiết kiệm token). Cấu trúc object:
+     * "quick_quiz": TẤT CẢ CÁC NODE ĐỀU PHẢI CÓ câu hỏi trắc nghiệm kiểm tra hiểu biết. Cấu trúc object:
        {{
-         "question": "Câu hỏi ngắn kiểm tra bản chất khái niệm?",
+         "question": "Câu hỏi ngắn kiểm tra bản chất khái niệm / module này?",
          "options": ["A. Lựa chọn 1", "B. Lựa chọn 2"],
          "answer": "A",
          "explanation": "Giải thích ngắn gọn 1 câu vì sao đáp án A đúng."
@@ -127,8 +127,8 @@ PIPELINE_MINDMAP_EXTRACTION_PROMPT = """[ROLE]: Chuyên gia Sư phạm Cấp cao
    Giúp người học vừa nắm được bức tranh tổng quan vừa tra cứu được tường tận từng chi tiết.
 3. TITLE: Cực kỳ ngắn gọn (từ 2 đến 5 từ tiếng Việt), nêu đúng tên chủ đề hoặc khái niệm kỹ thuật.
 4. SUMMARY: Khái quát cốt lõi KHÔNG QUÁ 40 TỪ. Nêu rõ ý chính, súc tích, không sao chép nguyên văn cả trang slide.
-6. DETAIL: Bắt buộc cung cấp detail đầy đủ (key_takeaway: câu đúc kết cốt lõi; ai_tutor_explanation; code_snippet nếu có).
-   - "quick_quiz": Trắc nghiệm tương tác compact tại các node khái niệm chính dạng {"question": "...", "options": ["A. ...", "B. ..."], "answer": "A", "explanation": "..."}. Node khác để null.
+6. DETAIL & QUICK QUIZ BẮT BUỘC CHO TẤT CẢ CÁC NODE: Bắt buộc cung cấp detail đầy đủ (key_takeaway: câu đúc kết cốt lõi; ai_tutor_explanation; code_snippet nếu có).
+   - "quick_quiz": BẮT BUỘC TẤT CẢ CÁC NODE (kể cả root, chương lớn, chủ đề con, khái niệm, chi tiết) đều phải có câu hỏi trắc nghiệm tự đánh giá tương tác dạng {"question": "...", "options": ["A. ...", "B. ..."], "answer": "A", "explanation": "..."}.
 
 NỘI DUNG SLIDE TỔNG HỢP:
 {concise_content}

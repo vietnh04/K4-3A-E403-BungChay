@@ -659,8 +659,8 @@
       currentDay = dayNum;
       renderDayTabs();
 
-      let dayInfo = KNOWLEDGE_BASE.days[dayNum];
-      if (!dayInfo && isLiveServer) {
+      let dayInfo = null;
+      if (isLiveServer) {
         try {
           const res = await fetch(`/api/day/${dayNum}`);
           if (res.ok) {
@@ -668,17 +668,33 @@
             KNOWLEDGE_BASE.days[dayNum] = dayInfo;
           }
         } catch (e) {
-          console.error("Fetch day error:", e);
+          console.warn("Fetch day error, falling back to local:", e);
         }
+      }
+
+      if (!dayInfo) {
+        dayInfo = KNOWLEDGE_BASE.days[dayNum];
       }
 
       if (!dayInfo) return;
 
-      document.getElementById('nav-lesson-title').innerText = `Lesson ${dayNum} &bull; ${dayInfo.code || ('DAY_0' + dayNum)}`;
-      document.getElementById('nav-lesson-subtitle').innerText = dayInfo.title;
-      document.getElementById('nav-progress-text').innerText = `${dayNum}/${KNOWLEDGE_BASE.metadata.days.length} days &bull; ${dayInfo.total_slides} slides`;
-      document.getElementById('nav-progress-bar').style.width = `${(dayNum / KNOWLEDGE_BASE.metadata.days.length) * 100}%`;
-      document.getElementById('day-badge-stats').innerText = `${dayInfo.total_slides} Slides &bull; ${dayInfo.pdf_file || 'Slide bài giảng'}`;
+      const metadataDays = (KNOWLEDGE_BASE.metadata && KNOWLEDGE_BASE.metadata.days) || [];
+      const totalDays = metadataDays.length || 9;
+
+      const navTitle = document.getElementById('nav-lesson-title');
+      if (navTitle) navTitle.innerText = `Lesson ${dayNum} • ${dayInfo.code || ('DAY_0' + dayNum)}`;
+
+      const navSub = document.getElementById('nav-lesson-subtitle');
+      if (navSub) navSub.innerText = dayInfo.title;
+
+      const navProgress = document.getElementById('nav-progress-text');
+      if (navProgress) navProgress.innerText = `${dayNum}/${totalDays} days • ${dayInfo.total_slides || 0} slides`;
+
+      const navBar = document.getElementById('nav-progress-bar');
+      if (navBar) navBar.style.width = `${(dayNum / totalDays) * 100}%`;
+
+      const dayBadge = document.getElementById('day-badge-stats');
+      if (dayBadge) dayBadge.innerText = `${dayInfo.total_slides || 0} Slides • ${dayInfo.pdf_file || 'Slide bài giảng'}`;
 
       loadTreeData(dayInfo.tree);
       closeDetailPane();
@@ -866,6 +882,7 @@
     }
 
     function onNodeClick(d) {
+      if (!d || !d.data) return;
       currentNode = d;
       d3.selectAll(".node-card").classed("active", false);
       const cardEl = document.getElementById(`card-${d.data.id}`);
@@ -881,54 +898,119 @@
       }
 
       openDetailPane(d.data);
+
+      // Smooth auto-adjust camera if node might be occluded by drawer
+      try {
+        const container = document.getElementById('canvas-container');
+        if (container) {
+          const containerWidth = container.clientWidth;
+          const currentTransform = d3.zoomTransform(svg.node());
+          const nodeScreenX = currentTransform.applyX(d.y);
+          if (nodeScreenX + CARD_WIDTH > containerWidth - 60) {
+            const shiftX = (containerWidth - 60) - (nodeScreenX + CARD_WIDTH);
+            svg.transition().duration(400).call(d3Zoom.translateBy, shiftX, 0);
+          }
+        }
+      } catch (e) {
+        // Non-blocking UX enhancement
+      }
     }
 
     function openDetailPane(data) {
+      if (!data) return;
       const pane = document.getElementById('detail-pane');
       isDetailOpen = true;
 
-      document.getElementById('detail-title').innerText = data.title;
-      document.getElementById('detail-slide-badge').innerText = data.slide_page || 'Slide Bài Giảng';
-      document.getElementById('detail-takeaway').innerText = data.summary;
+      // 1. GUARANTEE DRAWER SLIDES OUT FIRST
+      if (pane) {
+        pane.classList.remove('w-0', 'opacity-0');
+        pane.classList.add('w-[420px]', 'xl:w-[480px]', 'opacity-100');
+      }
+
+      // 2. BASIC METADATA (Title, Slide badge, Takeaway)
+      try {
+        const titleEl = document.getElementById('detail-title');
+        if (titleEl) titleEl.innerText = data.title || 'Khái Niệm';
+
+        const slideBadge = document.getElementById('detail-slide-badge');
+        if (slideBadge) slideBadge.innerText = data.slide_page || 'Slide Bài Giảng';
+
+        const takeawayEl = document.getElementById('detail-takeaway');
+        if (takeawayEl) {
+          takeawayEl.innerText = data.summary || (data.detail && data.detail.key_takeaway) || 'Nắm vững khái niệm cốt lõi này.';
+        }
+      } catch (e) {
+        console.error("Error setting basic details:", e);
+      }
 
       const detail = data.detail || {};
-      document.getElementById('detail-ai-tutor').innerText = detail.ai_tutor_explanation || "AI Tutor: Nắm vững khái niệm cốt lõi này để liên hệ với các bài thực hành kế tiếp.";
 
-      const codeBox = document.getElementById('detail-code-box');
-      if (detail.code_snippet) {
-        codeBox.classList.remove('hidden');
-        document.getElementById('detail-code').innerText = detail.code_snippet;
-      } else {
-        codeBox.classList.add('hidden');
+      // 3. AI TUTOR GUIDANCE
+      try {
+        const tutorEl = document.getElementById('detail-ai-tutor');
+        if (tutorEl) {
+          tutorEl.innerText = detail.ai_tutor_explanation || "AI Tutor: Nắm vững khái niệm cốt lõi này để liên hệ với các bài thực hành kế tiếp.";
+        }
+      } catch (e) {
+        console.error("Error setting AI tutor:", e);
       }
 
-      const crossBox = document.getElementById('detail-cross-box');
-      if (data.cross_link) {
-        crossBox.classList.remove('hidden');
-        document.getElementById('cross-target-badge').innerText = `Day 0${data.cross_link.target_day}`;
-        document.getElementById('cross-label-text').innerText = data.cross_link.label;
-      } else {
-        crossBox.classList.add('hidden');
+      // 4. CODE SNIPPET / TERMINAL COMMAND
+      try {
+        const codeBox = document.getElementById('detail-code-box');
+        const codeEl = document.getElementById('detail-code');
+        if (codeBox) {
+          if (detail.code_snippet) {
+            codeBox.classList.remove('hidden');
+            if (codeEl) codeEl.innerText = detail.code_snippet;
+          } else {
+            codeBox.classList.add('hidden');
+          }
+        }
+      } catch (e) {
+        console.error("Error setting code snippet:", e);
       }
 
-      const quizBox = document.getElementById('detail-quiz-box');
-      let quizObj = null;
-      if (detail.quick_quiz) {
-        quizObj = normalizeQuiz(detail.quick_quiz, detail.ai_tutor_explanation);
-      }
-      if (!quizObj) {
-        quizObj = generateSmartQuizForNode(data);
+      // 5. CROSS-DAY BRIDGE
+      try {
+        const crossBox = document.getElementById('detail-cross-box');
+        if (crossBox) {
+          if (data.cross_link) {
+            crossBox.classList.remove('hidden');
+            const targetBadge = document.getElementById('cross-target-badge');
+            if (targetBadge) targetBadge.innerText = `Day 0${data.cross_link.target_day}`;
+            const crossLabel = document.getElementById('cross-label-text');
+            if (crossLabel) crossLabel.innerText = data.cross_link.label;
+          } else {
+            crossBox.classList.add('hidden');
+          }
+        }
+      } catch (e) {
+        console.error("Error setting cross-link:", e);
       }
 
-      if (quizObj) {
-        quizBox.classList.remove('hidden');
-        renderQuizUI(quizObj);
-      } else {
-        quizBox.classList.add('hidden');
-      }
+      // 6. QUICK QUIZ (ACTIVE RECALL)
+      try {
+        const quizBox = document.getElementById('detail-quiz-box');
+        let quizObj = null;
+        if (detail.quick_quiz) {
+          quizObj = normalizeQuiz(detail.quick_quiz, detail.ai_tutor_explanation);
+        }
+        if (!quizObj || !quizObj.options || quizObj.options.length === 0) {
+          quizObj = generateSmartQuizForNode(data);
+        }
 
-      pane.classList.remove('w-0', 'opacity-0');
-      pane.classList.add('w-[420px]', 'xl:w-[480px]', 'opacity-100');
+        if (quizBox) {
+          if (quizObj) {
+            quizBox.classList.remove('hidden');
+            renderQuizUI(quizObj);
+          } else {
+            quizBox.classList.add('hidden');
+          }
+        }
+      } catch (e) {
+        console.error("Error setting quick quiz:", e);
+      }
     }
 
     function closeDetailPane() {
@@ -1032,80 +1114,91 @@
 
       // Case 1: Structured Object (Direction 1)
       if (typeof rawQuiz === 'object' && rawQuiz !== null) {
-        const q = rawQuiz.question || rawQuiz.q || '';
+        const q = (rawQuiz.question || rawQuiz.q || '').trim();
         const rawOpts = rawQuiz.options || rawQuiz.opts || [];
-        const ans = (rawQuiz.answer || rawQuiz.correct_answer || rawQuiz.ans || 'A').toUpperCase().trim();
-        const exp = rawQuiz.explanation || rawQuiz.exp || fallbackExplanation || 'Nắm vững khái niệm cốt lõi này để liên hệ bài tập.';
+        const ans = String(rawQuiz.answer || rawQuiz.correct_answer || rawQuiz.ans || 'A').toUpperCase().trim();
+        const exp = (rawQuiz.explanation || rawQuiz.exp || fallbackExplanation || 'Nắm vững khái niệm cốt lõi này để liên hệ bài tập.').trim();
 
-        const options = rawOpts.map((opt, idx) => {
-          const defaultKey = String.fromCharCode(65 + idx);
-          if (typeof opt === 'object' && opt !== null) {
-            return { key: (opt.key || defaultKey).toUpperCase(), text: opt.text || '' };
-          }
-          const m = String(opt).match(/^([A-D])[\.\:\)]\s*(.+)/i);
-          if (m) {
-            return { key: m[1].toUpperCase(), text: m[2].trim() };
-          }
-          return { key: defaultKey, text: String(opt).trim() };
-        });
-
-        return { question: q, options, answer: ans, explanation: exp };
-      }
-
-      // Case 2: String fallback (handles legacy strings like "Câu hỏi? A. ... | B. ... Đáp án: A")
-      if (typeof rawQuiz === 'string') {
-        const str = rawQuiz.trim();
-        const ansMatch = str.match(/Đáp án\s*(?:đúng)?\s*[:：]?\s*([A-D])/i) || str.match(/\(([A-D])\)/i);
-        const ans = ansMatch ? ansMatch[1].toUpperCase() : 'A';
-
-        let cleanStr = str.replace(/Đáp án\s*(?:đúng)?\s*[:：]?\s*[A-D].*$/i, '').trim();
-        cleanStr = cleanStr.replace(/\(\s*Đáp án đúng\s*:\s*[A-D]\s*\)/i, '').trim();
-
-        let question = cleanStr;
-        const options = [];
-
-        // Find where option A starts
-        const firstOptMatch = cleanStr.match(/(?:^|\s)(?:A[\.\:\)]\s*)/i);
-        if (firstOptMatch && firstOptMatch.index !== undefined) {
-          question = cleanStr.substring(0, firstOptMatch.index).trim();
-          const optsStr = cleanStr.substring(firstOptMatch.index).trim();
-          const optMatches = [...optsStr.matchAll(/(?:^|\s+)([A-D])[\.\:\)]\s*(.*?)(?=(?:\s+[A-D][\.\:\)]|$))/gi)];
-          optMatches.forEach(m => {
-            options.push({
-              key: m[1].toUpperCase(),
-              text: m[2].trim().replace(/^[\s\|]+|[\s\|;\.]+$/g, '')
-            });
+        let options = [];
+        if (Array.isArray(rawOpts)) {
+          options = rawOpts.map((opt, idx) => {
+            const defaultKey = String.fromCharCode(65 + idx);
+            if (typeof opt === 'object' && opt !== null) {
+              return { key: String(opt.key || defaultKey).toUpperCase(), text: String(opt.text || '').trim() };
+            }
+            const m = String(opt).match(/^([A-D])[\.\:\)]\s*(.+)/i);
+            if (m) {
+              return { key: m[1].toUpperCase(), text: m[2].trim() };
+            }
+            return { key: defaultKey, text: String(opt).trim() };
           });
         }
 
-        if (options.length === 0) {
-          const parts = cleanStr.split('|').map(s => s.trim());
-          if (parts.length > 1) {
-            question = parts[0];
-            for (let i = 1; i < parts.length; i++) {
-              const key = String.fromCharCode(64 + i);
-              options.push({ key, text: parts[i].replace(/^[A-D][\.\:\)]\s*/i, '') });
+        if (options.length > 0) {
+          return { question: q || 'Khái niệm then chốt cần ghi nhớ?', options, answer: ans, explanation: exp };
+        }
+      }
+
+      // Case 2: String fallback (handles legacy strings like "Câu hỏi?\nA. ...\nB. ...\n(Đáp án đúng: B)")
+      if (typeof rawQuiz === 'string') {
+        const s = rawQuiz.trim();
+        const ansMatch = s.match(/(?:đáp án|đáp án đúng|answer|correct)\s*[:：]?\s*([A-D])/i) || s.match(/\(([A-D])\)/i);
+        const answer = ansMatch ? ansMatch[1].toUpperCase() : 'A';
+
+        const clean = s.replace(/\(\s*(?:đáp án|đáp án đúng)\s*[:：]?\s*[A-D]\s*\)/gi, '')
+                       .replace(/(?:đáp án|đáp án đúng)\s*[:：]?\s*[A-D].*$/gmi, '')
+                       .trim();
+
+        const lines = clean.split(/\r?\n|\\n/).map(l => l.trim()).filter(Boolean);
+        const questionLines = [];
+        const options = [];
+        let hasFoundFirstOpt = false;
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const optMatch = line.match(/^([A-D])[\.\:\)]\s*(.*)/i);
+          if (optMatch) {
+            hasFoundFirstOpt = true;
+            options.push({
+              key: optMatch[1].toUpperCase(),
+              text: optMatch[2].trim()
+            });
+          } else if (!hasFoundFirstOpt) {
+            questionLines.push(line);
+          } else {
+            if (options.length > 0) {
+              options[options.length - 1].text += ' ' + line;
             }
           }
         }
 
+        let question = questionLines.join(' ').trim();
         if (options.length === 0) {
-          options.push({ key: 'A', text: 'Tìm hiểu đúng vấn đề trọng tâm' });
-          options.push({ key: 'B', text: 'Triển khai giải pháp trực tiếp' });
+          const parts = clean.split('|').map(p => p.trim()).filter(Boolean);
+          if (parts.length > 1) {
+            question = parts[0];
+            for (let j = 1; j < parts.length; j++) {
+              const key = String.fromCharCode(64 + j);
+              options.push({ key: key, text: parts[j].replace(/^[A-D][\.\:\)]\s*/i, '') });
+            }
+          }
         }
 
-        return {
-          question: question || 'Khái niệm này tập trung vào bản chất gì?',
-          options,
-          answer: ans,
-          explanation: fallbackExplanation || 'Nắm vững kiến thức này để hoàn thành bài thực hành.'
-        };
+        if (options.length > 0) {
+          return {
+            question: question || 'Khái niệm then chốt cần ghi nhớ?',
+            options: options,
+            answer: answer,
+            explanation: fallbackExplanation || 'Nắm vững kiến thức này để hoàn thành bài thực hành.'
+          };
+        }
       }
 
       return null;
     }
 
     function renderQuizUI(quiz) {
+      if (!quiz) return;
       currentQuizData = quiz;
       currentQuizState = { selected: null, isAnswered: false };
 
@@ -1126,21 +1219,25 @@
       if (retryBtn) retryBtn.classList.add('hidden');
       if (revealBtnText) revealBtnText.innerText = "Xem giải thích đáp án";
 
-      if (questionEl) questionEl.innerText = quiz.question;
-      if (answerKeyEl) answerKeyEl.innerText = `Đáp án đúng: ${quiz.answer}`;
-      if (answerExpEl) answerExpEl.innerText = quiz.explanation;
+      if (questionEl) questionEl.innerText = quiz.question || '';
+      if (answerKeyEl) answerKeyEl.innerText = `Đáp án đúng: ${quiz.answer || 'A'}`;
+      if (answerExpEl) answerExpEl.innerText = quiz.explanation || 'Nắm vững khái niệm này.';
 
-      if (optionsContainer) {
-        optionsContainer.innerHTML = quiz.options.map(opt => `
-          <button onclick="handleSelectQuizOption('${opt.key}')"
-                  id="btn-quiz-opt-${opt.key}"
+      if (optionsContainer && Array.isArray(quiz.options)) {
+        optionsContainer.innerHTML = quiz.options.map(opt => {
+          const safeKey = String(opt.key || 'A').replace(/[^A-D]/g, '') || 'A';
+          const safeText = String(opt.text || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return `
+          <button onclick="handleSelectQuizOption('${safeKey}')"
+                  id="btn-quiz-opt-${safeKey}"
                   class="quiz-opt-btn w-full text-left p-2.5 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:bg-blue-50/50 text-slate-800 text-xs font-medium transition-all flex items-center gap-2.5 cursor-pointer shadow-2xs group">
             <span class="w-5 h-5 rounded-lg bg-slate-100 group-hover:bg-blue-100 text-slate-700 group-hover:text-blue-700 flex items-center justify-center font-bold text-[10px] shrink-0 transition-colors">
-              ${opt.key}
+              ${safeKey}
             </span>
-            <span class="flex-1 leading-snug">${opt.text}</span>
+            <span class="flex-1 leading-snug">${safeText}</span>
           </button>
-        `).join('');
+          `;
+        }).join('');
       }
     }
 
